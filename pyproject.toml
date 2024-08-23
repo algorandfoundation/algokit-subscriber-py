@@ -1,0 +1,117 @@
+[tool.poetry]
+name = "algokit-subscriber-py"
+version = "0.1.0"
+description = ""
+authors = ["Algorand Foundation"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+py-algorand-sdk = "^2.6.1"
+algokit-utils = "^2.3.0"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.10.1"
+ruff = "^0.5.0"
+pytest = "^8.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+# TODO: eventually bring this down to 120
+line-length = 280
+lint.select = [
+    # all possible codes as of this ruff version are listed here,
+    # ones we don't want/need are commented out to make it clear
+    # which have been omitted on purpose vs which ones get added
+    # in new ruff releases and should be considered for enabling
+    "F",   # pyflakes
+    "E",
+    "W",   # pycodestyle
+    "C90", # mccabe
+    "I",   # isort
+    "N",   # PEP8 naming
+    "UP",  # pyupgrade
+    "YTT", # flake8-2020
+    "ANN", # flake8-annotations
+    # "S",    # flake8-bandit
+    # "BLE",  # flake8-blind-except
+    "FBT", # flake8-boolean-trap
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    # "COM",  # flake8-commas
+    "C4",  # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "T10", # flake8-debugger
+    # "DJ",   # flake8-django
+    # "EM",   # flake8-errmsg
+    # "EXE",  # flake8-executable
+    "ISC", # flake8-implicit-str-concat
+    "ICN", # flake8-import-conventions
+    # "G",    # flake8-logging-format
+    # "INP",  # flake8-no-pep420
+    "PIE", # flake8-pie
+    "T20", # flake8-print
+    "PYI", # flake8-pyi
+    "PT",  # flake8-pytest-style
+    "Q",   # flake8-quotes
+    "RSE", # flake8-raise
+    "RET", # flake8-return
+    "SLF", # flake8-self
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "TCH", # flake8-type-checking
+    "ARG", # flake8-unused-arguments
+    "PTH", # flake8-use-pathlib
+    "ERA", # eradicate
+    # "PD",   # pandas-vet
+    "PGH", # pygrep-hooks
+    "PL",  # pylint
+    # "TRY",  # tryceratops
+    # "NPY",  # NumPy-specific rules
+    "RUF", # Ruff-specific rules
+]
+lint.ignore = [
+    "ANN101", # no type for self
+    "ANN102", # no type for cls
+    "RET505", # allow else after return
+    "SIM108", # allow if-else in place of ternary
+    "E111",   # indentation is not a multiple of four
+    "E117",   # over-indented
+    "ISC001", # single line implicit string concatenation
+    "ISC002", # multi line implicit string concatenation
+    "Q000",   # bad quotes inline string
+    "Q001",   # bad quotes multiline string
+    "Q002",   # bad quotes docstring
+    "Q003",   # avoidable escaped quotes
+    "W191",   # indentation contains tabs
+    "ERA001", # commented out code
+]
+# Exclude a variety of commonly ignored directories.
+extend-exclude = ["docs", ".git", ".mypy_cache", ".ruff_cache"]
+# Assume Python 3.12.
+target-version = "py312"
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+suppress-none-returning = true
+
+[tool.mypy]
+files = ["src", "tests"]
+exclude = ["dist"]
+python_version = "3.10"
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unreachable = true
+warn_return_any = true
+strict = true
+disallow_untyped_decorators = true
+disallow_any_generics = false
+implicit_reexport = false
+show_error_codes = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "tests"]
