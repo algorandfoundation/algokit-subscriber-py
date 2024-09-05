@@ -36,7 +36,7 @@ def test_start_to_now() -> None:
 
     subscribed = get_subscribe_transactions_from_sender(
         {
-            "rounds_to_sync": 1,
+            "max_rounds_to_sync": 1,
             "sync_behaviour": "catchup-with-indexer",
             "watermark": 0,
             "current_round": last_txn_round

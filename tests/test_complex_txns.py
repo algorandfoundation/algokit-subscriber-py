@@ -24,7 +24,7 @@ def test_nested_inners_from_indexer(algorand_mainnet: AlgorandClient) -> None:
                     "sender": "AACCDJTFPQR5UQJZ337NFR56CC44T776EWBGVJG5NY2QFTQWBWTALTEN4A",
                 }
             }],
-            "rounds_to_sync": 1,
+            "max_rounds_to_sync": 1,
             "current_round": NESTED_INNER_ROUND + 1,
             "sync_behaviour": "catchup-with-indexer",
             "watermark": NESTED_INNER_ROUND - 1,
@@ -33,8 +33,6 @@ def test_nested_inners_from_indexer(algorand_mainnet: AlgorandClient) -> None:
     )
 
     assert len(txns["subscribed_transactions"]) == 1
-
-    # TOOD: Determine why id offset is different (off by +2)
     assert txns["subscribed_transactions"][0]['id'] == NESTED_INNER_ID
 
 def test_nested_inners_from_algod(algorand_mainnet: AlgorandClient) -> None:
@@ -47,7 +45,7 @@ def test_nested_inners_from_algod(algorand_mainnet: AlgorandClient) -> None:
                     "sender": "AACCDJTFPQR5UQJZ337NFR56CC44T776EWBGVJG5NY2QFTQWBWTALTEN4A",
                 }
             }],
-            "rounds_to_sync": 1,
+            "max_rounds_to_sync": 1,
             "current_round": NESTED_INNER_ROUND + 1,
             "sync_behaviour": "sync-oldest",
             "watermark": NESTED_INNER_ROUND - 1,
@@ -56,6 +54,4 @@ def test_nested_inners_from_algod(algorand_mainnet: AlgorandClient) -> None:
     )
 
     assert len(txns["subscribed_transactions"]) == 1
-
-    # TOOD: Determine why id offset is different (off by +1)
     assert txns["subscribed_transactions"][0]['id'] == NESTED_INNER_ID

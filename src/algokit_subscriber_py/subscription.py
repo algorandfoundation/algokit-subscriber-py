@@ -679,7 +679,8 @@ def get_filtered_indexer_transactions(transaction: TransactionResult, txn_filter
     def get_parent_offset() -> int:
         nonlocal parent_offset
         parent_offset += 1
-        return parent_offset - 1
+        # TODO: Investigate further: I would expect to have to return parent_offset - 1 here, but returning parent_offset works
+        return parent_offset
 
     transactions = [{**transaction, 'filters_matched': [txn_filter['name']]}, *get_indexer_inner_transactions(transaction, transaction, get_parent_offset)]
 
@@ -687,17 +688,20 @@ def get_filtered_indexer_transactions(transaction: TransactionResult, txn_filter
 
 
 def get_indexer_inner_transactions(root: TransactionResult, parent: TransactionResult, offset: Callable) -> list[SubscribedTransaction]:
-    return [
-        cast(SubscribedTransaction, {
+    result = []
+    for t in parent.get('inner-txns', []):
+        parent_offset = offset()
+        result.append(cast(SubscribedTransaction, {
             **t,
             'parent_transaction_id': root['id'],
-            'id': f"{root['id']}/inner/{offset() + 1}",
-            'intra-round-offset': root['intra-round-offset'] + offset() + 1,
-        })
-        for t in parent.get('inner-txns', [])
-    ] + [
-        inner for t in parent.get('inner-txns', []) for inner in get_indexer_inner_transactions(root, t, offset)
-    ]
+            'id': f"{root['id']}/inner/{parent_offset + 1}",
+            'intra-round-offset': root['intra-round-offset'] + parent_offset + 1,
+        }))
+    
+    for t in parent.get('inner-txns', []):
+        result.extend(get_indexer_inner_transactions(root, t, offset))
+    
+    return result
 
 def indexer_post_filter(  # noqa: C901
     subscription: TransactionFilter,

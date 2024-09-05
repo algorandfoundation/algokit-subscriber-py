@@ -63,8 +63,8 @@ def get_subscribed_transactions_for_test(sub_info: dict, algorand: AlgorandClien
     return get_subscribed_transactions(
         subscription={
             "filters": filters,
-            "max_rounds_to_sync": sub_info["rounds_to_sync"],
-            "max_indexer_rounds_to_sync": sub_info.get("indexer_rounds_to_sync"),
+            "max_rounds_to_sync": sub_info["max_rounds_to_sync"],
+            "max_indexer_rounds_to_sync": sub_info.get("max_indexer_rounds_to_sync"),
             "sync_behaviour": sub_info["sync_behaviour"],
             "watermark": sub_info.get("watermark", 0),
             "arc28_events": sub_info.get("arc28_events", []),

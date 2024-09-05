@@ -15,7 +15,7 @@ def filter_fixture() -> dict:
     def subscribe_algod(txn_filter: dict, confirmed_round: int, arc28_events: list | None = None) -> TransactionSubscriptionResult:
         return get_subscribed_transactions_for_test(
             {
-                "rounds_to_sync": 1,
+                "max_rounds_to_sync": 1,
                 "sync_behaviour": "sync-oldest",
                 "watermark": confirmed_round - 1,
                 "current_round": confirmed_round,
@@ -37,7 +37,7 @@ def filter_fixture() -> dict:
 
         return get_subscribed_transactions_for_test(
             {
-                "rounds_to_sync": 1,
+                "max_rounds_to_sync": 1,
                 "sync_behaviour": "catchup-with-indexer",
                 "watermark": confirmed_round - 1,
                 "current_round": confirmed_round + 1,

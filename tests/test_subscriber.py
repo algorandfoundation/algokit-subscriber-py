@@ -339,6 +339,8 @@ def test_subscribes_correctly_with_multiple_filters() -> None:
 
     # Random transaction
     results_2 = send_x_transactions(1, random_account, algorand)
+    sender_1_txn_ids_from_batch = []
+    sender_2_rounds_from_batch = []
     result_2 = subscriber['subscriber'].poll_once()
     assert len(result_2['subscribed_transactions']) == 0
     assert subscriber['get_watermark']() >= results_2['last_txn_round']
@@ -353,6 +355,8 @@ def test_subscribes_correctly_with_multiple_filters() -> None:
     tx_ids_23 = results_23['tx_ids']
     txns_23 = results_23['txns']
 
+    sender_1_txn_ids_from_batch = []
+    sender_2_rounds_from_batch = []
     result_3 = subscriber['subscriber'].poll_once()
     subscribed_txns_3 = result_3['subscribed_transactions']
     assert len(subscribed_txns_3) == 5
@@ -369,7 +373,7 @@ def test_subscribes_correctly_with_multiple_filters() -> None:
     assert len(result_3['subscribed_transactions']) == 5
     assert [t['id'] for t in result_3['subscribed_transactions']] == tx_ids_3 + tx_ids_13 + tx_ids_23
     assert sender_1_txn_ids == tx_ids_1 + tx_ids_13
-    # TODO: Get this working
+    assert len(sender_1_txn_ids_from_batch) == len(tx_ids_13)
     assert sender_1_txn_ids_from_batch == tx_ids_13
     assert sender_2_rounds == [int(t['confirmation']['confirmed-round']) for t in txns_2] + [int(t['confirmation']['confirmed-round']) for t in txns_23]
     assert sender_2_rounds_from_batch == [int(t['confirmation']['confirmed-round']) for t in txns_23]

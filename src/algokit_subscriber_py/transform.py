@@ -10,6 +10,11 @@ from .types.indexer import TransactionResult
 from .types.subscription import BalanceChange, BalanceChangeRole, BlockMetadata, SubscribedTransaction
 from .types.transaction import AnyTransaction, TransactionType
 from .utils import encode_address, logger
+import msgpack
+import base64
+import hashlib
+from collections import OrderedDict
+
 
 ALGORAND_ZERO_ADDRESS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
 
@@ -71,7 +76,7 @@ def get_block_transactions(block: Block) -> list[TransactionInBlock]:
     def get_offset() -> int:
         nonlocal offset
         offset += 1
-        return offset
+        return offset - 1
 
     block_txns = block.get("txns")
     if block_txns is None:
@@ -83,7 +88,7 @@ def get_block_transactions(block: Block) -> list[TransactionInBlock]:
         def get_parent_offset() -> int:
             nonlocal parent_offset
             parent_offset += 1
-            return parent_offset
+            return parent_offset - 1
 
         parent_data = extract_transaction_from_block_transaction(
             block_transaction, block["gh"], block["gen"]
@@ -292,9 +297,27 @@ def extract_and_normalise_transaction(
 
     return txn
 
+# Taken from algosdk
+def _sort_dict(d):
+    """
+    Sorts a dictionary recursively and removes all zero values.
+
+    Args:
+        d (dict): dictionary to be sorted
+
+    Returns:
+        OrderedDict: sorted dictionary with no zero values
+    """
+    od = OrderedDict()
+    for k, v in sorted(d.items()):
+        if isinstance(v, dict):
+            od[k] = _sort_dict(v)
+        elif v:
+            od[k] = v
+    return od
 
 def get_tx_id_from_block_transaction(
-    _block_transaction: BlockTransaction | BlockInnerTransaction, _genesis_hash: bytes, _genesis_id: str
+    block_transaction: BlockTransaction | BlockInnerTransaction, genesis_hash: bytes, genesis_id: str
 ) -> str:
     """
     Get the transaction ID from a block transaction.
@@ -305,8 +328,14 @@ def get_tx_id_from_block_transaction(
     Returns:
         str: The transaction ID
     """
-    # TODO: Implement this function
-    return ""
+    txn = extract_and_normalise_transaction(block_transaction, genesis_hash, genesis_id)
+
+    ALGORAND_TRANSACTION_LENGTH = 52
+    encoded_message = msgpack.packb(_sort_dict(txn), use_bin_type=True)
+    tag = b'TX'
+    gh = tag + encoded_message
+    raw_tx_id = hashlib.new('sha512_256', gh).digest()
+    return base64.b32encode(raw_tx_id).decode()[:ALGORAND_TRANSACTION_LENGTH]
 
 class TransactionInBlockWithChildOffset(TransactionInBlock):
     get_child_offset: NotRequired[Callable[[], int]]
@@ -321,7 +350,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
     close_amount = t.get("close_amount")
     created_app_id = t.get("created_app_id")
     round_offset = t["round_offset"]
-    parent_offset = t.get("parent_offset") or 0
+    parent_offset = t["parent_offset"]
     parent_transaction_id = t.get("parent_transaction_id")
     round_index = t["round_index"]
     round_number = t["round_number"]
@@ -473,32 +502,32 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                     "reveals": [
                         {
                             "sig-slot": {
-                                "lower-sig-weight": reveal["s"]["l"],
+                                "lower-sig-weight": state_proof["r"][position]["s"].get("l", 0),
                                 "signature": {
-                                    "merkle-array-index": reveal["s"]["s"]["idx"],
-                                    "falcon-signature": reveal["s"]["s"]["sig"],
+                                    "merkle-array-index": state_proof["r"][position]["s"]["s"]["idx"],
+                                    "falcon-signature": state_proof["r"][position]["s"]["s"]["sig"],
                                     "proof": {
                                         "hash-factory": {
-                                            "hash-type": reveal["s"]["s"]["prf"]["hsh"][
+                                            "hash-type": state_proof["r"][position]["s"]["s"]["prf"]["hsh"][
                                                 "t"
                                             ]
                                         },
-                                        "tree-depth": reveal["s"]["s"]["prf"]["td"],
-                                        "path": list(reveal["s"]["s"]["prf"]["pth"]),
+                                        "tree-depth": state_proof["r"][position]["s"]["s"]["prf"]["td"],
+                                        "path": list(state_proof["r"][position]["s"]["s"]["prf"]["pth"]),
                                     },
-                                    "verifying-key": reveal["s"]["s"]["vkey"]["k"],
+                                    "verifying-key": state_proof["r"][position]["s"]["s"]["vkey"]["k"],
                                 },
                             },
-                            "position": reveal["position"],
+                            "position": position,
                             "participant": {
-                                "weight": reveal["participant"]["w"],
+                                "weight": state_proof["r"][position]["p"]["w"],
                                 "verifier": {
-                                    "key-lifetime": reveal["participant"]["p"]["lf"],
-                                    "commitment": reveal["participant"]["p"]["cmt"],
+                                    "key-lifetime": state_proof["r"][position]["p"]["p"]["lf"],
+                                    "commitment": state_proof["r"][position]["p"]["p"]["cmt"],
                                 },
                             },
                         }
-                        for reveal in state_proof["r"]
+                        for position in state_proof["r"]
                     ],
                 },
                 "message": {

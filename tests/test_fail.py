@@ -23,7 +23,7 @@ def test_fails_if_too_far_from_tip() -> None:
     try:
         get_subscribe_transactions_from_sender(
             {
-                'rounds_to_sync': 1,
+                'max_rounds_to_sync': 1,
                 'sync_behaviour': 'fail',
                 'watermark': 0,
                 'current_round': last_txn_round
@@ -62,7 +62,7 @@ def test_does_not_fail_if_not_too_far_from_tip() -> None:
 
     subscribed = get_subscribe_transactions_from_sender(
         {
-            'rounds_to_sync': 1,
+            'max_rounds_to_sync': 1,
             'sync_behaviour': 'fail',
             'watermark': last_txn_round - 1,
             'current_round': last_txn_round

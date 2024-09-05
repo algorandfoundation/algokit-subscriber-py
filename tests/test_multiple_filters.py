@@ -32,7 +32,7 @@ def test_multiple_filters_with_indexer() -> None:
                 "sender": senders,
             }
         }],
-        "rounds_to_sync": last_txn_round - post_indexer_round,
+        "max_rounds_to_sync": last_txn_round - post_indexer_round,
         "sync_behaviour": "catchup-with-indexer",
         "current_round": last_txn_round,
         "watermark": 0,
