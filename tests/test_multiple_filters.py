@@ -23,7 +23,12 @@ def test_multiple_filters_with_indexer() -> None:
     tx_ids22 = send_x_transactions(1, senders[1], algorand)["tx_ids"]
     tx_ids33 = send_x_transactions(1, senders[2], algorand)["tx_ids"]
     last_txn_round = send_x_transactions(1, generate_account(algorand), algorand)["last_txn_round"]
-    time.sleep(1)
+    while True:
+        try:
+            algorand.client.indexer.block_info(last_txn_round)
+            break
+        except Exception:
+            time.sleep(1)
 
     subscribed = get_subscribed_transactions_for_test({
         "filters": [{
