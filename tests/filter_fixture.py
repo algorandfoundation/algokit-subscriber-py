@@ -59,16 +59,16 @@ def filter_fixture() -> dict:
         if isinstance(tx_ids, str):
             tx_ids = [tx_ids]
 
-        confirmed_round = localnet.client.algod.pending_transaction_info(tx_ids[0])["confirmed-round"]
+        confirmed_round = localnet.client.algod.pending_transaction_info(tx_ids[-1])["confirmed-round"]
 
         algod = subscribe_algod(txn_filter, confirmed_round, arc28_events)
         assert len(algod["subscribed_transactions"]) == len(tx_ids)
         assert [s["id"] for s in algod["subscribed_transactions"]] == tx_ids
 
         # TODO: Fix test_various_filters_on_payments with indexer
-        # indexer = subscribe_indexer(txn_filter, confirmed_round, arc28_events)
-        # assert len(indexer["subscribed_transactions"]) == len(tx_ids)
-        # assert [s["id"] for s in indexer["subscribed_transactions"]] == tx_ids
+        indexer = subscribe_indexer(txn_filter, confirmed_round, arc28_events)
+        assert len(indexer["subscribed_transactions"]) == len(tx_ids)
+        assert [s["id"] for s in indexer["subscribed_transactions"]] == tx_ids
 
         return {
             "algod": algod,

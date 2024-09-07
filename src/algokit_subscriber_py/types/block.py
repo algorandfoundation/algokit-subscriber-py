@@ -122,7 +122,7 @@ class TransactionInBlock(TypedDict):
     close_amount: NotRequired[None | int]
     """The ALGO close amount if the sender account was closed from this transaction."""
 
-    logs: NotRequired[None | list[bytes]]
+    logs: NotRequired[None | list[str]]
     """Any logs that were issued as a result of this transaction."""
 
 class BlockInnerTransaction(TypedDict):

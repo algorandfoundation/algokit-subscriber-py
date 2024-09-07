@@ -74,7 +74,7 @@ def has_emitted_matching_arc28_event(  # noqa: PLR0913
     Check if a transaction has emitted a matching ARC-28 event.
 
     Args:
-    logs (list[bytes]): The transaction logs.
+    logs (list[str]): The transaction logs encoded as bas64 strings.
     all_events (list[Arc28EventToProcess]): All ARC-28 events to process.
     event_groups (list[Arc28EventGroup]): All ARC-28 event groups.
     event_filter (list[dict[str, str]]): The event filter to apply.
@@ -94,11 +94,16 @@ def has_emitted_matching_arc28_event(  # noqa: PLR0913
         )
     ]
 
-    return any(
-        log for log in logs
-        if len(log) > 4  # noqa: PLR2004
-        if any(e['event_prefix'] == base64.b16encode(log[:4].encode('utf-8', errors='surrogateescape')).lower().decode() for e in potential_events)
-    )
+    
+    hex_prefixes = [base64.b64decode(log).hex()[:8] for log in logs]
+
+    # check if any of the hex_prefixes match the event_prefixes
+    for hex_prefix in hex_prefixes:
+        for event in potential_events:
+            if hex_prefix == event['event_prefix']:
+                return True
+
+    return False
 
 def extract_arc28_events(
     transaction_id: str,
@@ -206,7 +211,7 @@ def indexer_pre_filter(
         args['min_amount'] = min(subscription['min_amount'] - 1, 2**53 - 1)
 
     if subscription.get('max_amount') and (
-        subscription['type'] == "pay" or (subscription.get('asset_id') and (subscription['min_amount'] or 0) > 0)
+        subscription['type'] == "pay" or (subscription.get('asset_id') and (subscription.get('min_amount', 0)) > 0)
     ):
         args['max_amount'](subscription['max_amount']) + 1
 
@@ -232,6 +237,11 @@ def indexer_pre_filter_in_memory(subscription: TransactionFilter) -> Callable[[T
     """
     def filter_transaction(t: TransactionResult) -> bool:  # noqa: C901, PLR0912
         result = True
+        axfer = t.get('asset-transfer-transaction')
+        pay = t.get('payment-transaction')
+        appl = t.get('application-transaction')
+        afrz = t.get('asset-freeze-transaction')
+        acfg = t.get('asset-config-transaction')
 
         if subscription.get('sender'):
             if isinstance(subscription['sender'], str):
@@ -242,13 +252,13 @@ def indexer_pre_filter_in_memory(subscription: TransactionFilter) -> Callable[[T
         if subscription.get('receiver'):
             if isinstance(subscription['receiver'], str):
                 result = result and (
-                    (t.get('asset-transfer-transaction', {}).get('receiver') == subscription['receiver']) or
-                    (t.get('payment-transaction', {}).get('receiver') == subscription['receiver'])
+                    axfer and axfer.get('receiver') == subscription['receiver'] or
+                    pay and pay.get('receiver') == subscription['receiver']
                 )
             else:
                 result = result and (
-                    (t.get('asset-transfer-transaction', {}).get('receiver') in subscription['receiver']) or
-                    (t.get('payment-transaction', {}).get('receiver') in subscription['receiver'])
+                    axfer and axfer.get('receiver') in subscription['receiver'] or
+                    pay and pay.get('receiver') in subscription['receiver']
                 )
 
         if subscription.get('type'):
@@ -262,14 +272,15 @@ def indexer_pre_filter_in_memory(subscription: TransactionFilter) -> Callable[[T
 
         if subscription.get('app_id'):
             if isinstance(subscription['app_id'], int):
+                pass
                 result = result and (
                     t.get('created-application-index') == int(subscription['app_id']) or
-                    t.get('application-transaction', {}).get('application-id') == int(subscription['app_id'])
+                    appl and appl.get('application-id') == int(subscription['app_id'])
                 )
             else:
                 result = result and (
                     ((t.get('created-application-index') or 0) in map(int, subscription['app_id'])) or
-                    (t.get('application-transaction', {}).get('application-id', 0) in map(int, subscription['app_id']))
+                    appl and appl.get('application-id', 0) in map(int, subscription['app_id'])
                 )
 
         if subscription.get('asset_id'):
@@ -277,29 +288,29 @@ def indexer_pre_filter_in_memory(subscription: TransactionFilter) -> Callable[[T
                 asset_id = int(subscription['asset_id'])
                 result = result and (
                     t.get('created-asset-index') == asset_id or
-                    t.get('asset-config-transaction', {}).get('asset-id') == asset_id or
-                    t.get('asset-freeze-transaction', {}).get('asset-id') == asset_id or
-                    t.get('asset-transfer-transaction', {}).get('asset-id') == asset_id
+                    acfg and acfg.get('asset-id') == asset_id or
+                    acfg and acfg.get('asset-id') == asset_id or
+                    axfer and axfer.get('asset-id') == asset_id
                 )
             else:
                 asset_ids = set(map(int, subscription['asset_id']))
                 result = result and (
                     t.get('created-asset-index') in asset_ids or
-                    t.get('asset-config-transaction', {}).get('asset-id') in asset_ids or
-                    t.get('asset-freeze-transaction', {}).get('asset-id') in asset_ids or
-                    t.get('asset-transfer-transaction', {}).get('asset-id') in asset_ids
+                    axfer and axfer.get('asset-id') in asset_ids or
+                    acfg and acfg.get('asset-id') in asset_ids or
+                    afrz and afrz.get('asset-id') in asset_ids
                 )
 
         if subscription.get('min_amount'):
             result = result and (
-                (t.get('payment-transaction', {}).get('amount', 0) >= subscription['min_amount']) or
-                (t.get('asset-transfer-transaction', {}).get('amount', 0) >= subscription['min_amount'])
+                (pay and pay.get('amount', 0) >= subscription['min_amount']) or
+                (axfer and axfer.get('amount', 0) >= subscription['min_amount'])
             )
 
         if subscription.get('max_amount'):
             result = result and (
-                (t.get('payment-transaction', {}).get('amount', 0) <= subscription['max_amount']) or
-                (t.get('asset-transfer-transaction', {}).get('amount', 0) <= subscription['max_amount'])
+                (pay and pay.get('amount', 0) <= subscription['max_amount']) or
+                (axfer and axfer.get('amount', 0) <= subscription['max_amount'])
             )
 
         return result
@@ -463,17 +474,20 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
                 for f in chunked_filters:
                     # Retrieve all pre-filtered transactions from the indexer
                     transactions = search_transactions(indexer, indexer_pre_filter(f['filter'], start_round, indexer_sync_to_round_number))
+                    print("transactions", len(transactions))
 
                     # Process each transaction
                     for t in transactions['transactions']:
                         # Re-run the pre-filter in-memory to properly extract inner transactions
                         filtered_transactions = get_filtered_indexer_transactions(t, f)
+                        print("filtered_transactions", len(filtered_transactions))
 
                         # Run the post-filter to get the final list of matching transactions
                         post_filtered_transactions = list(filter(
                             lambda x: indexer_post_filter(f['filter'], arc28_events, subscription.get('arc28_events', []))(x),
                             filtered_transactions
                         ))
+                        print("post_filtered_transactions", len(post_filtered_transactions))
 
                         catchup_transactions.extend(post_filtered_transactions)
 
@@ -496,12 +510,12 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
         start = time.time()
         blocks = get_blocks_bulk({"start_round": algod_sync_from_round_number, "max_round": end_round}, algod)
         block_transactions = [t for b in blocks for t in get_block_transactions(b['block'])]
-        algod_transactions = [
-            get_indexer_transaction_from_algod_transaction(t, f['name'])
-            for f in filters
-            for t in block_transactions
-            if transaction_filter(f['filter'], arc28_events, subscription.get('arc28_events') or [])(t)
-        ]
+        algod_transactions = []
+        for f in filters:
+            for t in block_transactions:
+                if transaction_filter(f['filter'], arc28_events, subscription.get('arc28_events') or [])(t):
+                    algod_transactions.append(get_indexer_transaction_from_algod_transaction(t, f['name']))
+        
         algod_transactions = deduplicate_subscribed_transactions(algod_transactions)
 
         block_metadata = [block_data_to_block_metadata(b) for b in blocks]
@@ -603,12 +617,12 @@ def extract_balance_changes_from_indexer_transaction(transaction: TransactionRes
                 'address': sender,
                 'amount': -(transaction['closing-amount'] or 0),
                 'asset_id': 0,
-                'roles': [BalanceChangeRole.Sender, BalanceChangeRole.CloseTo],
+                'roles': [BalanceChangeRole.Sender],
             })
 
             changes.append({
                 'address': close_to,
-                'amount': -(transaction['closing-amount'] or 0),
+                'amount': (transaction['closing-amount'] or 0),
                 'asset_id': 0,
                 'roles': [BalanceChangeRole.CloseTo],
             })
@@ -640,12 +654,12 @@ def extract_balance_changes_from_indexer_transaction(transaction: TransactionRes
                 'address': sender,
                 'amount': -(att['close-amount'] or 0),
                 'asset_id': asset_id,
-                'roles': [BalanceChangeRole.Sender, BalanceChangeRole.CloseTo],
+                'roles': [BalanceChangeRole.Sender],
             })
 
             changes.append({
                 'address': close_to,
-                'amount': -(att['close-amount'] or 0),
+                'amount': (att['close-amount'] or 0),
                 'asset_id': asset_id,
                 'roles': [BalanceChangeRole.CloseTo],
             })
@@ -684,8 +698,12 @@ def get_filtered_indexer_transactions(transaction: TransactionResult, txn_filter
 
     transactions = [{**transaction, 'filters_matched': [txn_filter['name']]}, *get_indexer_inner_transactions(transaction, transaction, get_parent_offset)]
 
-    return list(filter(indexer_pre_filter_in_memory(txn_filter["filter"]), transactions)) # type: ignore[arg-type]
+    filtered = list(filter(indexer_pre_filter_in_memory(txn_filter["filter"]), transactions)) # type: ignore[arg-type]
+    if (len(filtered) != len(transactions)):
+        print("filtered", len(filtered))
+        print("transactions", len(transactions))
 
+    return filtered
 
 def get_indexer_inner_transactions(root: TransactionResult, parent: TransactionResult, offset: Callable) -> list[SubscribedTransaction]:
     result = []
@@ -710,6 +728,7 @@ def indexer_post_filter(  # noqa: C901
 ) -> Callable[[TransactionResult], bool]:
     def filter_function(t: TransactionResult) -> bool:  # noqa: C901
         result = True
+        appl = t.get('application-transaction')
 
         if subscription.get('asset_create') is True:
             result &= bool(t.get('created-asset-index'))
@@ -721,34 +740,45 @@ def indexer_post_filter(  # noqa: C901
         elif subscription.get('app_create') is False:
             result &= not t.get('created-application-index')
 
-        if bool(subscription.get('app_on_complete')) and bool(t.get('application-transaction')):
-            result &= t['application-transaction']['on-completion'].value == subscription.get('app_on_complete')
+        if subscription.get('app_on_complete'):
+            if not appl:
+                return False
+            
+            if isinstance(subscription.get('app_on_complete'), str):
+                result &= appl['on-completion'] == subscription.get('app_on_complete')
+            else:
+                result &= appl['on-completion'] in subscription.get('app_on_complete')
 
         if subscription.get('method_signature'):
+            if not appl:
+                return False
             method_signature = subscription['method_signature']
             if isinstance(method_signature, str):
                 result &= (
-                    bool(t.get('application-transaction')) and
-                    bool(t['application-transaction'].get('application-args')) and
-                    t['application-transaction']['application-args'][0] == get_method_selector_base64(method_signature)
+                    bool(appl.get('application-args')) and
+                    appl['application-args'][0] == get_method_selector_base64(method_signature)
                 )
             else:
                 result &= any(
-                    bool(t.get('application-transaction')) and
-                    bool(t['application-transaction'].get('application-args')) and
-                    t['application-transaction']['application-args'][0] == get_method_selector_base64(method)
+                    appl.get('application-args') and
+                    appl['application-args'][0] == get_method_selector_base64(method)
                     for method in method_signature
                 )
 
         if subscription.get('app_call_arguments_match'):
+            if not appl:
+                return False
+            
             result &= (
-                bool(t.get('application-transaction')) and
                 subscription['app_call_arguments_match'](
-                    [bytes.fromhex(a) for a in t['application-transaction'].get('application-args', [])]
+                    [bytes.fromhex(a) for a in appl.get('application-args', [])]
                 )
             )
 
         if subscription.get('arc28_events'):
+            if not appl:
+                return False
+            
             result &= (
                 bool(t.get('application-transaction')) and
                 bool(t.get('logs')) and
@@ -758,7 +788,7 @@ def indexer_post_filter(  # noqa: C901
                     arc28_event_groups,
                     subscription['arc28_events'],
                     t.get('created-application-index') or
-                    t.get('application-transaction', {}).get('application-id', 0) or 0,
+                    appl.get('application-id', 0),
                     lambda: t
                 )
             )
@@ -860,11 +890,13 @@ def transaction_filter(  # noqa: C901, PLR0915
                 result = result and any(bool(t.get('apaa')) and base64.b64encode(t['apaa'][0]).decode('utf-8') == get_method_selector_base64(method) for method in method_signature)
 
         if subscription.get('arc28_events'):
+            # convert logs (currently utf8 encoded strings) to base64 encoded bytes
+
             result = result and (
                 t.get('type') == TransactionType.appl.value and
                 logs is not None and
                 has_emitted_matching_arc28_event(
-                    logs, arc28_events, arc28_event_groups, subscription['arc28_events'],
+                    [base64.b64encode(log.encode('utf-8', errors='surrogateescape')).decode('utf-8') for log in logs], arc28_events, arc28_event_groups, subscription['arc28_events'],
                     created_app_id or t.get('apid', 0),
                     lambda: get_indexer_transaction_from_algod_transaction(txn)
                 )
