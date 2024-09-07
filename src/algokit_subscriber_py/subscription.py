@@ -475,20 +475,17 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
                 for f in chunked_filters:
                     # Retrieve all pre-filtered transactions from the indexer
                     transactions = search_transactions(indexer, indexer_pre_filter(f['filter'], start_round, indexer_sync_to_round_number))
-                    print("transactions", len(transactions))
 
                     # Process each transaction
                     for t in transactions['transactions']:
                         # Re-run the pre-filter in-memory to properly extract inner transactions
                         filtered_transactions = get_filtered_indexer_transactions(t, f)
-                        print("filtered_transactions", [t['id'] for t in filtered_transactions])
 
                         # Run the post-filter to get the final list of matching transactions
                         post_filtered_transactions = list(filter(
                             lambda x: indexer_post_filter(f['filter'], arc28_events, subscription.get('arc28_events', []))(x),
                             filtered_transactions
                         ))
-                        print("post_filtered_transactions", [t['id'] for t in post_filtered_transactions])
 
                         catchup_transactions.extend(post_filtered_transactions)
 
@@ -718,9 +715,6 @@ def get_filtered_indexer_transactions(transaction: TransactionResult, txn_filter
     transactions = [{**transaction, 'filters_matched': [txn_filter['name']]}, *get_indexer_inner_transactions(transaction, transaction, get_parent_offset)]
 
     filtered = list(filter(indexer_pre_filter_in_memory(txn_filter["filter"]), transactions)) # type: ignore[arg-type]
-    if (len(filtered) != len(transactions)):
-        print("filtered", len(filtered))
-        print("transactions", len(transactions))
 
     return filtered
 
@@ -814,13 +808,7 @@ def indexer_post_filter(  # noqa: C901
 
         if subscription.get('balance_changes'):
             balance_changes = extract_balance_changes_from_indexer_transaction(t)
-            has_match = has_balance_change_match(balance_changes, subscription['balance_changes'])
-            print("has_match", has_match, t['id'])
-            print("balance_changes")
-            pprint(balance_changes)
-            print("subscription['balance_changes']")
-            pprint(subscription['balance_changes'])
-            result &= has_match
+            result &= has_balance_change_match(balance_changes, subscription['balance_changes'])
 
         if subscription.get('custom_filter'):
             result &= subscription['custom_filter'](t)
