@@ -620,7 +620,6 @@ def test_waits_until_transaction_appears_by_default_when_started() -> None:
 #       eventsEmitted.push(`inspect:${result.subscribedTransactions.map((b) => b.id).join(':')}`)
 #       pollComplete = true
 #     })
-# @pytest.mark.skip(reason="This works... sometimes. The event order seems to be non-determinstic for some reason")
 def test_correctly_fires_various_on_methods() -> None:
     algorand = AlgorandClient.default_local_net()
     test_account = generate_account(algorand)

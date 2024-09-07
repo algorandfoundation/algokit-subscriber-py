@@ -3,6 +3,7 @@ import hashlib
 import time
 from collections.abc import Callable
 from typing import Any, cast
+from pprint import pprint
 
 import algosdk
 from algosdk.v2client.algod import AlgodClient
@@ -480,14 +481,14 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
                     for t in transactions['transactions']:
                         # Re-run the pre-filter in-memory to properly extract inner transactions
                         filtered_transactions = get_filtered_indexer_transactions(t, f)
-                        print("filtered_transactions", len(filtered_transactions))
+                        print("filtered_transactions", [t['id'] for t in filtered_transactions])
 
                         # Run the post-filter to get the final list of matching transactions
                         post_filtered_transactions = list(filter(
                             lambda x: indexer_post_filter(f['filter'], arc28_events, subscription.get('arc28_events', []))(x),
                             filtered_transactions
                         ))
-                        print("post_filtered_transactions", len(post_filtered_transactions))
+                        print("post_filtered_transactions", [t['id'] for t in post_filtered_transactions])
 
                         catchup_transactions.extend(post_filtered_transactions)
 
@@ -681,7 +682,25 @@ def extract_balance_changes_from_indexer_transaction(transaction: TransactionRes
                 'roles': [BalanceChangeRole.AssetDestroyer],
             })
 
-    return changes
+
+    # Deduplicate and consolidate balance changes
+    consolidated_changes = []
+    for change in changes:
+        existing = None
+        for c in consolidated_changes:
+            if c['address'] == change['address'] and c['asset_id'] == change['asset_id']:
+                existing = c
+                break
+        
+        if existing:
+            existing['amount'] += change['amount']
+            for role in change['roles']:
+                if role not in existing['roles']:
+                    existing['roles'].append(role)
+        else:
+            consolidated_changes.append(change)
+    
+    return consolidated_changes
 
 def get_filtered_indexer_transactions(transaction: TransactionResult, txn_filter: NamedTransactionFilter) -> list[SubscribedTransaction]:
     """
@@ -795,7 +814,13 @@ def indexer_post_filter(  # noqa: C901
 
         if subscription.get('balance_changes'):
             balance_changes = extract_balance_changes_from_indexer_transaction(t)
-            result &= has_balance_change_match(balance_changes, subscription['balance_changes'])
+            has_match = has_balance_change_match(balance_changes, subscription['balance_changes'])
+            print("has_match", has_match, t['id'])
+            print("balance_changes")
+            pprint(balance_changes)
+            print("subscription['balance_changes']")
+            pprint(subscription['balance_changes'])
+            result &= has_match
 
         if subscription.get('custom_filter'):
             result &= subscription['custom_filter'](t)
