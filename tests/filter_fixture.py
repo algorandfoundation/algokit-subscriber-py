@@ -33,6 +33,7 @@ def filter_fixture() -> dict:
                 localnet.client.indexer.block_info(confirmed_round)
                 break
             except Exception:
+                print(f"Waiting for round {confirmed_round} to be available on indexer...")
                 time.sleep(1)
 
         return get_subscribed_transactions_for_test(

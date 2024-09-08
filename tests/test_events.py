@@ -772,8 +772,6 @@ def test_arc28_event_subscription_app_id_include(filter_fixture: dict) -> None:
         ],
     )
 
-# TODO: subscribe_indexer tests
-
 def test_arc28_event_subscription_app_id_exclude(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -803,22 +801,22 @@ def test_arc28_event_subscription_app_id_exclude(filter_fixture: dict) -> None:
 
     assert len(subscription['subscribed_transactions']) == 0
 
-    # subscription2 = filter_fixture['subscribe_indexer'](
-    #     {
-    #         "sender": test_account.address,
-    #         "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
-    #     },
-    #     txns.tx_ids[0],
-    #     [
-    #         {
-    #             "group_name": "group1",
-    #             "events": [swapped_event],
-    #             "process_for_app_ids": [app1["creation"]["application-index"] + 1],
-    #         },
-    #     ],
-    # )
+    subscription2 = filter_fixture['subscribe_indexer'](
+        {
+            "sender": test_account.address,
+            "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
+        },
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"],
+        [
+            {
+                "group_name": "group1",
+                "events": [swapped_event],
+                "process_for_app_ids": [app1["creation"]["application-index"] + 1],
+            },
+        ],
+    )
 
-    # assert len(subscription2['subscribed_transactions']) == 0
+    assert len(subscription2['subscribed_transactions']) == 0
 
 def test_arc28_event_subscription_predicate_include(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
@@ -876,22 +874,22 @@ def test_arc28_event_subscription_predicate_exclude(filter_fixture: dict) -> Non
 
     assert len(subscription['subscribed_transactions']) == 0
 
-    # subscription2 = filter_fixture['subscribe_indexer'](
-    #     {
-    #         "sender": test_account.address,
-    #         "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
-    #     },
-    #     txns.tx_ids[0],
-    #     [
-    #         {
-    #             "group_name": "group1",
-    #             "events": [swapped_event],
-    #             "process_transaction": lambda transaction: transaction['id'] != txns.tx_ids[1],
-    #         },
-    #     ],
-    # )
+    subscription2 = filter_fixture['subscribe_indexer'](
+        {
+            "sender": test_account.address,
+            "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
+        },
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"],
+        [
+            {
+                "group_name": "group1",
+                "events": [swapped_event],
+                "process_transaction": lambda transaction: transaction['id'] != txns.tx_ids[1],
+            },
+        ],
+    )
 
-    # assert len(subscription2['subscribed_transactions']) == 0
+    assert len(subscription2['subscribed_transactions']) == 0
 
 def test_arc28_event_subscription_group_validation(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
@@ -923,19 +921,19 @@ def test_arc28_event_subscription_group_validation(filter_fixture: dict) -> None
     assert len(subscription['subscribed_transactions']) == 0
 
 
-    # subscription2 = filter_fixture['subscribe_indexer'](
-    #     {
-    #         "sender": test_account.address,
-    #         "arc28_events": [{"event_name": "Swapped", "group_name": "group2"}],
-    #     },
-    #     txns.tx_ids[0],
-    #     [
-    #         {
-    #             "group_name": "group1",
-    #             "events": [swapped_event],
-    #             "process_transaction": lambda transaction: transaction['id'] != txns.tx_ids[1],
-    #         },
-    #     ],
-    # )
+    subscription2 = filter_fixture['subscribe_indexer'](
+        {
+            "sender": test_account.address,
+            "arc28_events": [{"event_name": "Swapped", "group_name": "group2"}],
+        },
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"],
+        [
+            {
+                "group_name": "group1",
+                "events": [swapped_event],
+                "process_transaction": lambda transaction: transaction['id'] != txns.tx_ids[1],
+            },
+        ],
+    )
 
-    # assert len(subscription2['subscribed_transactions']) == 0
+    assert len(subscription2['subscribed_transactions']) == 0
