@@ -634,7 +634,7 @@ def extract_balance_changes_from_indexer_transaction(transaction: TransactionRes
         close_to = att.get('close-to')
 
         changes.append({
-            'address': sender,
+            'address': att.get('sender') or sender,
             'amount': -amount,
             'asset_id': asset_id,
             'roles': [BalanceChangeRole.Sender],

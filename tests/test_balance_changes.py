@@ -782,16 +782,70 @@ def test_various_filters_on_payments(filter_fixture: dict) -> None:  # noqa: F81
         txns.tx_ids[9]
     )
 
-    # TODO: Check balance change output (like the snapshot in the TS test)
-    # address = {}
+    address = {
+        account: 'account1',
+        account2: 'account2',
+        account3: 'account3',        
+    }
 
-    # address[account] = 'account1'
-    # address[account2] = 'account2'
-    # address[account3] = 'account3'
-    # result = filter_fixture['subscribe_algod'](
-    #     { 'balance_changes': [{ 'min_amount': 0 }] },
-    #     localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"]
-    # )
+    result = filter_fixture['subscribe_algod'](
+        {'balance_changes': [{'min_amount': 0}]}, 
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"]
+    )
+
+    balance_changes = [
+        [
+            f"{address[b['address']]}: {b['amount']} ({', '.join([r.value for r in b['roles']])})"
+            for b in sorted(s['balance_changes'], key=lambda x: address[x['address']])
+        ]
+        for s in result['subscribed_transactions']
+    ]
+
+    expected_balance_changes = [
+        [
+            "account1: -2000 (Sender)",
+            "account2: 1000 (Receiver)",
+        ],
+        [
+            "account1: 1000 (Receiver)",
+            "account2: -2000 (Sender)",
+        ],
+        [
+            "account1: -3000 (Sender)",
+            "account2: 2000 (Receiver)",
+        ],
+        [
+            "account1: 2000 (Receiver)",
+            "account2: -3000 (Sender)",
+        ],
+        [
+            "account1: -4000 (Sender)",
+            "account2: 3000 (Receiver)",
+        ],
+        [
+            "account1: 3000 (Receiver)",
+            "account2: -4000 (Sender)",
+        ],
+        [
+            "account1: -197000 (Sender)",
+            "account2: 100000 (Receiver)",
+            "account3: 96000 (CloseTo)",
+        ],
+        [
+            "account1: 296000 (Receiver, CloseTo)",
+            "account2: -297000 (Sender)",
+        ],
+        [
+            "account1: 194000 (CloseTo)",
+            "account2: 100000 (Receiver)",
+            "account3: -296000 (Sender)",
+        ],
+        [
+            "account1: 0 (Sender, Receiver)",
+        ],
+    ]
+
+    assert balance_changes == expected_balance_changes
 
 
 # test('Works with various balance change filters on asset transfer', async () => {
@@ -1264,5 +1318,90 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:
         },
         txns.tx_ids[12]
     )
+
+    address = {}
+    address[account] = 'account1'
+    address[account2] = 'account2'
+    address[account3] = 'account3'
+    address[test_account] = 'testAccount'
+
+    result = filter_fixture['subscribe_algod'](
+        {'balance_changes': [{'min_amount': 0}]},
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"]
+    )
+
+    assets = {}
+    assets[asset1] = 'asset1'
+    assets[asset2] = 'asset2'
+
+    balance_changes = []
+    for s in result['subscribed_transactions']:
+        transaction_changes = []
+        for b in s['balance_changes']:
+            if b['asset_id'] != 0:
+                roles = ', '.join([role.value for role in b['roles']])
+                asset_id = assets[b['asset_id']]
+                change_str = f"{address[b['address']]}: {b['amount']} x {asset_id} ({roles})"
+                transaction_changes.append(change_str)
+        balance_changes.append(sorted(transaction_changes))
+
+    expected_balance_changes = [
+        [
+            "account1: -1 x asset1 (Sender)",
+            "account2: 1 x asset1 (Receiver)",
+        ],
+        [
+            "account1: 1 x asset1 (Receiver)",
+            "account2: -1 x asset1 (Sender)",
+        ],
+        [
+            "account1: -2 x asset1 (Sender)",
+            "account2: 2 x asset1 (Receiver)",
+        ],
+        [
+            "account1: 2 x asset1 (Receiver)",
+            "account2: -2 x asset1 (Sender)",
+        ],
+        [
+            "account1: -3 x asset1 (Sender)",
+            "account2: 3 x asset1 (Receiver)",
+        ],
+        [
+            "account1: 3 x asset1 (Receiver)",
+            "account2: -3 x asset1 (Sender)",
+        ],
+        [
+            "account1: -10 x asset1 (Sender)",
+            "account2: 7 x asset1 (Receiver)",
+            "account3: 3 x asset1 (CloseTo)",
+        ],
+        [
+            "account1: 0 x asset1 (Sender, Receiver)",
+        ],
+        [
+            "account1: 17 x asset1 (Receiver, CloseTo)",
+            "account2: -17 x asset1 (Sender)",
+        ],
+        [
+            "account2: 0 x asset1 (Sender, Receiver)",
+        ],
+        [
+            "account1: 20 x asset1 (CloseTo)",
+            "account2: 3 x asset1 (Receiver)",
+            "account3: -23 x asset1 (Sender)",
+        ],
+        [
+            "account1: -1 x asset2 (Sender)",
+            "account2: 1 x asset2 (Receiver)",
+        ],
+        [
+            "account1: 23 x asset2 (Receiver)",
+            "account2: -23 x asset2 (Sender)",
+        ],
+    ]
+
+    print(len(balance_changes))
+    for i, bc in enumerate(balance_changes):
+        assert bc == expected_balance_changes[i]
 
     # TODO: Check balance change output (like the snapshot in the TS test)

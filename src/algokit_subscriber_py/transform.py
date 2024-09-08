@@ -698,7 +698,7 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
     ].get("xaid"):
         balance_changes.append(
             {
-                "address": encode_address(transaction["txn"]["snd"]),
+                "address": encode_address(transaction["txn"].get("asnd", transaction["txn"]["snd"])),
                 "asset_id": transaction["txn"]["xaid"],
                 "amount": -1 * (transaction["txn"].get("aamt", 0) or 0),
                 "roles": [BalanceChangeRole.Sender],

@@ -9,11 +9,11 @@ from .indexer import TransactionResult
 
 
 class BalanceChangeRole(Enum):
-  Sender = 'Sender',
-  Receiver = 'Receiver',
-  CloseTo = 'CloseTo',
-  AssetCreator = 'AssetCreator',
-  AssetDestroyer = 'AssetDestroyer',
+  Sender = 'Sender'
+  Receiver = 'Receiver'
+  CloseTo = 'CloseTo'
+  AssetCreator = 'AssetCreator'
+  AssetDestroyer = 'AssetDestroyer'
 
 class TransactionSubscriptionResult(TypedDict):
     """The result of a single subscription pull/poll."""

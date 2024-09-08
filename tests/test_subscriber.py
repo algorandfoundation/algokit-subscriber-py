@@ -690,7 +690,6 @@ def test_correctly_fires_various_on_methods() -> None:
 
     expected_batch_result = f'{tx_ids[0]}:{tx_ids[1]}:{tx_ids_2[0]}:{tx_ids_2[1]}'
 
-    # TODO: Event order is non-deterministic, so we need to fix it
     assert events_emitted[0] == f'before:poll:{initial_watermark}'
     assert events_emitted[1] == f'batch:account1:{tx_ids[0]}:{tx_ids[1]}'
     assert events_emitted[2] == f'account1:{tx_ids[0]}'
