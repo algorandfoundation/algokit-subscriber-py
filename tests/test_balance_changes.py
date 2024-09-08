@@ -1400,8 +1400,5 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:
         ],
     ]
 
-    print(len(balance_changes))
     for i, bc in enumerate(balance_changes):
         assert bc == expected_balance_changes[i]
-
-    # TODO: Check balance change output (like the snapshot in the TS test)
