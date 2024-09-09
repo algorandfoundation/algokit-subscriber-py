@@ -13,8 +13,6 @@ NESTED_INNER_ID = "QLYC4KMQW5RZRA7W5GYCJ4CUVWWSZKMK2V4X3XFQYSGYCJH6LI4Q/inner/5"
 def algorand_mainnet() -> AlgorandClient:
     return AlgorandClient.main_net()
 
-# TODO: Do a full snapshot assertion for both these tests. Just eyeballing it for now but it looks to line up with TS results
-
 def test_nested_inners_from_indexer(algorand_mainnet: AlgorandClient) -> None:
     txns = get_subscribed_transactions_for_test(
         sub_info={
