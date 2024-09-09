@@ -354,6 +354,26 @@ def get_tx_id_from_block_transaction(
 class TransactionInBlockWithChildOffset(TransactionInBlock):
     get_child_offset: NotRequired[Callable[[], int]]
 
+def convert_bytes_to_base64(obj):
+    """
+    Recursively iterate over a nested dict and convert any bytes values to base64 strings.
+
+    Args:
+        obj: The object to convert (can be a dict, list, or any other type)
+
+    Returns:
+        The object with all bytes values converted to base64 strings
+    """
+    if isinstance(obj, dict):
+        return {key: convert_bytes_to_base64(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_bytes_to_base64(item) for item in obj]
+    elif isinstance(obj, bytes):
+        return base64.b64encode(obj).decode('utf-8')
+    else:
+        return obj
+
+
 def get_indexer_transaction_from_algod_transaction(  # noqa: C901
     t: TransactionInBlock | TransactionInBlockWithChildOffset, filter_name: str | None = None
 ) -> SubscribedTransaction:
@@ -551,7 +571,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                     "ln-proven-weight": state_proof_message["P"],
                     "voters-commitment": state_proof_message["v"],
                 },
-                "state-proof-type": transaction.sprf_type,
+                "state-proof-type": transaction.sprf_type or 0,
             }
 
         if block_transaction.get("dt") is not None:
@@ -576,7 +596,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                 for ibt in block_transaction["dt"].get("itx", []) # type: ignore[union-attr]
             ]
 
-        return result
+        return convert_bytes_to_base64(result)
 
     except Exception as e:
         logger.error(

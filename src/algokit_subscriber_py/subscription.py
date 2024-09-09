@@ -579,7 +579,7 @@ def process_extra_fields(
     return {
         **transaction,
         'arc28_events': arc28_events if len(arc28_events) > 0 else None,
-        'balance_changes': balance_changes if len(balance_changes) > 0 else None,
+        'balance_changes': balance_changes,
         'inner-txns': inner_txns if len(inner_txns) > 0 else None,
         'filters_matched': transaction.get('filters_matched') or None,
     }
