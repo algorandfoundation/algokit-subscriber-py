@@ -72,7 +72,7 @@ class AlgodOnComplete(IntEnum):
     delete the AppParams for the application from the creator's balance
     record
     """
-class IndexerOnComplete(str, Enum):
+class IndexerOnComplete(Enum):
     """
     Enum representing the different types of application completion.
     """

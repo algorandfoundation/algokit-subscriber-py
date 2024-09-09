@@ -7,7 +7,10 @@ from algokit_subscriber_py.subscription import get_subscribed_transactions
 from algokit_subscriber_py.types.subscription import TransactionSubscriptionResult
 from algokit_utils.beta.algorand_client import AlgorandClient
 from algokit_utils.beta.composer import PayParams
-
+import base64
+from algokit_subscriber_py.utils import encode_address
+from algokit_subscriber_py.types.transaction import Transaction
+from algokit_subscriber_py.types.block import TransactionInBlock
 
 def send_x_transactions(x: int, sender: str, algorand: AlgorandClient ) -> dict:
     txns = []
@@ -92,3 +95,53 @@ def get_subscribe_transactions_from_sender(subscription: dict, account: str | li
 
 def get_confirmations(algorand: AlgorandClient, txids: list[str]) -> list[dict]:
     return [cast(dict, algorand.client.algod.pending_transaction_info(txid)) for txid in txids]
+
+def get_transaction_in_block_for_diff(transaction: TransactionInBlock) -> dict:
+    return {
+        "transaction": get_transaction_for_diff(transaction["transaction"]),
+        "parent_offset": transaction.get("parent_offset"),
+        "parent_transaction_id": transaction.get("parent_transaction_id"),
+        "round_index": transaction["round_index"],
+        "round_offset": transaction["round_offset"],
+        "created_app_id": transaction.get("created_app_id"),
+        "created_asset_id": transaction.get("created_asset_id"),
+        "asset_close_amount": transaction.get("asset_close_amount"),
+        "close_amount": transaction.get("close_amount"),
+    }
+
+def get_transaction_for_diff(transaction: Transaction) -> dict:
+    t = {
+        **transaction,
+        "name": None,
+        "app_accounts": [encode_address(a.public_key) for a in transaction.get("app_accounts", [])],
+        "from": encode_address(transaction["from"].public_key),
+        "to": encode_address(transaction["to"].public_key) if transaction.get("to") else None,
+        "rekey_to": encode_address(transaction["rekey_to"].public_key) if transaction.get("rekey_to") else None,
+        "app_args": [base64.b64encode(a).decode('utf-8') for a in transaction.get("app_args", [])],
+        "genesis_hash": base64.b64encode(transaction["genesis_hash"]).decode('utf-8'),
+        "group": base64.b64encode(transaction["group"]).decode('utf-8') if transaction.get("group") else None,
+        "lease": base64.b64encode(transaction["lease"]).decode('utf-8') if transaction.get("lease") else None,
+        "note": base64.b64encode(transaction["note"]).decode('utf-8') if transaction.get("note") else None,
+        "tag": base64.b64encode(transaction["tag"]).decode('utf-8'),
+    }
+
+    return clear_undefineds(t)
+
+def clear_undefineds(obj: dict) -> dict:
+    return {
+        k: clear_undefineds(v) if isinstance(v, dict) else v
+        for k, v in obj.items()
+        if v is not None
+    }
+
+def remove_none_values(obj):
+    if isinstance(obj, dict):
+        return {
+            key: remove_none_values(value)
+            for key, value in obj.items()
+            if value is not None
+        }
+    elif isinstance(obj, list):
+        return [remove_none_values(item) for item in obj if item is not None]
+    else:
+        return obj

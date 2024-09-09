@@ -8,7 +8,7 @@ from typing_extensions import NotRequired  # noqa: UP035
 from .types.block import Block, BlockData, BlockInnerTransaction, BlockTransaction, TransactionInBlock
 from .types.indexer import TransactionResult
 from .types.subscription import BalanceChange, BalanceChangeRole, BlockMetadata, SubscribedTransaction
-from .types.transaction import AnyTransaction, TransactionType
+from .types.transaction import AnyTransaction, TransactionType, AlgodOnComplete, IndexerOnComplete
 from .utils import encode_address, logger
 import msgpack
 import base64
@@ -18,6 +18,20 @@ from collections import OrderedDict
 
 ALGORAND_ZERO_ADDRESS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
 
+def algod_on_complete_to_indexer_on_complete(algod_oc: AlgodOnComplete) -> IndexerOnComplete:
+    print(f"algod_oc: {algod_oc}")
+    if algod_oc == AlgodOnComplete.NoOpOC:
+        return IndexerOnComplete.noop
+    if algod_oc == AlgodOnComplete.OptInOC:
+        return IndexerOnComplete.optin
+    if algod_oc == AlgodOnComplete.CloseOutOC:
+        return IndexerOnComplete.closeout
+    if algod_oc == AlgodOnComplete.ClearStateOC:
+        return IndexerOnComplete.clear
+    if algod_oc == AlgodOnComplete.UpdateApplicationOC:
+        return IndexerOnComplete.update
+    if algod_oc == AlgodOnComplete.DeleteApplicationOC:  # noqa: RET503
+        return IndexerOnComplete.delete
 
 def remove_nulls(obj: dict) -> dict:
     for key in list(obj.keys()):
@@ -403,9 +417,9 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
             "created-asset-index": created_asset_id,
             "genesis-hash": transaction.genesis_hash,
             "genesis-id": transaction.genesis_id,
-            "group": transaction.group,
-            "note": transaction.note,
-            "lease": transaction.lease,
+            "group": base64.b64encode(transaction.group).decode('utf-8') if transaction.group else None,
+            "note": transaction.note or '',
+            "lease": transaction.lease or '',
             "rekey-to": transaction.rekey_to,
             "closing-amount": close_amount,
             "created-application-index": created_app_id,
@@ -414,7 +428,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                 if block_transaction.get("sgnr")
                 else None
             ),
-            "logs": b64_logs,
+            "logs": b64_logs if len(b64_logs) > 0 else None,
         }
 
         if isinstance(transaction, AssetConfigTxn):
@@ -448,11 +462,11 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
         elif isinstance(transaction, ApplicationCallTxn):
             result["application-transaction"] = {
                 "application-id": transaction.index,
-                "approval-program": transaction.approval_program,
-                "clear-state-program": transaction.clear_program,
-                "on-completion": transaction.on_complete,
+                "approval-program": transaction.approval_program or '',
+                "clear-state-program": transaction.clear_program or '',
+                "on-completion": algod_on_complete_to_indexer_on_complete(transaction.on_complete).value,
                 "application-args": [base64.b64encode(b).decode('utf-8') for b in transaction.app_args or []],
-                "extra-program-pages": transaction.extra_pages,
+                "extra-program-pages": transaction.extra_pages or None,
                 "foreign-apps": transaction.foreign_apps,
                 "foreign-assets": transaction.foreign_assets,
                 "accounts": transaction.accounts,

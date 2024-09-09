@@ -561,21 +561,27 @@ def process_extra_fields(
         if groups_to_apply else []
     )
 
-    return {
-        **transaction,
-        'arc28_events': extract_arc28_events(
+    arc28_events = extract_arc28_events(
             # TODO: Determine why id isnt set for inners
             transaction.get('id', ""),
-            [base64.b64decode(log) for log in transaction.get('logs', [])],
+            [base64.b64decode(log) for log in transaction.get('logs') or []],
             events_to_apply,
             lambda group_name: next(g for g in groups_to_apply if g['group_name'] == group_name)['continue_on_error']
-        ),
-        'balance_changes': extract_balance_changes_from_indexer_transaction(transaction),
-        'inner_txns': [
-            process_extra_fields(inner, arc28_events, arc28_groups)
-            for inner in (transaction.get('inner-txns') or [])
-        ],
-        'filters_matched': transaction.get('filters_matched', []),
+    )
+
+    balance_changes = extract_balance_changes_from_indexer_transaction(transaction)
+
+    inner_txns = [
+        process_extra_fields(inner, arc28_events, arc28_groups)
+        for inner in (transaction.get('inner-txns') or [])
+    ]
+
+    return {
+        **transaction,
+        'arc28_events': arc28_events if len(arc28_events) > 0 else None,
+        'balance_changes': balance_changes if len(balance_changes) > 0 else None,
+        'inner-txns': inner_txns if len(inner_txns) > 0 else None,
+        'filters_matched': transaction.get('filters_matched') or None,
     }
 
 def extract_balance_changes_from_indexer_transaction(transaction: TransactionResult) -> list[BalanceChange]:
@@ -929,17 +935,5 @@ def transaction_filter(  # noqa: C901, PLR0915
 
     return filter_function
 
-def algod_on_complete_to_indexer_on_complete(algod_oc: AlgodOnComplete) -> IndexerOnComplete:
-    if algod_oc == AlgodOnComplete.NoOpOC:
-        return IndexerOnComplete.noop
-    if algod_oc == AlgodOnComplete.OptInOC:
-        return IndexerOnComplete.optin
-    if algod_oc == AlgodOnComplete.CloseOutOC:
-        return IndexerOnComplete.closeout
-    if algod_oc == AlgodOnComplete.ClearStateOC:
-        return IndexerOnComplete.clear
-    if algod_oc == AlgodOnComplete.UpdateApplicationOC:
-        return IndexerOnComplete.update
-    if algod_oc == AlgodOnComplete.DeleteApplicationOC:  # noqa: RET503
-        return IndexerOnComplete.delete
+
 
