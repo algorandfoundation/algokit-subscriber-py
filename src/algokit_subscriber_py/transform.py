@@ -19,7 +19,6 @@ from collections import OrderedDict
 ALGORAND_ZERO_ADDRESS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
 
 def algod_on_complete_to_indexer_on_complete(algod_oc: AlgodOnComplete) -> IndexerOnComplete:
-    print(f"algod_oc: {algod_oc}")
     if algod_oc == AlgodOnComplete.NoOpOC:
         return IndexerOnComplete.noop
     if algod_oc == AlgodOnComplete.OptInOC:
