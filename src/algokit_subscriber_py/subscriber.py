@@ -69,38 +69,40 @@ class AlgorandSubscriber:
 
         while not self.stop_requested:
             start_time = time.time()
-            result = self.poll_once()
-            duration_in_seconds = time.time() - start_time
+            try:
+                result = self.poll_once()
+                duration_in_seconds = time.time() - start_time
 
-            if not suppress_log:
-                logger.info(f"Subscription poll completed in {duration_in_seconds:.2f}s")
-                logger.info(f"Current round: {result['current_round']}")
-                logger.info(f"Starting watermark: {result['starting_watermark']}")
-                logger.info(f"New watermark: {result['new_watermark']}")
-                logger.info(f"Synced round range: {result['synced_round_range']}")
-                logger.info(f"Subscribed transactions: {len(result['subscribed_transactions'])}")
-
-            if inspect:
-                inspect(result)
-
-            # Check if there was a stop requested during one of the event handlers or inspect
-            if self.stop_requested:
-                break
-
-            if result['current_round'] > result['new_watermark'] or not self.config.get('wait_for_block_when_at_tip', False):
-                sleep_time = self.config.get('frequency_in_seconds', 1)
                 if not suppress_log:
-                    logger.info(f"Sleeping for {sleep_time}s")
-                time.sleep(sleep_time)
-            else:
-                next_round = result['current_round'] + 1
-                if not suppress_log:
-                    logger.info(f"Waiting for round {next_round}")
-                wait_start = time.time()
-                self.algod.status_after_block(result['current_round'])
-                if not suppress_log:
-                    logger.info(f"Waited for {time.time() - wait_start:.2f}s until next block")
+                    logger.info(f"Subscription poll completed in {duration_in_seconds:.2f}s")
+                    logger.info(f"Current round: {result['current_round']}")
+                    logger.info(f"Starting watermark: {result['starting_watermark']}")
+                    logger.info(f"New watermark: {result['new_watermark']}")
+                    logger.info(f"Synced round range: {result['synced_round_range']}")
+                    logger.info(f"Subscribed transactions: {len(result['subscribed_transactions'])}")
 
+                if inspect:
+                    inspect(result)
+
+                # Check if there was a stop requested during one of the event handlers or inspect
+                if self.stop_requested:
+                    break
+
+                if result['current_round'] > result['new_watermark'] or not self.config.get('wait_for_block_when_at_tip', False):
+                    sleep_time = self.config.get('frequency_in_seconds', 1)
+                    if not suppress_log:
+                        logger.info(f"Sleeping for {sleep_time}s")
+                    time.sleep(sleep_time)
+                else:
+                    next_round = result['current_round'] + 1
+                    if not suppress_log:
+                        logger.info(f"Waiting for round {next_round}")
+                    wait_start = time.time()
+                    self.algod.status_after_block(result['current_round'])
+                    if not suppress_log:
+                        logger.info(f"Waited for {time.time() - wait_start:.2f}s until next block")
+            except Exception as e:
+                self.event_emitter.emit('error', e)
         self.started = False
 
     def stop(self, reason: str | None = None) -> None:

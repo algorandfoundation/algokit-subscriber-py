@@ -700,4 +700,51 @@ def test_correctly_fires_various_on_methods() -> None:
     assert events_emitted[7] == f'poll:{expected_batch_result}'
     assert events_emitted[8] == f'inspect:{expected_batch_result}'
 
-# TODO: onError test
+def test_on_error():
+    watermark = 0
+
+    def get_watermark() -> int:
+        return watermark
+
+    def set_watermark(new_watermark: int) -> None:
+        nonlocal watermark  # noqa: PLW0603
+        watermark = new_watermark
+
+    algorand = AlgorandClient.default_local_net()
+    expected_error = Exception('BOOM')
+    error_triggered = False
+
+    subscriber = AlgorandSubscriber(
+        algod_client=algorand.client.algod,
+        indexer_client=algorand.client.indexer,
+        config={
+        'filters': [
+            {
+                'name': 'pay txns',
+                'filter': {
+                    'type': 'pay',
+                    'min_amount': 0
+                }
+            }
+        ],
+        'wait_for_block_when_at_tip': True,
+        'sync_behaviour': 'catchup-with-indexer',
+        'watermark_persistence': {
+            'get': get_watermark,
+            'set': set_watermark
+        },
+    })
+
+    def on_pay_txns(t: dict, e: str) -> None:
+        raise expected_error
+
+    def on_error(error: Exception, _: str) -> None:
+        nonlocal error_triggered
+        error_triggered = True
+        assert error == expected_error
+        subscriber.stop('TEST')
+
+    subscriber.on('pay txns', on_pay_txns)
+    subscriber.on_error(on_error)
+
+    subscriber.start()

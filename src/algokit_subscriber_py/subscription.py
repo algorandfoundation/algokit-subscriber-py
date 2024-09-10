@@ -3,7 +3,7 @@ import hashlib
 import time
 from collections.abc import Callable
 from typing import Any, cast
-from pprint import pprint
+from .transform import algod_on_complete_to_indexer_on_complete
 
 import algosdk
 from algosdk.v2client.algod import AlgodClient
