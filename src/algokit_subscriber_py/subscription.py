@@ -395,6 +395,10 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     algod: AlgodClient,
     indexer: IndexerClient | None = None
 ) -> TransactionSubscriptionResult:
+    """
+    Executes a single pull/poll to subscribe to transactions on the configured Algorand
+    blockchain for the given subscription context.
+    """
     watermark = subscription['watermark']
     filters = subscription['filters']
     max_rounds_to_sync = subscription.get('max_rounds_to_sync') or 500

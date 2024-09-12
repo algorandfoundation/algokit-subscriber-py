@@ -13,6 +13,12 @@ from .utils import logger
 
 class AlgorandSubscriber:
     def __init__(self, config: AlgorandSubscriberConfig, algod_client: AlgodClient, indexer_client: IndexerClient | None = None):
+        """
+        Create a new `AlgorandSubscriber`.
+        :param config: The subscriber configuration
+        :param algod_client: An algod client
+        :param indexer_client: An (optional) indexer client; only needed if `subscription.syncBehaviour` is `catchup-with-indexer`
+        """
         self.algod = algod_client
         self.indexer = indexer_client
         self.config = config
@@ -29,6 +35,9 @@ class AlgorandSubscriber:
         raise error
 
     def poll_once(self) -> TransactionSubscriptionResult:
+        """
+        Execute a single subscription poll.
+        """
         watermark = self.config['watermark_persistence']['get']() or 0
         current_round = cast(dict, self.algod.status())['last-round']
 
@@ -62,6 +71,13 @@ class AlgorandSubscriber:
         return poll_result
 
     def start(self, inspect: Callable | None = None, suppress_log: bool = False) -> None:  # noqa: FBT001, FBT002
+        """
+        Start the subscriber in a loop until `stop` is called.
+
+        This is useful when running in the context of a long-running process / container.
+
+        If you want to inspect or log what happens under the covers you can pass in an `inspect` callable that will be called for each poll.
+        """
         if self.started:
             return
         self.started = True
@@ -112,24 +128,40 @@ class AlgorandSubscriber:
         logger.info(f"Stopping subscriber: {reason}")
 
     def on(self, filter_name: str, listener: EventListener) -> 'AlgorandSubscriber':
+        """
+        Register an event handler to run on every subscribed transaction matching the given filter name.
+        """
         if filter_name == 'error':
             raise ValueError("'error' is reserved, please supply a different filter_name.")
         self.event_emitter.on(filter_name, listener)
         return self
 
     def on_batch(self, filter_name: str, listener: EventListener) -> 'AlgorandSubscriber':
+        """
+        Register an event handler to run on all subscribed transactions matching the given filter name
+        for each subscription poll.
+        """
         self.event_emitter.on(f'batch:{filter_name}', listener)
         return self
 
     def on_before_poll(self, listener: EventListener) -> 'AlgorandSubscriber':
+        """
+        Register an event handler to run before each subscription poll.
+        """
         self.event_emitter.on('before:poll', listener)
         return self
 
     def on_poll(self, listener: EventListener) -> 'AlgorandSubscriber':
+        """
+        Register an event handler to run after each subscription poll.
+        """
         self.event_emitter.on('poll', listener)
         return self
 
     def on_error(self, listener: EventListener) -> 'AlgorandSubscriber':
+        """
+        Register an event handler to run when an error occurs.
+        """
         self.event_emitter.off('error', self.default_error_handler)
         self.event_emitter.on('error', listener)
         return self

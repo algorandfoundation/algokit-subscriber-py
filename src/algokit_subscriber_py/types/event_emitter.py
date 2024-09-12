@@ -4,6 +4,9 @@ from typing import Any
 from .subscription import SubscribedTransaction
 
 EventListener = Callable[[SubscribedTransaction, str], None]
+"""
+A function that takes a SubscribedTransaction and the event name.
+"""
 
 class EventEmitter:
     """

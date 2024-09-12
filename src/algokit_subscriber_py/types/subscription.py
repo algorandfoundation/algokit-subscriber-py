@@ -184,39 +184,6 @@ class BeforePollMetadata(TypedDict):
     current_round: int
     """The current round of algod"""
 
-class CoreTransactionSubscriptionParams(TypedDict):
-    filters: list['NamedTransactionFilter']
-    """The filter(s) to apply to find transactions of interest."""
-
-    arc28_events: NotRequired[list['Arc28EventGroup']]
-    """Any ARC-28 event definitions to process from app call logs"""
-
-    max_rounds_to_sync: NotRequired[int | None]
-    """
-    The maximum number of rounds to sync from algod for each subscription pull/poll.
-    Defaults to 500.
-    """
-
-    max_indexer_rounds_to_sync: NotRequired[int | None]
-    """
-    The maximum number of rounds to sync from indexer when using `sync_behaviour: 'catchup-with-indexer'`.
-    """
-
-    sync_behaviour: str
-    """
-    If the current tip of the configured Algorand blockchain is more than `max_rounds_to_sync`
-    past `watermark` then how should that be handled.
-    """
-
-class NamedTransactionFilter(TypedDict):
-    """Specify a named filter to apply to find transactions of interest."""
-
-    name: str
-    """The name to give the filter."""
-
-    filter: 'TransactionFilter'
-    """The filter itself."""
-
 class TransactionFilter(TypedDict):
     type: NotRequired[str | list[str]]
     """Filter based on the given transaction type(s)."""
@@ -278,6 +245,39 @@ class TransactionFilter(TypedDict):
     custom_filter: NotRequired[Callable[[TransactionResult], bool]]
     """Catch-all custom filter to filter for things that the rest of the filters don't provide."""
 
+class NamedTransactionFilter(TypedDict):
+    """Specify a named filter to apply to find transactions of interest."""
+
+    name: str
+    """The name to give the filter."""
+
+    filter: TransactionFilter
+    """The filter itself."""
+
+class CoreTransactionSubscriptionParams(TypedDict):
+    filters: list['NamedTransactionFilter']
+    """The filter(s) to apply to find transactions of interest."""
+
+    arc28_events: NotRequired[list['Arc28EventGroup']]
+    """Any ARC-28 event definitions to process from app call logs"""
+
+    max_rounds_to_sync: NotRequired[int | None]
+    """
+    The maximum number of rounds to sync from algod for each subscription pull/poll.
+    Defaults to 500.
+    """
+
+    max_indexer_rounds_to_sync: NotRequired[int | None]
+    """
+    The maximum number of rounds to sync from indexer when using `sync_behaviour: 'catchup-with-indexer'`.
+    """
+
+    sync_behaviour: str
+    """
+    If the current tip of the configured Algorand blockchain is more than `max_rounds_to_sync`
+    past `watermark` then how should that be handled.
+    """
+
 class TransactionSubscriptionParams(CoreTransactionSubscriptionParams):
     watermark: int
     """
@@ -313,14 +313,8 @@ class AlgorandSubscriberConfig(CoreTransactionSubscriptionParams):
     its position in the chain
     """
 
-class SubscriberConfigFilter(TypedDict):
+class SubscriberConfigFilter(NamedTransactionFilter):
     """A single event to subscribe to / emit."""
-
-    name: str
-    """The name to give the filter."""
-
-    filter: TransactionFilter
-    """The filter itself."""
 
     mapper: NotRequired[Callable[[list['SubscribedTransaction']], list[Any]]]
     """
