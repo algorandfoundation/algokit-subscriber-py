@@ -5,7 +5,7 @@ from typing import TypeVar
 from algosdk.encoding import encode_address as sdk_encode_address
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 def range_inclusive(start: int, end: int) -> list[int]:
     return list(range(start, end + 1))
