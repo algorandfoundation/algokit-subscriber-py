@@ -13,6 +13,7 @@ from .transactions import get_subscribe_transactions_from_sender, send_x_transac
 #       algod,
 #     )
 
+
 #     expect(subscribed.currentRound).toBe(lastTxnRound)
 #     expect(subscribed.startingWatermark).toBe(0)
 #     expect(subscribed.newWatermark).toBe(lastTxnRound)
@@ -44,7 +45,8 @@ def test_only_processes_latest_txn() -> None:
     assert subscribed["new_watermark"] == last_txn_round
     assert subscribed["synced_round_range"] == (last_txn_round, last_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 1
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[1]['tx_id']
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[1]["tx_id"]
+
 
 #   test('Only processes the latest transaction when starting from an earlier round with other transactions', async () => {
 #     const { algod, testAccount } = localnet.context
@@ -56,6 +58,7 @@ def test_only_processes_latest_txn() -> None:
 #       testAccount,
 #       algod,
 #     )
+
 
 #     expect(subscribed.currentRound).toBe(currentRound)
 #     expect(subscribed.startingWatermark).toBe(olderTxnRound - 1)
@@ -91,7 +94,7 @@ def test_only_processes_latest_txn_with_earlier_round_start() -> None:
     assert subscribed["new_watermark"] == current_txn_round
     assert subscribed["synced_round_range"] == (current_txn_round, current_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 1
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[0]['tx_id']
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[0]["tx_id"]
 
 
 #   test('Process multiple transactions', async () => {
@@ -103,6 +106,7 @@ def test_only_processes_latest_txn_with_earlier_round_start() -> None:
 #       testAccount,
 #       algod,
 #     )
+
 
 #     expect(subscribed.currentRound).toBe(lastTxnRound)
 #     expect(subscribed.startingWatermark).toBe(0)
@@ -137,5 +141,5 @@ def test_process_multiple_txns() -> None:
     assert subscribed["new_watermark"] == last_txn_round
     assert subscribed["synced_round_range"] == (rounds[1], last_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 2
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[1]['tx_id']
-    assert subscribed["subscribed_transactions"][1]["id"] == txns[2]['tx_id']
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[1]["tx_id"]
+    assert subscribed["subscribed_transactions"][1]["id"] == txns[2]["tx_id"]

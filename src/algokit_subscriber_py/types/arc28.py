@@ -10,6 +10,7 @@ class Arc28EventArg(TypedDict):
     """
     Represents an argument of an ARC-28 event.
     """
+
     type: str
     """The type of the argument"""
 
@@ -19,10 +20,12 @@ class Arc28EventArg(TypedDict):
     desc: NotRequired[str]
     """An optional, user-friendly description for the argument"""
 
+
 class Arc28Event(TypedDict):
     """
     The definition of metadata for an ARC-28 event as per the ARC-28 specification.
     """
+
     name: str
     """The name of the event"""
 
@@ -37,6 +40,7 @@ class Arc28EventGroup(TypedDict):
     """
     Specifies a group of ARC-28 event definitions along with instructions for when to attempt to process the events.
     """
+
     group_name: str
     """The name to designate for this group of events."""
 
@@ -72,6 +76,7 @@ class Arc28EventToProcess(TypedDict):
 
     event_definition: Arc28Event
     """The ARC-28 definition of the event"""
+
 
 class EmittedArc28Event(Arc28EventToProcess):
     """

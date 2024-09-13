@@ -8,6 +8,7 @@ EventListener = Callable[[SubscribedTransaction, str], None]
 A function that takes a SubscribedTransaction and the event name.
 """
 
+
 class EventEmitter:
     """
     A simple event emitter that allows for the registration of event listeners and the
@@ -29,7 +30,7 @@ class EventEmitter:
                     self._listeners[event_name].remove(listener)
                     self._one_time_listeners[event_name].remove(listener)
 
-    def on(self, event_name: str, listener: EventListener) -> 'EventEmitter':
+    def on(self, event_name: str, listener: EventListener) -> "EventEmitter":
         """
         Registers a listener for the given event name.
         """
@@ -39,7 +40,7 @@ class EventEmitter:
         self._listeners[event_name].append(listener)
         return self
 
-    def once(self, event_name: str, listener: EventListener) -> 'EventEmitter':
+    def once(self, event_name: str, listener: EventListener) -> "EventEmitter":
         """
         Registers a listener for the given event name that will only be called once.
         """
@@ -50,7 +51,9 @@ class EventEmitter:
 
         return self.on(event_name, listener)
 
-    def remove_listener(self, event_name: str, listener: EventListener) -> 'EventEmitter':
+    def remove_listener(
+        self, event_name: str, listener: EventListener
+    ) -> "EventEmitter":
         """
         Removes a listener for the given event name.
         """

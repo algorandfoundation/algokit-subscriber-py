@@ -1,8 +1,27 @@
 from enum import Enum, IntEnum
 
-from algosdk.transaction import ApplicationCallTxn, AssetConfigTxn, AssetFreezeTxn, AssetTransferTxn, KeyregTxn, PaymentTxn, StateProofTxn, Transaction
+from algosdk.transaction import (
+    ApplicationCallTxn,
+    AssetConfigTxn,
+    AssetFreezeTxn,
+    AssetTransferTxn,
+    KeyregTxn,
+    PaymentTxn,
+    StateProofTxn,
+    Transaction,
+)
 
-AnyTransaction = Transaction | AssetConfigTxn | ApplicationCallTxn | AssetFreezeTxn | AssetTransferTxn | PaymentTxn | KeyregTxn | StateProofTxn
+AnyTransaction = (
+    Transaction
+    | AssetConfigTxn
+    | ApplicationCallTxn
+    | AssetFreezeTxn
+    | AssetTransferTxn
+    | PaymentTxn
+    | KeyregTxn
+    | StateProofTxn
+)
+
 
 class TransactionType(Enum):
     """
@@ -10,25 +29,26 @@ class TransactionType(Enum):
     """
 
     # Payment transaction
-    pay = 'pay'
+    pay = "pay"
 
     # Key registration transaction
-    keyreg = 'keyreg'
+    keyreg = "keyreg"
 
     # Asset configuration transaction
-    acfg = 'acfg'
+    acfg = "acfg"
 
     # Asset transfer transaction
-    axfer = 'axfer'
+    axfer = "axfer"
 
     # Asset freeze transaction
-    afrz = 'afrz'
+    afrz = "afrz"
 
     # Application transaction
-    appl = 'appl'
+    appl = "appl"
 
     # State proof transaction
-    stpf = 'stpf'
+    stpf = "stpf"
+
 
 class AlgodOnComplete(IntEnum):
     """
@@ -72,14 +92,16 @@ class AlgodOnComplete(IntEnum):
     delete the AppParams for the application from the creator's balance
     record
     """
+
+
 class IndexerOnComplete(Enum):
     """
     Enum representing the different types of application completion.
     """
 
-    noop = 'noop'
-    optin = 'optin'
-    closeout = 'closeout'
-    clear = 'clear'
-    update = 'update'
-    delete = 'delete'
+    noop = "noop"
+    optin = "optin"
+    closeout = "closeout"
+    clear = "clear"
+    update = "update"
+    delete = "delete"

@@ -9,11 +9,12 @@ from .indexer import TransactionResult
 
 
 class BalanceChangeRole(Enum):
-  Sender = 'Sender'
-  Receiver = 'Receiver'
-  CloseTo = 'CloseTo'
-  AssetCreator = 'AssetCreator'
-  AssetDestroyer = 'AssetDestroyer'
+    Sender = "Sender"
+    Receiver = "Receiver"
+    CloseTo = "CloseTo"
+    AssetCreator = "AssetCreator"
+    AssetDestroyer = "AssetDestroyer"
+
 
 class TransactionSubscriptionResult(TypedDict):
     """The result of a single subscription pull/poll."""
@@ -36,18 +37,19 @@ class TransactionSubscriptionResult(TypedDict):
     subscribed transactions to keep it reliable.
     """
 
-    subscribed_transactions: list['SubscribedTransaction']
+    subscribed_transactions: list["SubscribedTransaction"]
     """
     Any transactions that matched the given filter within
     the synced round range. This substantively uses the indexer transaction
     format to represent the data with some additional fields.
     """
 
-    block_metadata: NotRequired[list['BlockMetadata']]
+    block_metadata: NotRequired[list["BlockMetadata"]]
     """
     The metadata about any blocks that were retrieved from algod as part
     of the subscription poll.
     """
+
 
 class BlockMetadata(TypedDict):
     """Metadata about a block that was retrieved from algod."""
@@ -73,7 +75,7 @@ class BlockMetadata(TypedDict):
     seed: str
     """The base64 seed of the block."""
 
-    rewards: NotRequired['BlockRewards']
+    rewards: NotRequired["BlockRewards"]
     """Fields relating to rewards"""
 
     parent_transaction_count: int
@@ -96,8 +98,9 @@ class BlockMetadata(TypedDict):
     TransactionsRootSHA256 is an auxiliary TransactionRoot, built using a vector commitment instead of a merkle tree, and SHA256 hash function instead of the default SHA512_256. This commitment can be used on environments where only the SHA256 function exists.
     """
 
-    upgrade_state: NotRequired['BlockUpgradeState']
+    upgrade_state: NotRequired["BlockUpgradeState"]
     """Fields relating to a protocol upgrade."""
+
 
 class BlockRewards(TypedDict):
     fee_sink: str
@@ -118,6 +121,7 @@ class BlockRewards(TypedDict):
     rewards_residue: int
     """Number of leftover MicroAlgos after the distribution of RewardsRate/rewardUnits MicroAlgos for every reward unit in the next round."""
 
+
 class BlockUpgradeState(TypedDict):
     current_protocol: str
     """Current protocol version"""
@@ -134,6 +138,7 @@ class BlockUpgradeState(TypedDict):
     next_protocol_switch_on: NotRequired[None | int]
     """Round on which the protocol upgrade will take effect."""
 
+
 class SubscribedTransaction(TransactionResult):
     """
     The common model used to expose a transaction that is returned from a subscription.
@@ -148,7 +153,7 @@ class SubscribedTransaction(TransactionResult):
     parent_transaction_id: NotRequired[None | str]
     """The transaction ID of the parent of this transaction (if it's an inner transaction)."""
 
-    inner_txns: NotRequired[list['SubscribedTransaction']]
+    inner_txns: NotRequired[list["SubscribedTransaction"]]
     """Inner transactions produced by application execution."""
 
     arc28_events: NotRequired[list[EmittedArc28Event]]
@@ -157,8 +162,9 @@ class SubscribedTransaction(TransactionResult):
     filters_matched: NotRequired[list[str]]
     """The names of any filters that matched the given transaction to result in it being 'subscribed'."""
 
-    balance_changes: NotRequired[list['BalanceChange']]
+    balance_changes: NotRequired[list["BalanceChange"]]
     """The balance changes in the transaction."""
+
 
 class BalanceChange(TypedDict):
     """Represents a balance change effect for a transaction."""
@@ -172,8 +178,9 @@ class BalanceChange(TypedDict):
     amount: int
     """The amount of the balance change in smallest divisible unit or microAlgos."""
 
-    roles: list['BalanceChangeRole']
+    roles: list["BalanceChangeRole"]
     """The roles the account was playing that led to the balance change"""
+
 
 class BeforePollMetadata(TypedDict):
     """Metadata about an impending subscription poll."""
@@ -183,6 +190,7 @@ class BeforePollMetadata(TypedDict):
 
     current_round: int
     """The current round of algod"""
+
 
 class TransactionFilter(TypedDict):
     type: NotRequired[str | list[str]]
@@ -239,11 +247,26 @@ class TransactionFilter(TypedDict):
     Note: the definitions for these events must be passed in to the subscription config via `arc28_events`.
     """
 
-    balance_changes: NotRequired[list[dict[str, Union[int, list[int], str, list[str], 'BalanceChangeRole', list['BalanceChangeRole']]]]]
+    balance_changes: NotRequired[
+        list[
+            dict[
+                str,
+                Union[
+                    int,
+                    list[int],
+                    str,
+                    list[str],
+                    "BalanceChangeRole",
+                    list["BalanceChangeRole"],
+                ],
+            ]
+        ]
+    ]
     """Filter to transactions that result in balance changes that match one or more of the given set of balance changes."""
 
     custom_filter: NotRequired[Callable[[TransactionResult], bool]]
     """Catch-all custom filter to filter for things that the rest of the filters don't provide."""
+
 
 class NamedTransactionFilter(TypedDict):
     """Specify a named filter to apply to find transactions of interest."""
@@ -254,11 +277,12 @@ class NamedTransactionFilter(TypedDict):
     filter: TransactionFilter
     """The filter itself."""
 
+
 class CoreTransactionSubscriptionParams(TypedDict):
-    filters: list['NamedTransactionFilter']
+    filters: list["NamedTransactionFilter"]
     """The filter(s) to apply to find transactions of interest."""
 
-    arc28_events: NotRequired[list['Arc28EventGroup']]
+    arc28_events: NotRequired[list["Arc28EventGroup"]]
     """Any ARC-28 event definitions to process from app call logs"""
 
     max_rounds_to_sync: NotRequired[int | None]
@@ -278,6 +302,7 @@ class CoreTransactionSubscriptionParams(TypedDict):
     past `watermark` then how should that be handled.
     """
 
+
 class TransactionSubscriptionParams(CoreTransactionSubscriptionParams):
     watermark: int
     """
@@ -290,6 +315,7 @@ class TransactionSubscriptionParams(CoreTransactionSubscriptionParams):
     If not provided, it will be resolved on demand.
     """
 
+
 class WatermarkPersistence(TypedDict):
     get: Callable[[], int | None]
     """Method to retrieve the current watermark"""
@@ -297,8 +323,9 @@ class WatermarkPersistence(TypedDict):
     set: Callable[[int], None]
     """Method to persist the new watermark"""
 
+
 class AlgorandSubscriberConfig(CoreTransactionSubscriptionParams):
-    filters: list['SubscriberConfigFilter'] # type: ignore[misc]
+    filters: list["SubscriberConfigFilter"]  # type: ignore[misc]
     """The set of filters to subscribe to / emit events for, along with optional data mappers."""
 
     frequency_in_seconds: NotRequired[int]
@@ -313,10 +340,11 @@ class AlgorandSubscriberConfig(CoreTransactionSubscriptionParams):
     its position in the chain
     """
 
+
 class SubscriberConfigFilter(NamedTransactionFilter):
     """A single event to subscribe to / emit."""
 
-    mapper: NotRequired[Callable[[list['SubscribedTransaction']], list[Any]]]
+    mapper: NotRequired[Callable[[list["SubscribedTransaction"]], list[Any]]]
     """
     An optional data mapper if you want the event data to take a certain shape when subscribing to events with this filter name.
     """

@@ -18,11 +18,15 @@ def test_multiple_filters_with_indexer() -> None:
     tx_ids1 = send_x_transactions(2, senders[0], algorand)["tx_ids"]
     tx_ids2 = send_x_transactions(2, senders[1], algorand)["tx_ids"]
     tx_ids3 = send_x_transactions(2, senders[2], algorand)["tx_ids"]
-    post_indexer_round = send_x_transactions(1, generate_account(algorand), algorand)["last_txn_round"]
+    post_indexer_round = send_x_transactions(1, generate_account(algorand), algorand)[
+        "last_txn_round"
+    ]
     tx_ids11 = send_x_transactions(1, senders[0], algorand)["tx_ids"]
     tx_ids22 = send_x_transactions(1, senders[1], algorand)["tx_ids"]
     tx_ids33 = send_x_transactions(1, senders[2], algorand)["tx_ids"]
-    last_txn_round = send_x_transactions(1, generate_account(algorand), algorand)["last_txn_round"]
+    last_txn_round = send_x_transactions(1, generate_account(algorand), algorand)[
+        "last_txn_round"
+    ]
     while True:
         try:
             algorand.client.indexer.block_info(last_txn_round)
@@ -30,18 +34,23 @@ def test_multiple_filters_with_indexer() -> None:
         except Exception:
             time.sleep(1)
 
-    subscribed = get_subscribed_transactions_for_test({
-        "filters": [{
-            "name": "default",
-            "filter": {
-                "sender": senders,
-            }
-        }],
-        "max_rounds_to_sync": last_txn_round - post_indexer_round,
-        "sync_behaviour": "catchup-with-indexer",
-        "current_round": last_txn_round,
-        "watermark": 0,
-    }, algorand)
+    subscribed = get_subscribed_transactions_for_test(
+        {
+            "filters": [
+                {
+                    "name": "default",
+                    "filter": {
+                        "sender": senders,
+                    },
+                }
+            ],
+            "max_rounds_to_sync": last_txn_round - post_indexer_round,
+            "sync_behaviour": "catchup-with-indexer",
+            "current_round": last_txn_round,
+            "watermark": 0,
+        },
+        algorand,
+    )
 
     assert subscribed["current_round"] == last_txn_round
     assert subscribed["starting_watermark"] == 0
@@ -57,4 +66,3 @@ def test_multiple_filters_with_indexer() -> None:
     assert subscribed["subscribed_transactions"][6]["id"] == tx_ids11[0]
     assert subscribed["subscribed_transactions"][7]["id"] == tx_ids22[0]
     assert subscribed["subscribed_transactions"][8]["id"] == tx_ids33[0]
-

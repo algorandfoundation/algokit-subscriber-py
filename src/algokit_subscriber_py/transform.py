@@ -1,24 +1,50 @@
 import base64
+import hashlib
+from collections import OrderedDict
 from collections.abc import Callable, Sequence
 from typing import Any, TypedDict, cast
 
-from algosdk.transaction import ApplicationCallTxn, AssetConfigTxn, AssetFreezeTxn, AssetTransferTxn, KeyregTxn, PaymentTxn, StateProofTxn, Transaction
+import msgpack
+from algosdk.transaction import (
+    ApplicationCallTxn,
+    AssetConfigTxn,
+    AssetFreezeTxn,
+    AssetTransferTxn,
+    KeyregTxn,
+    PaymentTxn,
+    StateProofTxn,
+    Transaction,
+)
 from typing_extensions import NotRequired  # noqa: UP035
 
-from .types.block import Block, BlockData, BlockInnerTransaction, BlockTransaction, TransactionInBlock
+from .types.block import (
+    Block,
+    BlockData,
+    BlockInnerTransaction,
+    BlockTransaction,
+    TransactionInBlock,
+)
 from .types.indexer import TransactionResult
-from .types.subscription import BalanceChange, BalanceChangeRole, BlockMetadata, SubscribedTransaction
-from .types.transaction import AnyTransaction, TransactionType, AlgodOnComplete, IndexerOnComplete
+from .types.subscription import (
+    BalanceChange,
+    BalanceChangeRole,
+    BlockMetadata,
+    SubscribedTransaction,
+)
+from .types.transaction import (
+    AlgodOnComplete,
+    AnyTransaction,
+    IndexerOnComplete,
+    TransactionType,
+)
 from .utils import encode_address, logger
-import msgpack
-import base64
-import hashlib
-from collections import OrderedDict
-
 
 ALGORAND_ZERO_ADDRESS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ"
 
-def algod_on_complete_to_indexer_on_complete(algod_oc: AlgodOnComplete) -> IndexerOnComplete:
+
+def algod_on_complete_to_indexer_on_complete(
+    algod_oc: AlgodOnComplete,
+) -> IndexerOnComplete:
     if algod_oc == AlgodOnComplete.NoOpOC:
         return IndexerOnComplete.noop
     if algod_oc == AlgodOnComplete.OptInOC:
@@ -31,6 +57,7 @@ def algod_on_complete_to_indexer_on_complete(algod_oc: AlgodOnComplete) -> Index
         return IndexerOnComplete.update
     if algod_oc == AlgodOnComplete.DeleteApplicationOC:  # noqa: RET503
         return IndexerOnComplete.delete
+
 
 def remove_nulls(obj: dict) -> dict:
     for key in list(obj.keys()):
@@ -122,7 +149,10 @@ def get_block_transactions(block: Block) -> list[TransactionInBlock]:
             )
         )
 
-        if block_transaction.get("dt") is None or block_transaction["dt"].get("itx") is None:
+        if (
+            block_transaction.get("dt") is None
+            or block_transaction["dt"].get("itx") is None
+        ):
             continue
 
         for itxn in block_transaction["dt"]["itx"]:
@@ -131,7 +161,7 @@ def get_block_transactions(block: Block) -> list[TransactionInBlock]:
                     itxn,
                     block,
                     block_transaction,
-                    parent_data["transaction"].get_txid(), # type: ignore[no-untyped-call]
+                    parent_data["transaction"].get_txid(),  # type: ignore[no-untyped-call]
                     round_index,
                     get_offset,
                     get_parent_offset,
@@ -202,10 +232,10 @@ def get_block_inner_transactions(  # noqa: PLR0913
         )
     ]
 
-    if block_transaction.get("dt") is None or block_transaction["dt"].get("itx") is None: # type: ignore[union-attr]
+    if block_transaction.get("dt") is None or block_transaction["dt"].get("itx") is None:  # type: ignore[union-attr]
         return txns
 
-    for inner_inner_transaction in block_transaction["dt"]["itx"]: # type: ignore[union-attr]
+    for inner_inner_transaction in block_transaction["dt"]["itx"]:  # type: ignore[union-attr]
         txns.extend(
             get_block_inner_transactions(
                 inner_inner_transaction,
@@ -229,6 +259,7 @@ class ExtractedBlockTransaction(TypedDict):
     close_amount: int | None
     logs: list[bytes] | None
 
+
 def extract_transaction_from_block_transaction(
     block_transaction: BlockInnerTransaction, genesis_hash: bytes, genesis_id: str
 ) -> ExtractedBlockTransaction:
@@ -249,11 +280,11 @@ def extract_transaction_from_block_transaction(
 
     # There's a bug in the SDK when decoding app args, so we remove them an add them back manually
     app_args: list[bytes] | None = None
-    if 'apaa' in txn:
-        app_args = txn['apaa']
-        del txn['apaa']
+    if "apaa" in txn:
+        app_args = txn["apaa"]
+        del txn["apaa"]
 
-    t: AnyTransaction = Transaction.undictify(txn) # type: ignore[no-untyped-call]
+    t: AnyTransaction = Transaction.undictify(txn)  # type: ignore[no-untyped-call]
 
     if app_args and isinstance(t, ApplicationCallTxn):
         t.app_args = app_args
@@ -268,10 +299,7 @@ def extract_transaction_from_block_transaction(
     }
 
     dt = block_transaction.get("dt")
-    if (
-        dt is not None
-        and dt.get("lg") is not None
-    ):
+    if dt is not None and dt.get("lg") is not None:
         result["logs"] = dt["lg"]
 
     return result
@@ -297,21 +325,22 @@ def extract_and_normalise_transaction(
     remove_nulls(txn)
 
     if block_transaction.get("hgi") is True:
-        txn['gen'] = genesis_id
+        txn["gen"] = genesis_id
 
     if block_transaction.get("hgh") is None:
-        txn['gh'] = genesis_hash
+        txn["gh"] = genesis_hash
 
-    if txn['type'] == TransactionType.axfer and txn.get('arcv') is None:
-        txn['arcv'] = ALGORAND_ZERO_ADDRESS
+    if txn["type"] == TransactionType.axfer and txn.get("arcv") is None:
+        txn["arcv"] = ALGORAND_ZERO_ADDRESS
 
-    if txn['type'] == TransactionType.pay and txn.get('rcv') is None:
-        txn['rcv'] = ALGORAND_ZERO_ADDRESS
+    if txn["type"] == TransactionType.pay and txn.get("rcv") is None:
+        txn["rcv"] = ALGORAND_ZERO_ADDRESS
 
     return txn
 
+
 # Taken from algosdk
-def _sort_dict(d):
+def _sort_dict(d: dict) -> OrderedDict:
     """
     Sorts a dictionary recursively and removes all zero values.
 
@@ -329,8 +358,11 @@ def _sort_dict(d):
             od[k] = v
     return od
 
+
 def get_tx_id_from_block_transaction(
-    block_transaction: BlockTransaction | BlockInnerTransaction, genesis_hash: bytes, genesis_id: str
+    block_transaction: BlockTransaction | BlockInnerTransaction,
+    genesis_hash: bytes,
+    genesis_id: str,
 ) -> str:
     """
     Get the transaction ID from a block transaction.
@@ -343,17 +375,19 @@ def get_tx_id_from_block_transaction(
     """
     txn = extract_and_normalise_transaction(block_transaction, genesis_hash, genesis_id)
 
-    ALGORAND_TRANSACTION_LENGTH = 52
+    algorand_transaction_length = 52
     encoded_message = msgpack.packb(_sort_dict(txn), use_bin_type=True)
-    tag = b'TX'
+    tag = b"TX"
     gh = tag + encoded_message
-    raw_tx_id = hashlib.new('sha512_256', gh).digest()
-    return base64.b32encode(raw_tx_id).decode()[:ALGORAND_TRANSACTION_LENGTH]
+    raw_tx_id = hashlib.new("sha512_256", gh).digest()
+    return base64.b32encode(raw_tx_id).decode()[:algorand_transaction_length]
+
 
 class TransactionInBlockWithChildOffset(TransactionInBlock):
     get_child_offset: NotRequired[Callable[[], int]]
 
-def convert_bytes_to_base64(obj):
+
+def convert_bytes_to_base64(obj: Any) -> Any:  # noqa: ANN401
     """
     Recursively iterate over a nested dict and convert any bytes values to base64 strings.
 
@@ -368,16 +402,17 @@ def convert_bytes_to_base64(obj):
     elif isinstance(obj, list):
         return [convert_bytes_to_base64(item) for item in obj]
     elif isinstance(obj, bytes):
-        return base64.b64encode(obj).decode('utf-8')
+        return base64.b64encode(obj).decode("utf-8")
     else:
         return obj
 
 
 def get_indexer_transaction_from_algod_transaction(  # noqa: C901
-    t: TransactionInBlock | TransactionInBlockWithChildOffset, filter_name: str | None = None
+    t: TransactionInBlock | TransactionInBlockWithChildOffset,
+    filter_name: str | None = None,
 ) -> SubscribedTransaction:
     transaction = t["transaction"]
-    created_asset_id = t['created_asset_id']
+    created_asset_id = t["created_asset_id"]
     block_transaction = t["block_transaction"]
     asset_close_amount = t["asset_close_amount"]
     close_amount = t.get("close_amount")
@@ -393,19 +428,21 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
 
     if not transaction.type:
         raise ValueError(
-            f"Received no transaction type for transaction {transaction.get_txid()}" # type: ignore[no-untyped-call]
+            f"Received no transaction type for transaction {transaction.get_txid()}"  # type: ignore[no-untyped-call]
         )
 
     child_offset = round_offset
+
     def get_child_offset() -> int:
         return child_offset + 1
 
-    if 'get_child_offset' in t:
-        get_child_offset = cast(TransactionInBlockWithChildOffset, t)["get_child_offset"]
-
+    if "get_child_offset" in t:
+        get_child_offset = cast(TransactionInBlockWithChildOffset, t)[
+            "get_child_offset"
+        ]
 
     tx_id = (
-        transaction.get_txid() # type: ignore[no-untyped-call]
+        transaction.get_txid()  # type: ignore[no-untyped-call]
         if transaction.type != "stpf"
         else get_tx_id_from_block_transaction(
             block_transaction, genesis_hash, genesis_id
@@ -414,8 +451,10 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
 
     try:
         raw_logs = list((block_transaction.get("dt") or {"lg": []}).get("lg", []))
-        bytes_logs = [raw_log.encode('utf-8', errors="surrogateescape") for raw_log in raw_logs]
-        b64_logs = [base64.b64encode(log).decode('utf-8') for log in bytes_logs]
+        bytes_logs = [
+            raw_log.encode("utf-8", errors="surrogateescape") for raw_log in raw_logs
+        ]
+        b64_logs = [base64.b64encode(log).decode("utf-8") for log in bytes_logs]
 
         result: SubscribedTransaction = {
             "id": (
@@ -436,14 +475,18 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
             "created-asset-index": created_asset_id,
             "genesis-hash": transaction.genesis_hash,
             "genesis-id": transaction.genesis_id,
-            "group": base64.b64encode(transaction.group).decode('utf-8') if transaction.group else None,
-            "note": transaction.note or '',
-            "lease": transaction.lease or '',
+            "group": (
+                base64.b64encode(transaction.group).decode("utf-8")
+                if transaction.group
+                else None
+            ),
+            "note": transaction.note or "",
+            "lease": transaction.lease or "",
             "rekey-to": transaction.rekey_to,
             "closing-amount": close_amount,
             "created-application-index": created_app_id,
             "auth-addr": (
-                encode_address(cast(bytes,block_transaction.get("sgnr")))
+                encode_address(cast(bytes, block_transaction.get("sgnr")))
                 if block_transaction.get("sgnr")
                 else None
             ),
@@ -481,10 +524,15 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
         elif isinstance(transaction, ApplicationCallTxn):
             result["application-transaction"] = {
                 "application-id": transaction.index,
-                "approval-program": transaction.approval_program or '',
-                "clear-state-program": transaction.clear_program or '',
-                "on-completion": algod_on_complete_to_indexer_on_complete(transaction.on_complete).value,
-                "application-args": [base64.b64encode(b).decode('utf-8') for b in transaction.app_args or []],
+                "approval-program": transaction.approval_program or "",
+                "clear-state-program": transaction.clear_program or "",
+                "on-completion": algod_on_complete_to_indexer_on_complete(
+                    transaction.on_complete
+                ).value,
+                "application-args": [
+                    base64.b64encode(b).decode("utf-8")
+                    for b in transaction.app_args or []
+                ],
                 "extra-program-pages": transaction.extra_pages or None,
                 "foreign-apps": transaction.foreign_apps,
                 "foreign-assets": transaction.foreign_assets,
@@ -535,28 +583,46 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                     "reveals": [
                         {
                             "sig-slot": {
-                                "lower-sig-weight": state_proof["r"][position]["s"].get("l", 0),
+                                "lower-sig-weight": state_proof["r"][position]["s"].get(
+                                    "l", 0
+                                ),
                                 "signature": {
-                                    "merkle-array-index": state_proof["r"][position]["s"]["s"]["idx"],
-                                    "falcon-signature": state_proof["r"][position]["s"]["s"]["sig"],
+                                    "merkle-array-index": state_proof["r"][position][
+                                        "s"
+                                    ]["s"]["idx"],
+                                    "falcon-signature": state_proof["r"][position]["s"][
+                                        "s"
+                                    ]["sig"],
                                     "proof": {
                                         "hash-factory": {
-                                            "hash-type": state_proof["r"][position]["s"]["s"]["prf"]["hsh"][
-                                                "t"
-                                            ]
+                                            "hash-type": state_proof["r"][position][
+                                                "s"
+                                            ]["s"]["prf"]["hsh"]["t"]
                                         },
-                                        "tree-depth": state_proof["r"][position]["s"]["s"]["prf"]["td"],
-                                        "path": list(state_proof["r"][position]["s"]["s"]["prf"]["pth"]),
+                                        "tree-depth": state_proof["r"][position]["s"][
+                                            "s"
+                                        ]["prf"]["td"],
+                                        "path": list(
+                                            state_proof["r"][position]["s"]["s"]["prf"][
+                                                "pth"
+                                            ]
+                                        ),
                                     },
-                                    "verifying-key": state_proof["r"][position]["s"]["s"]["vkey"]["k"],
+                                    "verifying-key": state_proof["r"][position]["s"][
+                                        "s"
+                                    ]["vkey"]["k"],
                                 },
                             },
                             "position": position,
                             "participant": {
                                 "weight": state_proof["r"][position]["p"]["w"],
                                 "verifier": {
-                                    "key-lifetime": state_proof["r"][position]["p"]["p"]["lf"],
-                                    "commitment": state_proof["r"][position]["p"]["p"]["cmt"],
+                                    "key-lifetime": state_proof["r"][position]["p"][
+                                        "p"
+                                    ]["lf"],
+                                    "commitment": state_proof["r"][position]["p"]["p"][
+                                        "cmt"
+                                    ],
                                 },
                             },
                         }
@@ -592,7 +658,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                         "get_child_offset": get_child_offset,
                     }
                 )
-                for ibt in block_transaction["dt"].get("itx", []) # type: ignore[union-attr]
+                for ibt in block_transaction["dt"].get("itx", [])  # type: ignore[union-attr]
             ]
 
         return convert_bytes_to_base64(result)
@@ -628,9 +694,7 @@ def block_data_to_block_metadata(block_data: BlockData) -> BlockMetadata:
         "genesis_id": block["gen"],
         "genesis_hash": base64.b64encode(block["gh"]).decode("utf-8"),
         "previous_block_hash": (
-            base64.b64encode(block["prev"]).decode("utf-8")
-            if block["prev"]
-            else None
+            base64.b64encode(block["prev"]).decode("utf-8") if block["prev"] else None
         ),
         "seed": base64.b64encode(block["seed"]).decode("utf-8"),
         "parent_transaction_count": len(block.get("txns") or []),
@@ -656,7 +720,9 @@ def block_data_to_block_metadata(block_data: BlockData) -> BlockMetadata:
     }
 
 
-def count_all_transactions(txns: Sequence[BlockTransaction | BlockInnerTransaction]) -> int:
+def count_all_transactions(
+    txns: Sequence[BlockTransaction | BlockInnerTransaction],
+) -> int:
     return sum(
         1 + count_all_transactions(getattr(txn.get("dt", {}), "itx", []))
         for txn in txns
@@ -682,9 +748,7 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
         balance_changes.extend(
             [
                 {
-                    "address": encode_address(
-                        transaction["txn"]["snd"]
-                    ),
+                    "address": encode_address(transaction["txn"]["snd"]),
                     "amount": -1 * (transaction["txn"].get("amt", 0) or 0),
                     "roles": [BalanceChangeRole.Sender],
                     "asset_id": 0,
@@ -695,9 +759,7 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
         if transaction["txn"].get("rcv"):
             balance_changes.append(
                 {
-                    "address": encode_address(
-                        transaction["txn"]["rcv"]
-                    ),
+                    "address": encode_address(transaction["txn"]["rcv"]),
                     "amount": transaction["txn"].get("amt", 0) or 0,
                     "roles": [BalanceChangeRole.Receiver],
                     "asset_id": 0,
@@ -708,17 +770,13 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
             balance_changes.extend(
                 [
                     {
-                        "address": encode_address(
-                            transaction["txn"]["close"]
-                        ),
+                        "address": encode_address(transaction["txn"]["close"]),
                         "amount": transaction.get("ca", 0) or 0,
                         "roles": [BalanceChangeRole.CloseTo],
                         "asset_id": 0,
                     },
                     {
-                        "address": encode_address(
-                            transaction["txn"]["snd"]
-                        ),
+                        "address": encode_address(transaction["txn"]["snd"]),
                         "amount": -1 * (transaction.get("ca", 0) or 0),
                         "roles": [BalanceChangeRole.Sender],
                         "asset_id": 0,
@@ -731,7 +789,9 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
     ].get("xaid"):
         balance_changes.append(
             {
-                "address": encode_address(transaction["txn"].get("asnd", transaction["txn"]["snd"])),
+                "address": encode_address(
+                    transaction["txn"].get("asnd", transaction["txn"]["snd"])
+                ),
                 "asset_id": transaction["txn"]["xaid"],
                 "amount": -1 * (transaction["txn"].get("aamt", 0) or 0),
                 "roles": [BalanceChangeRole.Sender],
@@ -741,9 +801,7 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
         if transaction["txn"].get("arcv"):
             balance_changes.append(
                 {
-                    "address": encode_address(
-                        transaction["txn"]["arcv"]
-                    ),
+                    "address": encode_address(transaction["txn"]["arcv"]),
                     "asset_id": transaction["txn"]["xaid"],
                     "amount": transaction["txn"].get("aamt", 0) or 0,
                     "roles": [BalanceChangeRole.Receiver],
@@ -754,9 +812,7 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
             balance_changes.extend(
                 [
                     {
-                        "address": encode_address(
-                            transaction["txn"]["aclose"]
-                        ),
+                        "address": encode_address(transaction["txn"]["aclose"]),
                         "asset_id": transaction["txn"]["xaid"],
                         "amount": transaction.get("aca", 0) or 0,
                         "roles": [BalanceChangeRole.CloseTo],
@@ -776,9 +832,7 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
         if not transaction["txn"].get("caid") and transaction.get("caid"):
             balance_changes.append(
                 {
-                    "address": encode_address(
-                        transaction["txn"]["snd"]
-                    ),
+                    "address": encode_address(transaction["txn"]["snd"]),
                     "asset_id": transaction["caid"] or 0,
                     "amount": transaction["txn"].get("apar", {}).get("t", 0) or 0,
                     "roles": [BalanceChangeRole.AssetCreator],
@@ -787,9 +841,7 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
         elif transaction["txn"].get("caid") and not transaction["txn"].get("apar"):
             balance_changes.append(
                 {
-                    "address": encode_address(
-                        transaction["txn"]["snd"]
-                    ),
+                    "address": encode_address(transaction["txn"]["snd"]),
                     "asset_id": transaction["txn"]["caid"],
                     "amount": 0,
                     "roles": [BalanceChangeRole.AssetDestroyer],
@@ -810,108 +862,139 @@ def extract_balance_changes_from_block_transaction(  # noqa: PLR0912, C901
 
     return list(consolidated_changes.values())
 
-def extract_balance_changes_from_indexer_transaction(transaction: TransactionResult) -> list[BalanceChange]:  # noqa: C901
+
+def extract_balance_changes_from_indexer_transaction(  # noqa: C901
+    transaction: TransactionResult,
+) -> list[BalanceChange]:
     balance_changes: list[BalanceChange] = []
 
-    if transaction.get('fee', 0) > 0:
-        balance_changes.append(BalanceChange(
-            address=transaction['sender'],
-            amount=-1 * int(transaction['fee']),
-            roles=[BalanceChangeRole.Sender],
-            asset_id=0
-        ))
-
-    if transaction['tx-type']== TransactionType.pay.value and 'payment-transaction' in transaction:
-        pay = transaction['payment-transaction']
-        balance_changes.extend([
+    if transaction.get("fee", 0) > 0:
+        balance_changes.append(
             BalanceChange(
-                address=transaction['sender'],
-                amount=-1 *( pay.get('amount') or 0),
+                address=transaction["sender"],
+                amount=-1 * int(transaction["fee"]),
                 roles=[BalanceChangeRole.Sender],
-                asset_id=0
-            ),
-            BalanceChange(
-                address=pay['receiver'],
-                amount=pay['amount'],
-                roles=[BalanceChangeRole.Receiver],
-                asset_id=0
+                asset_id=0,
             )
-        ])
+        )
 
-        if 'close-amount' in pay:
-            balance_changes.extend([
+    if (
+        transaction["tx-type"] == TransactionType.pay.value
+        and "payment-transaction" in transaction
+    ):
+        pay = transaction["payment-transaction"]
+        balance_changes.extend(
+            [
                 BalanceChange(
-                    address=str(['close-remainder-to']),
-                    amount=pay.get('close-amount') or 0,
-                    roles=[BalanceChangeRole.CloseTo],
-                    asset_id=0
-                ),
-                BalanceChange(
-                    address=transaction['sender'],
-                    amount=-1 * (pay.get('close-amount') or 0),
+                    address=transaction["sender"],
+                    amount=-1 * (pay.get("amount") or 0),
                     roles=[BalanceChangeRole.Sender],
-                    asset_id=0
-                )
-            ])
-
-    if transaction['tx-type'] == TransactionType.axfer.value and 'asset-transfer-transaction' in transaction:
-        axfer = transaction['asset-transfer-transaction']
-        balance_changes.extend([
-            BalanceChange(
-                address=axfer.get('sender') or transaction['sender'],
-                asset_id=axfer['asset-id'],
-                amount=-1 *(axfer.get('amount') or 0),
-                roles=[BalanceChangeRole.Sender]
-            ),
-            BalanceChange(
-                address=axfer['receiver'],
-                asset_id=axfer['asset-id'],
-                amount=axfer.get('amount', 0),
-                roles=[BalanceChangeRole.Receiver]
-            )
-        ])
-
-        if axfer.get('close-amount') is not None and axfer.get('close-to') is not None:
-            balance_changes.extend([
-                BalanceChange(
-                    address=str(axfer['close-to']),
-                    asset_id=axfer['asset-id'],
-                    amount=axfer.get('close-amount') or 0,
-                    roles=[BalanceChangeRole.CloseTo]
+                    asset_id=0,
                 ),
                 BalanceChange(
-                    address=axfer.get('sender') or transaction['sender'],
-                    asset_id=axfer['asset-id'],
-                    amount=-1 * (axfer.get('close-amount') or 0),
-                    roles=[BalanceChangeRole.Sender]
-                )
-            ])
+                    address=pay["receiver"],
+                    amount=pay["amount"],
+                    roles=[BalanceChangeRole.Receiver],
+                    asset_id=0,
+                ),
+            ]
+        )
 
-    if transaction['tx-type']== TransactionType.acfg.value and 'asset-config-transaction' in transaction:
-        acfg = transaction['asset-config-transaction']
-        if acfg.get('asset-id') is None and transaction.get('created-asset-index') is not None:
-            balance_changes.append(BalanceChange(
-                address=transaction['sender'],
-                asset_id=transaction['created-asset-index'] or 0,
-                amount=int(acfg.get('params', {}).get('total', 0)),
-                roles=[BalanceChangeRole.AssetCreator]
-            ))
-        elif 'asset-id' in acfg and 'params' not in acfg:
-            balance_changes.append(BalanceChange(
-                address=transaction['sender'],
-                asset_id=acfg['asset-id'],
-                amount=0,
-                roles=[BalanceChangeRole.AssetDestroyer]
-            ))
+        if "close-amount" in pay:
+            balance_changes.extend(
+                [
+                    BalanceChange(
+                        address=str(["close-remainder-to"]),
+                        amount=pay.get("close-amount") or 0,
+                        roles=[BalanceChangeRole.CloseTo],
+                        asset_id=0,
+                    ),
+                    BalanceChange(
+                        address=transaction["sender"],
+                        amount=-1 * (pay.get("close-amount") or 0),
+                        roles=[BalanceChangeRole.Sender],
+                        asset_id=0,
+                    ),
+                ]
+            )
+
+    if (
+        transaction["tx-type"] == TransactionType.axfer.value
+        and "asset-transfer-transaction" in transaction
+    ):
+        axfer = transaction["asset-transfer-transaction"]
+        balance_changes.extend(
+            [
+                BalanceChange(
+                    address=axfer.get("sender") or transaction["sender"],
+                    asset_id=axfer["asset-id"],
+                    amount=-1 * (axfer.get("amount") or 0),
+                    roles=[BalanceChangeRole.Sender],
+                ),
+                BalanceChange(
+                    address=axfer["receiver"],
+                    asset_id=axfer["asset-id"],
+                    amount=axfer.get("amount", 0),
+                    roles=[BalanceChangeRole.Receiver],
+                ),
+            ]
+        )
+
+        if axfer.get("close-amount") is not None and axfer.get("close-to") is not None:
+            balance_changes.extend(
+                [
+                    BalanceChange(
+                        address=str(axfer["close-to"]),
+                        asset_id=axfer["asset-id"],
+                        amount=axfer.get("close-amount") or 0,
+                        roles=[BalanceChangeRole.CloseTo],
+                    ),
+                    BalanceChange(
+                        address=axfer.get("sender") or transaction["sender"],
+                        asset_id=axfer["asset-id"],
+                        amount=-1 * (axfer.get("close-amount") or 0),
+                        roles=[BalanceChangeRole.Sender],
+                    ),
+                ]
+            )
+
+    if (
+        transaction["tx-type"] == TransactionType.acfg.value
+        and "asset-config-transaction" in transaction
+    ):
+        acfg = transaction["asset-config-transaction"]
+        if (
+            acfg.get("asset-id") is None
+            and transaction.get("created-asset-index") is not None
+        ):
+            balance_changes.append(
+                BalanceChange(
+                    address=transaction["sender"],
+                    asset_id=transaction["created-asset-index"] or 0,
+                    amount=int(acfg.get("params", {}).get("total", 0)),
+                    roles=[BalanceChangeRole.AssetCreator],
+                )
+            )
+        elif "asset-id" in acfg and "params" not in acfg:
+            balance_changes.append(
+                BalanceChange(
+                    address=transaction["sender"],
+                    asset_id=acfg["asset-id"],
+                    amount=0,
+                    roles=[BalanceChangeRole.AssetDestroyer],
+                )
+            )
 
     # Consolidate balance changes
     consolidated_changes: dict[tuple, BalanceChange] = {}
     for change in balance_changes:
-        key = (change['address'], change['asset_id'])
+        key = (change["address"], change["asset_id"])
         if key in consolidated_changes:
             existing = consolidated_changes[key]
-            existing['amount'] += change['amount']
-            existing['roles'].extend([role for role in change['roles'] if role not in existing['roles']])
+            existing["amount"] += change["amount"]
+            existing["roles"].extend(
+                [role for role in change["roles"] if role not in existing["roles"]]
+            )
         else:
             consolidated_changes[key] = change
 

@@ -38,6 +38,7 @@ complex_event = Arc28Event(
 #       },
 #     })
 
+
 #     return {
 #       app,
 #       creation,
@@ -64,6 +65,7 @@ def app(localnet: AlgorandClient, creator: str, *, create: bool) -> dict:
         "creation": creation,
     }
 
+
 #   test('Works for simple event', async () => {
 #     const { testAccount } = localnet.context
 #     const app1 = await app({ create: true })
@@ -85,6 +87,7 @@ def app(localnet: AlgorandClient, creator: str, *, create: bool) -> dict:
 #       )
 #     ).subscribedTransactions[0]
 
+
 #     invariant(subscription.arc28Events)
 #     expect(subscription.arc28Events.length).toBe(1)
 #     expect(subscription.arc28Events[0].args.length).toEqual(2)
@@ -96,14 +99,14 @@ def app(localnet: AlgorandClient, creator: str, *, create: bool) -> dict:
 #     expect(subscription.arc28Events[0].eventSignature).toBe('Swapped(uint64,uint64)')
 #     expect(subscription.arc28Events[0].groupName).toBe('group1')
 #   })
-def test_simple_event(filter_fixture: dict) -> None:  # noqa: F811
+def test_simple_event(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
     app1 = app(localnet, test_account.address, create=True)
     txn = app1["app"].emit_swapped(a=1, b=2)
 
-    subscription = filter_fixture['subscribe_and_verify'](
+    subscription = filter_fixture["subscribe_and_verify"](
         {
             "sender": test_account.address,
             "app_id": app1["creation"]["application-index"],
@@ -115,19 +118,22 @@ def test_simple_event(filter_fixture: dict) -> None:  # noqa: F811
                 "events": [swapped_event],
             },
         ],
-    )['subscribed_transactions'][0]
+    )["subscribed_transactions"][0]
 
-    assert subscription['arc28_events']
-    assert len(subscription['arc28_events']) == 1
-    assert subscription['arc28_events'][0]['args']
-    assert len(subscription['arc28_events'][0]['args']) == 2  # noqa: PLR2004
-    assert subscription['arc28_events'][0]['args'][0] == 1
-    assert subscription['arc28_events'][0]['args'][1] == 2  # noqa: PLR2004
-    assert subscription['arc28_events'][0]['args_by_name'] == {"a": 1, "b": 2}
-    assert subscription['arc28_events'][0]['event_name'] == "Swapped"
-    assert subscription['arc28_events'][0]['event_prefix'] == "1ccbd925"
-    assert subscription['arc28_events'][0]['event_signature'] == "Swapped(uint64,uint64)"
-    assert subscription['arc28_events'][0]['group_name'] == "group1"
+    assert subscription["arc28_events"]
+    assert len(subscription["arc28_events"]) == 1
+    assert subscription["arc28_events"][0]["args"]
+    assert len(subscription["arc28_events"][0]["args"]) == 2
+    assert subscription["arc28_events"][0]["args"][0] == 1
+    assert subscription["arc28_events"][0]["args"][1] == 2
+    assert subscription["arc28_events"][0]["args_by_name"] == {"a": 1, "b": 2}
+    assert subscription["arc28_events"][0]["event_name"] == "Swapped"
+    assert subscription["arc28_events"][0]["event_prefix"] == "1ccbd925"
+    assert (
+        subscription["arc28_events"][0]["event_signature"] == "Swapped(uint64,uint64)"
+    )
+    assert subscription["arc28_events"][0]["group_name"] == "group1"
+
 
 # test('Processes multiple events', async () => {
 #     const { testAccount } = localnet.context
@@ -150,19 +156,20 @@ def test_simple_event(filter_fixture: dict) -> None:  # noqa: F811
 #       )
 #     ).subscribedTransactions[0]
 
+
 #     invariant(subscription.arc28Events)
 #     expect(subscription.arc28Events.length).toBe(2)
 #     expect(subscription.arc28Events[1].argsByName).toEqual({ b: 1n, a: 2n })
 #     expect(subscription.arc28Events[1].groupName).toBe('group1')
 #   })
-def test_multiple_events(filter_fixture: dict) -> None:  # noqa: F811
+def test_multiple_events(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
     app1 = app(localnet, test_account.address, create=True)
     txn = app1["app"].emit_swapped_twice(a=1, b=2)
 
-    subscription = filter_fixture['subscribe_and_verify'](
+    subscription = filter_fixture["subscribe_and_verify"](
         {
             "sender": test_account.address,
             "app_id": app1["creation"]["application-index"],
@@ -174,12 +181,13 @@ def test_multiple_events(filter_fixture: dict) -> None:  # noqa: F811
                 "events": [swapped_event],
             },
         ],
-    )['subscribed_transactions'][0]
+    )["subscribed_transactions"][0]
 
-    assert subscription['arc28_events']
-    assert len(subscription['arc28_events']) == 2
-    assert subscription['arc28_events'][1]['args_by_name'] == {"b": 1, "a": 2}
-    assert subscription['arc28_events'][1]['group_name'] == "group1"
+    assert subscription["arc28_events"]
+    assert len(subscription["arc28_events"]) == 2
+    assert subscription["arc28_events"][1]["args_by_name"] == {"b": 1, "a": 2}
+    assert subscription["arc28_events"][1]["group_name"] == "group1"
+
 
 #   test('Respects app ID filter exclusion', async () => {
 #     const { testAccount } = localnet.context
@@ -203,16 +211,17 @@ def test_multiple_events(filter_fixture: dict) -> None:  # noqa: F811
 #       )
 #     ).subscribedTransactions[0]
 
+
 #     expect(subscription.arc28Events).toBeFalsy()
 #   })
-def test_app_id_filter_exclusion(filter_fixture: dict) -> None:  # noqa: F811
+def test_app_id_filter_exclusion(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
     app1 = app(localnet, test_account.address, create=True)
     txn = app1["app"].emit_swapped(a=1, b=2)
 
-    subscription = filter_fixture['subscribe_and_verify'](
+    subscription = filter_fixture["subscribe_and_verify"](
         {
             "sender": test_account.address,
             "app_id": app1["creation"]["application-index"],
@@ -225,9 +234,10 @@ def test_app_id_filter_exclusion(filter_fixture: dict) -> None:  # noqa: F811
                 "process_for_app_ids": [app1["creation"]["application-index"] + 1],
             },
         ],
-    )['subscribed_transactions'][0]
+    )["subscribed_transactions"][0]
 
-    assert not subscription['arc28_events']
+    assert not subscription["arc28_events"]
+
 
 # test('Respects app predicate filter inclusion', async () => {
 #     const { testAccount } = localnet.context
@@ -251,17 +261,18 @@ def test_app_id_filter_exclusion(filter_fixture: dict) -> None:  # noqa: F811
 #       )
 #     ).subscribedTransactions[0]
 
+
 #     invariant(subscription.arc28Events)
 #     expect(subscription.arc28Events.length).toBe(1)
 #   })
-def test_app_predicate_filter_inclusion(filter_fixture: dict) -> None:  # noqa: F811
+def test_app_predicate_filter_inclusion(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
     app1 = app(localnet, test_account.address, create=True)
     txn = app1["app"].emit_swapped(a=1, b=2)
 
-    subscription = filter_fixture['subscribe_and_verify'](
+    subscription = filter_fixture["subscribe_and_verify"](
         {
             "sender": test_account.address,
             "app_id": app1["creation"]["application-index"],
@@ -271,13 +282,15 @@ def test_app_predicate_filter_inclusion(filter_fixture: dict) -> None:  # noqa: 
             {
                 "group_name": "group1",
                 "events": [swapped_event],
-                "process_transaction": lambda transaction: transaction['id'] == txn.tx_id,
+                "process_transaction": lambda transaction: transaction["id"]
+                == txn.tx_id,
             },
         ],
-    )['subscribed_transactions'][0]
+    )["subscribed_transactions"][0]
 
-    assert subscription['arc28_events']
-    assert len(subscription['arc28_events']) == 1
+    assert subscription["arc28_events"]
+    assert len(subscription["arc28_events"]) == 1
+
 
 #   test('Respects app predicate filter exclusion', async () => {
 #     const { testAccount } = localnet.context
@@ -301,16 +314,17 @@ def test_app_predicate_filter_inclusion(filter_fixture: dict) -> None:  # noqa: 
 #       )
 #     ).subscribedTransactions[0]
 
+
 #     expect(subscription.arc28Events).toBeFalsy()
 #   })
-def test_app_predicate_filter_exclusion(filter_fixture: dict) -> None:  # noqa: F811
+def test_app_predicate_filter_exclusion(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
     app1 = app(localnet, test_account.address, create=True)
     txn = app1["app"].emit_swapped(a=1, b=2)
 
-    subscription = filter_fixture['subscribe_and_verify'](
+    subscription = filter_fixture["subscribe_and_verify"](
         {
             "sender": test_account.address,
             "app_id": app1["creation"]["application-index"],
@@ -323,9 +337,10 @@ def test_app_predicate_filter_exclusion(filter_fixture: dict) -> None:  # noqa: 
                 "process_transaction": lambda _: False,
             },
         ],
-    )['subscribed_transactions'][0]
+    )["subscribed_transactions"][0]
 
-    assert not subscription['arc28_events']
+    assert not subscription["arc28_events"]
+
 
 #   test('Works for complex event / multiple events in group', async () => {
 #     const { testAccount } = localnet.context
@@ -360,6 +375,7 @@ def test_app_predicate_filter_exclusion(filter_fixture: dict) -> None:  # noqa: 
 #     expect(subscription.arc28Events[0].eventSignature).toBe('Swapped(uint64,uint64)')
 #     expect(subscription.arc28Events[0].groupName).toBe('group1')
 
+
 #     expect(subscription.arc28Events[1].args.length).toEqual(2)
 #     expect(subscription.arc28Events[1].args[0]).toEqual([1n, 2n, 3n])
 #     expect(subscription.arc28Events[1].args[1]).toEqual(2n)
@@ -369,14 +385,14 @@ def test_app_predicate_filter_exclusion(filter_fixture: dict) -> None:  # noqa: 
 #     expect(subscription.arc28Events[1].eventSignature).toBe('Complex(uint32[],uint64)')
 #     expect(subscription.arc28Events[1].groupName).toBe('group1')
 #   })
-def test_multiple_events_in_group(filter_fixture: dict) -> None:  # noqa: F811
+def test_multiple_events_in_group(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
     app1 = app(localnet, test_account.address, create=True)
     txn = app1["app"].emit_complex(a=1, b=2, array=[1, 2, 3])
 
-    subscription = filter_fixture['subscribe_and_verify'](
+    subscription = filter_fixture["subscribe_and_verify"](
         {
             "sender": test_account.address,
             "app_id": app1["creation"]["application-index"],
@@ -388,28 +404,36 @@ def test_multiple_events_in_group(filter_fixture: dict) -> None:  # noqa: F811
                 "events": [swapped_event, complex_event],
             },
         ],
-    )['subscribed_transactions'][0]
+    )["subscribed_transactions"][0]
 
-    assert subscription['arc28_events']
-    assert len(subscription['arc28_events']) == 2
+    assert subscription["arc28_events"]
+    assert len(subscription["arc28_events"]) == 2
 
-    assert len(subscription['arc28_events'][0]['args']) == 2  # noqa: PLR2004
-    assert subscription['arc28_events'][0]['args'][0] == 1
-    assert subscription['arc28_events'][0]['args'][1] == 2  # noqa: PLR2004
-    assert subscription['arc28_events'][0]['args_by_name'] == {"a": 1, "b": 2}
-    assert subscription['arc28_events'][0]['event_name'] == "Swapped"
-    assert subscription['arc28_events'][0]['event_prefix'] == "1ccbd925"
-    assert subscription['arc28_events'][0]['event_signature'] == "Swapped(uint64,uint64)"
-    assert subscription['arc28_events'][0]['group_name'] == "group1"
+    assert len(subscription["arc28_events"][0]["args"]) == 2
+    assert subscription["arc28_events"][0]["args"][0] == 1
+    assert subscription["arc28_events"][0]["args"][1] == 2
+    assert subscription["arc28_events"][0]["args_by_name"] == {"a": 1, "b": 2}
+    assert subscription["arc28_events"][0]["event_name"] == "Swapped"
+    assert subscription["arc28_events"][0]["event_prefix"] == "1ccbd925"
+    assert (
+        subscription["arc28_events"][0]["event_signature"] == "Swapped(uint64,uint64)"
+    )
+    assert subscription["arc28_events"][0]["group_name"] == "group1"
 
-    assert len(subscription['arc28_events'][1]['args']) == 2  # noqa: PLR2004
-    assert subscription['arc28_events'][1]['args'][0] == [1, 2, 3]
-    assert subscription['arc28_events'][1]['args'][1] == 2  # noqa: PLR2004
-    assert subscription['arc28_events'][1]['args_by_name'] == {"array": [1, 2, 3], "int": 2}
-    assert subscription['arc28_events'][1]['event_name'] == "Complex"
-    assert subscription['arc28_events'][1]['event_prefix'] == "18da5ea7"
-    assert subscription['arc28_events'][1]['event_signature'] == "Complex(uint32[],uint64)"
-    assert subscription['arc28_events'][1]['group_name'] == "group1"
+    assert len(subscription["arc28_events"][1]["args"]) == 2
+    assert subscription["arc28_events"][1]["args"][0] == [1, 2, 3]
+    assert subscription["arc28_events"][1]["args"][1] == 2
+    assert subscription["arc28_events"][1]["args_by_name"] == {
+        "array": [1, 2, 3],
+        "int": 2,
+    }
+    assert subscription["arc28_events"][1]["event_name"] == "Complex"
+    assert subscription["arc28_events"][1]["event_prefix"] == "18da5ea7"
+    assert (
+        subscription["arc28_events"][1]["event_signature"] == "Complex(uint32[],uint64)"
+    )
+    assert subscription["arc28_events"][1]["group_name"] == "group1"
+
 
 # test('Works for multiple groups', async () => {
 #     const { testAccount } = localnet.context
@@ -442,17 +466,18 @@ def test_multiple_events_in_group(filter_fixture: dict) -> None:  # noqa: F811
 #     expect(subscription.arc28Events[0].eventSignature).toBe('Swapped(uint64,uint64)')
 #     expect(subscription.arc28Events[0].groupName).toBe('group2')
 
+
 #     expect(subscription.arc28Events[1].eventSignature).toBe('Complex(uint32[],uint64)')
 #     expect(subscription.arc28Events[1].groupName).toBe('group1')
 #   })
-def test_multiple_groups(filter_fixture: dict) -> None:  # noqa: F811
+def test_multiple_groups(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
     app1 = app(localnet, test_account.address, create=True)
     txn = app1["app"].emit_complex(a=1, b=2, array=[1, 2, 3])
 
-    subscription = filter_fixture['subscribe_and_verify'](
+    subscription = filter_fixture["subscribe_and_verify"](
         {
             "sender": test_account.address,
             "app_id": app1["creation"]["application-index"],
@@ -468,16 +493,21 @@ def test_multiple_groups(filter_fixture: dict) -> None:  # noqa: F811
                 "events": [swapped_event],
             },
         ],
-    )['subscribed_transactions'][0]
+    )["subscribed_transactions"][0]
 
-    assert subscription['arc28_events']
-    assert len(subscription['arc28_events']) == 2
+    assert subscription["arc28_events"]
+    assert len(subscription["arc28_events"]) == 2
 
-    assert subscription['arc28_events'][0]['event_signature'] == "Swapped(uint64,uint64)"
-    assert subscription['arc28_events'][0]['group_name'] == "group2"
+    assert (
+        subscription["arc28_events"][0]["event_signature"] == "Swapped(uint64,uint64)"
+    )
+    assert subscription["arc28_events"][0]["group_name"] == "group2"
 
-    assert subscription['arc28_events'][1]['event_signature'] == "Complex(uint32[],uint64)"
-    assert subscription['arc28_events'][1]['group_name'] == "group1"
+    assert (
+        subscription["arc28_events"][1]["event_signature"] == "Complex(uint32[],uint64)"
+    )
+    assert subscription["arc28_events"][1]["group_name"] == "group1"
+
 
 #   test('Allows ARC-28 event subscription', async () => {
 #     const { testAccount, algod } = localnet.context
@@ -494,6 +524,7 @@ def test_multiple_groups(filter_fixture: dict) -> None:  # noqa: F811
 #       algod,
 #     )
 
+
 #     await subscribeAndVerifyFilter(
 #       {
 #         sender: testAccount.addr,
@@ -508,18 +539,24 @@ def test_multiple_groups(filter_fixture: dict) -> None:  # noqa: F811
 #       ],
 #     )
 #   })
-def test_arc28_event_subscription(filter_fixture: dict) -> None:  # noqa: F811
+def test_arc28_event_subscription(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(PayParams(amount=1_000_000, sender=test_account.address, receiver=test_account.address))
-    pay_txn_w_signer = TransactionWithSigner(txn=pay_txn, signer=localnet.account.get_signer(test_account.address))
+    pay_txn = localnet.transactions.payment(
+        PayParams(
+            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+        )
+    )
+    pay_txn_w_signer = TransactionWithSigner(
+        txn=pay_txn, signer=localnet.account.get_signer(test_account.address)
+    )
 
     app1 = app(localnet, test_account.address, create=True)["app"]
     atc = app1.compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
     txns = localnet.new_group().add_atc(atc).execute()
-    filter_fixture['subscribe_and_verify_filter'](
+    filter_fixture["subscribe_and_verify_filter"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
@@ -532,6 +569,7 @@ def test_arc28_event_subscription(filter_fixture: dict) -> None:  # noqa: F811
             },
         ],
     )
+
 
 # test('ARC-28 event subscription validates app ID (include)', async () => {
 #     const { testAccount, algod } = localnet.context
@@ -742,6 +780,7 @@ def test_arc28_event_subscription(filter_fixture: dict) -> None:  # noqa: F811
 #       ],
 #     )
 
+
 #     expect(subscription2.subscribedTransactions.length).toBe(0)
 #   })
 # })
@@ -749,15 +788,21 @@ def test_arc28_event_subscription_app_id_include(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(PayParams(amount=1_000_000, sender=test_account.address, receiver=test_account.address))
-    pay_txn_w_signer = TransactionWithSigner(txn=pay_txn, signer=localnet.account.get_signer(test_account.address))
+    pay_txn = localnet.transactions.payment(
+        PayParams(
+            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+        )
+    )
+    pay_txn_w_signer = TransactionWithSigner(
+        txn=pay_txn, signer=localnet.account.get_signer(test_account.address)
+    )
 
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
     txns = localnet.new_group().add_atc(atc).execute()
 
-    filter_fixture['subscribe_and_verify_filter'](
+    filter_fixture["subscribe_and_verify_filter"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
@@ -772,19 +817,26 @@ def test_arc28_event_subscription_app_id_include(filter_fixture: dict) -> None:
         ],
     )
 
+
 def test_arc28_event_subscription_app_id_exclude(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(PayParams(amount=1_000_000, sender=test_account.address, receiver=test_account.address))
-    pay_txn_w_signer = TransactionWithSigner(txn=pay_txn, signer=localnet.account.get_signer(test_account.address))
+    pay_txn = localnet.transactions.payment(
+        PayParams(
+            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+        )
+    )
+    pay_txn_w_signer = TransactionWithSigner(
+        txn=pay_txn, signer=localnet.account.get_signer(test_account.address)
+    )
 
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
     txns = localnet.new_group().add_atc(atc).execute()
 
-    subscription = filter_fixture['subscribe_algod'](
+    subscription = filter_fixture["subscribe_algod"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
@@ -799,14 +851,16 @@ def test_arc28_event_subscription_app_id_exclude(filter_fixture: dict) -> None:
         ],
     )
 
-    assert len(subscription['subscribed_transactions']) == 0
+    assert len(subscription["subscribed_transactions"]) == 0
 
-    subscription2 = filter_fixture['subscribe_indexer'](
+    subscription2 = filter_fixture["subscribe_indexer"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
         },
-        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"],
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])[
+            "confirmed-round"
+        ],
         [
             {
                 "group_name": "group1",
@@ -816,21 +870,28 @@ def test_arc28_event_subscription_app_id_exclude(filter_fixture: dict) -> None:
         ],
     )
 
-    assert len(subscription2['subscribed_transactions']) == 0
+    assert len(subscription2["subscribed_transactions"]) == 0
+
 
 def test_arc28_event_subscription_predicate_include(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(PayParams(amount=1_000_000, sender=test_account.address, receiver=test_account.address))
-    pay_txn_w_signer = TransactionWithSigner(txn=pay_txn, signer=localnet.account.get_signer(test_account.address))
+    pay_txn = localnet.transactions.payment(
+        PayParams(
+            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+        )
+    )
+    pay_txn_w_signer = TransactionWithSigner(
+        txn=pay_txn, signer=localnet.account.get_signer(test_account.address)
+    )
 
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
     txns = localnet.new_group().add_atc(atc).execute()
 
-    filter_fixture['subscribe_and_verify_filter'](
+    filter_fixture["subscribe_and_verify_filter"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
@@ -840,24 +901,32 @@ def test_arc28_event_subscription_predicate_include(filter_fixture: dict) -> Non
             {
                 "group_name": "group1",
                 "events": [swapped_event],
-                "process_transaction": lambda transaction: transaction['id'] == txns.tx_ids[1],
+                "process_transaction": lambda transaction: transaction["id"]
+                == txns.tx_ids[1],
             },
         ],
     )
+
 
 def test_arc28_event_subscription_predicate_exclude(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(PayParams(amount=1_000_000, sender=test_account.address, receiver=test_account.address))
-    pay_txn_w_signer = TransactionWithSigner(txn=pay_txn, signer=localnet.account.get_signer(test_account.address))
+    pay_txn = localnet.transactions.payment(
+        PayParams(
+            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+        )
+    )
+    pay_txn_w_signer = TransactionWithSigner(
+        txn=pay_txn, signer=localnet.account.get_signer(test_account.address)
+    )
 
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
     txns = localnet.new_group().add_atc(atc).execute()
 
-    subscription = filter_fixture['subscribe_algod'](
+    subscription = filter_fixture["subscribe_algod"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
@@ -867,43 +936,54 @@ def test_arc28_event_subscription_predicate_exclude(filter_fixture: dict) -> Non
             {
                 "group_name": "group1",
                 "events": [swapped_event],
-                "process_transaction": lambda transaction: transaction['id'] != txns.tx_ids[1],
+                "process_transaction": lambda transaction: transaction["id"]
+                != txns.tx_ids[1],
             },
         ],
     )
 
-    assert len(subscription['subscribed_transactions']) == 0
+    assert len(subscription["subscribed_transactions"]) == 0
 
-    subscription2 = filter_fixture['subscribe_indexer'](
+    subscription2 = filter_fixture["subscribe_indexer"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
         },
-        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"],
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])[
+            "confirmed-round"
+        ],
         [
             {
                 "group_name": "group1",
                 "events": [swapped_event],
-                "process_transaction": lambda transaction: transaction['id'] != txns.tx_ids[1],
+                "process_transaction": lambda transaction: transaction["id"]
+                != txns.tx_ids[1],
             },
         ],
     )
 
-    assert len(subscription2['subscribed_transactions']) == 0
+    assert len(subscription2["subscribed_transactions"]) == 0
+
 
 def test_arc28_event_subscription_group_validation(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(PayParams(amount=1_000_000, sender=test_account.address, receiver=test_account.address))
-    pay_txn_w_signer = TransactionWithSigner(txn=pay_txn, signer=localnet.account.get_signer(test_account.address))
+    pay_txn = localnet.transactions.payment(
+        PayParams(
+            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+        )
+    )
+    pay_txn_w_signer = TransactionWithSigner(
+        txn=pay_txn, signer=localnet.account.get_signer(test_account.address)
+    )
 
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
     txns = localnet.new_group().add_atc(atc).execute()
 
-    subscription = filter_fixture['subscribe_algod'](
+    subscription = filter_fixture["subscribe_algod"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group2"}],
@@ -913,27 +993,30 @@ def test_arc28_event_subscription_group_validation(filter_fixture: dict) -> None
             {
                 "group_name": "group1",
                 "events": [swapped_event],
-                "process_transaction": lambda transaction: transaction['id'] != txns.tx_ids[1],
+                "process_transaction": lambda transaction: transaction["id"]
+                != txns.tx_ids[1],
             },
         ],
     )
 
-    assert len(subscription['subscribed_transactions']) == 0
+    assert len(subscription["subscribed_transactions"]) == 0
 
-
-    subscription2 = filter_fixture['subscribe_indexer'](
+    subscription2 = filter_fixture["subscribe_indexer"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group2"}],
         },
-        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"],
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])[
+            "confirmed-round"
+        ],
         [
             {
                 "group_name": "group1",
                 "events": [swapped_event],
-                "process_transaction": lambda transaction: transaction['id'] != txns.tx_ids[1],
+                "process_transaction": lambda transaction: transaction["id"]
+                != txns.tx_ids[1],
             },
         ],
     )
 
-    assert len(subscription2['subscribed_transactions']) == 0
+    assert len(subscription2["subscribed_transactions"]) == 0

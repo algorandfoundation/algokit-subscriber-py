@@ -21,6 +21,7 @@ class BlockValueDelta(TypedDict):
     uint_value: NotRequired[int]
     """Uint64 value"""
 
+
 class BlockTransactionEvalDelta(TypedDict):
     """Eval deltas for a block"""
 
@@ -33,8 +34,9 @@ class BlockTransactionEvalDelta(TypedDict):
     lg: list[str]
     """Logs"""
 
-    itx: NotRequired[list['BlockInnerTransaction']]
+    itx: NotRequired[list["BlockInnerTransaction"]]
     """Inner transactions"""
+
 
 # TODO: Typing
 LogicSig = dict[str, Any]
@@ -42,13 +44,14 @@ LogicSig = dict[str, Any]
 # TODO: Typing
 MultisigSig = dict[str, Any]
 
+
 class TransactionInBlock(TypedDict):
     """
     The representation of all important data for a single transaction or inner transaction
     and its side effects within a committed block.
     """
 
-    block_transaction: 'BlockTransaction | BlockInnerTransaction'
+    block_transaction: "BlockTransaction | BlockInnerTransaction"
     """The block data for the transaction"""
 
     round_offset: int
@@ -125,6 +128,7 @@ class TransactionInBlock(TypedDict):
     logs: NotRequired[None | list[str]]
     """Any logs that were issued as a result of this transaction."""
 
+
 class BlockInnerTransaction(TypedDict):
     # TODO: Typing
     txn: dict[str, Any]
@@ -157,6 +161,7 @@ class BlockInnerTransaction(TypedDict):
     sgnr: NotRequired[None | bytes]
     """The signer, if signing with a different key than the Transaction type `from` property indicates"""
 
+
 class BlockTransaction(BlockInnerTransaction):
     """
     Data that is returned in a raw Algorand block for a single transaction
@@ -170,8 +175,10 @@ class BlockTransaction(BlockInnerTransaction):
     hgh: NotRequired[None | bool]
     """Has genesis hash"""
 
+
 # TODO: Typing
 BlockAgreementCertificate = dict[str, Any]
+
 
 class Block(TypedDict):
     """
@@ -272,6 +279,7 @@ class Block(TypedDict):
     The transactions within the block.
     """
 
+
 class BlockData(TypedDict):
     """
     Data that is returned in a raw Algorand block.
@@ -282,5 +290,3 @@ class BlockData(TypedDict):
 
     cert: BlockAgreementCertificate
     """cert (BlockAgreementCertificate): The block certification."""
-
-
