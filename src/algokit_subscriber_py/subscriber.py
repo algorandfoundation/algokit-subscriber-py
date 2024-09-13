@@ -26,7 +26,7 @@ class AlgorandSubscriber:
         self.started = False
         self.stop_requested = False
 
-        self.filter_names = list({f['name'] for f in self.config['filters']})
+        self.filter_names = [f['name'] for f in self.config['filters']]
 
         if config['sync_behaviour'] == 'catchup-with-indexer' and not indexer_client:
             raise ValueError("Received sync behaviour of catchup-with-indexer, but didn't receive an indexer instance.")
