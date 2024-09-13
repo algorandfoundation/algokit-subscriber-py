@@ -1,7 +1,7 @@
 import time
 from typing import cast
 
-import msgpack  # type: ignore[import]
+import msgpack  # type: ignore[import-untyped]
 from algosdk.v2client.algod import AlgodClient
 
 from .types.block import BlockData

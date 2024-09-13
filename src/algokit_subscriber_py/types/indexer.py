@@ -78,7 +78,7 @@ TransactionResult = TypedDict(
         "confirmed-round": NotRequired[int],
         "group": NotRequired[None | str],
         "note": NotRequired[str],
-        "logs": NotRequired[list[str]],
+        "logs": NotRequired[list[str] | None],
         "round-time": NotRequired[int],
         "intra-round-offset": NotRequired[int],
         "signature": NotRequired["TransactionSignature"],
@@ -229,10 +229,10 @@ ApplicationTransactionResult = TypedDict(
         "application-id": int,
         "foreign-apps": NotRequired[list[int]],
         "foreign-assets": NotRequired[list[int]],
-        "on-completion": "ApplicationOnComplete",
+        "on-completion": str,
         "approval-program": NotRequired[str],
         "clear-state-program": NotRequired[str],
-        "extra-program-pages": NotRequired[int],
+        "extra-program-pages": NotRequired[int | None],
     },
 )
 

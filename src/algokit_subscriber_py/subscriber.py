@@ -136,7 +136,7 @@ class AlgorandSubscriber:
 
                 # Check if there was a stop requested during one of the event handlers or inspect
                 if self.stop_requested:
-                    break
+                    break  # type: ignore[unreachable]
 
                 if result["current_round"] > result[
                     "new_watermark"

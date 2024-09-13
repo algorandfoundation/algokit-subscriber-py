@@ -4,7 +4,7 @@ from collections import OrderedDict
 from collections.abc import Callable, Sequence
 from typing import Any, TypedDict, cast
 
-import msgpack
+import msgpack  # type: ignore[import-untyped]
 from algosdk.transaction import (
     ApplicationCallTxn,
     AssetConfigTxn,
@@ -43,7 +43,7 @@ ALGORAND_ZERO_ADDRESS = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5H
 
 
 def algod_on_complete_to_indexer_on_complete(
-    algod_oc: AlgodOnComplete,
+    algod_oc: int,
 ) -> IndexerOnComplete:
     if algod_oc == AlgodOnComplete.NoOpOC:
         return IndexerOnComplete.noop
@@ -55,8 +55,10 @@ def algod_on_complete_to_indexer_on_complete(
         return IndexerOnComplete.clear
     if algod_oc == AlgodOnComplete.UpdateApplicationOC:
         return IndexerOnComplete.update
-    if algod_oc == AlgodOnComplete.DeleteApplicationOC:  # noqa: RET503
+    if algod_oc == AlgodOnComplete.DeleteApplicationOC:
         return IndexerOnComplete.delete
+
+    raise ValueError(f"Unknown on-completion type: {algod_oc}")
 
 
 def remove_nulls(obj: dict) -> dict:
@@ -151,11 +153,11 @@ def get_block_transactions(block: Block) -> list[TransactionInBlock]:
 
         if (
             block_transaction.get("dt") is None
-            or block_transaction["dt"].get("itx") is None
+            or block_transaction["dt"].get("itx") is None  # type: ignore[union-attr]
         ):
             continue
 
-        for itxn in block_transaction["dt"]["itx"]:
+        for itxn in block_transaction["dt"]["itx"]:  # type: ignore[index]
             txns.extend(
                 get_block_inner_transactions(
                     itxn,
@@ -235,7 +237,7 @@ def get_block_inner_transactions(  # noqa: PLR0913
     if block_transaction.get("dt") is None or block_transaction["dt"].get("itx") is None:  # type: ignore[union-attr]
         return txns
 
-    for inner_inner_transaction in block_transaction["dt"]["itx"]:  # type: ignore[union-attr]
+    for inner_inner_transaction in block_transaction["dt"]["itx"]:  # type: ignore[index]
         txns.extend(
             get_block_inner_transactions(
                 inner_inner_transaction,
@@ -257,7 +259,7 @@ class ExtractedBlockTransaction(TypedDict):
     created_app_id: int | None
     asset_close_amount: int | None
     close_amount: int | None
-    logs: list[bytes] | None
+    logs: list[str] | None
 
 
 def extract_transaction_from_block_transaction(
@@ -418,7 +420,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
     close_amount = t.get("close_amount")
     created_app_id = t.get("created_app_id")
     round_offset = t["round_offset"]
-    parent_offset = t["parent_offset"]
+    parent_offset = t["parent_offset"] or 0
     parent_transaction_id = t.get("parent_transaction_id")
     round_index = t["round_index"]
     round_number = t["round_number"]
@@ -661,7 +663,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                 for ibt in block_transaction["dt"].get("itx", [])  # type: ignore[union-attr]
             ]
 
-        return convert_bytes_to_base64(result)
+        return cast(SubscribedTransaction, convert_bytes_to_base64(result))
 
     except Exception as e:
         logger.error(

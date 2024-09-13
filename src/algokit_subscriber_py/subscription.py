@@ -282,14 +282,14 @@ def indexer_pre_filter_in_memory(  # noqa: C901
 
         if subscription.get("receiver"):
             if isinstance(subscription["receiver"], str):
-                result = result and (
+                result = result and bool(
                     axfer
                     and axfer.get("receiver") == subscription["receiver"]
                     or pay
                     and pay.get("receiver") == subscription["receiver"]
                 )
             else:
-                result = result and (
+                result = result and bool(
                     axfer
                     and axfer.get("receiver") in subscription["receiver"]
                     or pay
@@ -309,13 +309,13 @@ def indexer_pre_filter_in_memory(  # noqa: C901
 
         if subscription.get("app_id"):
             if isinstance(subscription["app_id"], int):
-                result = result and (
+                result = result and bool(
                     t.get("created-application-index") == int(subscription["app_id"])
                     or appl
                     and appl.get("application-id") == int(subscription["app_id"])
                 )
             else:
-                result = result and (
+                result = result and bool(
                     (
                         (t.get("created-application-index") or 0)
                         in map(int, subscription["app_id"])
@@ -328,7 +328,7 @@ def indexer_pre_filter_in_memory(  # noqa: C901
         if subscription.get("asset_id"):
             if isinstance(subscription["asset_id"], int | float):
                 asset_id = int(subscription["asset_id"])
-                result = result and (
+                result = result and bool(
                     t.get("created-asset-index") == asset_id
                     or acfg
                     and acfg.get("asset-id") == asset_id
@@ -339,7 +339,7 @@ def indexer_pre_filter_in_memory(  # noqa: C901
                 )
             else:
                 asset_ids = set(map(int, subscription["asset_id"]))
-                result = result and (
+                result = result and bool(
                     t.get("created-asset-index") in asset_ids
                     or axfer
                     and axfer.get("asset-id") in asset_ids
@@ -350,13 +350,13 @@ def indexer_pre_filter_in_memory(  # noqa: C901
                 )
 
         if subscription.get("min_amount"):
-            result = result and (
+            result = result and bool(
                 (pay and pay.get("amount", 0) >= subscription["min_amount"])
                 or (axfer and axfer.get("amount", 0) >= subscription["min_amount"])
             )
 
         if subscription.get("max_amount"):
-            result = result and (
+            result = result and bool(
                 (pay and pay.get("amount", 0) <= subscription["max_amount"])
                 or (axfer and axfer.get("amount", 0) <= subscription["max_amount"])
             )
@@ -471,7 +471,7 @@ def has_balance_change_match(
 
     return any(
         any(
-            check_single_change(actual_change, change_filter)
+            check_single_change(cast(dict, actual_change), change_filter)
             for actual_change in transaction_balance_changes
         )
         for change_filter in filtered_balance_changes
@@ -560,11 +560,11 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
             indexer_sync_to_round_number = current_round - max_rounds_to_sync
             if (
                 subscription.get("max_indexer_rounds_to_sync")
-                and indexer_sync_to_round_number - start_round + 1
+                and indexer_sync_to_round_number - start_round + 1  # type: ignore[operator]
                 > subscription["max_indexer_rounds_to_sync"]
             ):
                 indexer_sync_to_round_number = (
-                    start_round + subscription["max_indexer_rounds_to_sync"] - 1
+                    start_round + subscription["max_indexer_rounds_to_sync"] - 1  # type: ignore[operator]
                 )
                 end_round = indexer_sync_to_round_number
                 skip_algod_sync = True
@@ -636,12 +636,14 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
         ]
         algod_transactions = []
         for f in filters:
-            for t in block_transactions:
+            for t in block_transactions:  # type: ignore[assignment]
                 if transaction_filter(
                     f["filter"], arc28_events, subscription.get("arc28_events") or []
-                )(t):
+                )(
+                    t  # type: ignore[arg-type]
+                ):
                     algod_transactions.append(
-                        get_indexer_transaction_from_algod_transaction(t, f["name"])
+                        get_indexer_transaction_from_algod_transaction(t, f["name"])  # type: ignore[arg-type]
                     )
 
         algod_transactions = deduplicate_subscribed_transactions(algod_transactions)
@@ -703,14 +705,13 @@ def process_extra_fields(
     )
 
     arc28_events = extract_arc28_events(
-        # TODO: Determine why id isnt set for inners
         transaction.get("id", ""),
         [base64.b64decode(log) for log in transaction.get("logs") or []],
         events_to_apply,
         lambda group_name: next(
             g for g in groups_to_apply if g["group_name"] == group_name
         )["continue_on_error"],
-    )
+    )  # type: ignore[assignment]
 
     balance_changes = extract_balance_changes_from_indexer_transaction(transaction)
 
@@ -721,10 +722,10 @@ def process_extra_fields(
 
     return {
         **transaction,
-        "arc28_events": arc28_events if len(arc28_events) > 0 else None,
+        "arc28_events": arc28_events if len(arc28_events) > 0 else None,  # type: ignore[typeddict-item]
         "balance_changes": balance_changes,
-        "inner-txns": inner_txns if len(inner_txns) > 0 else None,
-        "filters_matched": transaction.get("filters_matched") or None,
+        "inner-txns": inner_txns if len(inner_txns) > 0 else None,  # type: ignore[typeddict-item]
+        "filters_matched": transaction.get("filters_matched") or None,  # type: ignore[typeddict-item]
     }
 
 
@@ -838,8 +839,8 @@ def extract_balance_changes_from_indexer_transaction(  # noqa: PLR0912, C901
             changes.append(
                 {
                     "address": transaction["sender"],
-                    "amount": act.get("params", {}).get("t", 0),
-                    "asset_id": transaction["created-asset-index"],
+                    "amount": act.get("params", {}).get("t", 0),  # type: ignore[typeddict-item]
+                    "asset_id": transaction["created-asset-index"],  # type: ignore[typeddict-item]
                     "roles": [BalanceChangeRole.AssetCreator],
                 }
             )
@@ -854,7 +855,7 @@ def extract_balance_changes_from_indexer_transaction(  # noqa: PLR0912, C901
             )
 
     # Deduplicate and consolidate balance changes
-    consolidated_changes = []
+    consolidated_changes: list[BalanceChange] = []
     for change in changes:
         existing = None
         for c in consolidated_changes:
@@ -897,7 +898,7 @@ def get_filtered_indexer_transactions(
     ]
 
     return list(
-        filter(indexer_pre_filter_in_memory(txn_filter["filter"]), transactions)
+        filter(indexer_pre_filter_in_memory(txn_filter["filter"]), transactions)  # type: ignore[arg-type]
     )
 
 
@@ -953,7 +954,7 @@ def indexer_post_filter(  # noqa: C901
             if isinstance(subscription.get("app_on_complete"), str):
                 result &= appl["on-completion"] == subscription.get("app_on_complete")
             else:
-                result &= appl["on-completion"] in subscription.get("app_on_complete")
+                result &= appl["on-completion"] in subscription.get("app_on_complete")  # type: ignore[operator]
 
         if subscription.get("method_signature"):
             if not appl:
@@ -987,7 +988,7 @@ def indexer_post_filter(  # noqa: C901
                 bool(t.get("application-transaction"))
                 and bool(t.get("logs"))
                 and has_emitted_matching_arc28_event(
-                    t["logs"],
+                    t["logs"] or [],
                     arc28_events,
                     arc28_event_groups,
                     subscription["arc28_events"],
