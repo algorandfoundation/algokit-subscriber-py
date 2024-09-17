@@ -23,27 +23,7 @@ complex_event = Arc28Event(
     ],
 )
 
-#   const app = async (config: { create: boolean }, creator?: Account) => {
-#     const app = new TestingAppClient(
-#       {
-#         resolveBy: 'id',
-#         id: 0,
-#       },
-#       localnet.context.algod,
-#     )
-#     const creation = await app.create.bare({
-#       sender: creator ?? systemAccount(),
-#       sendParams: {
-#         skipSending: !config.create,
-#       },
-#     })
 
-
-#     return {
-#       app,
-#       creation,
-#     }
-#   }
 def app(localnet: AlgorandClient, creator: str, *, create: bool) -> dict:
     signer = localnet.account.get_signer(creator)
     app = TestingAppClient(
@@ -66,39 +46,6 @@ def app(localnet: AlgorandClient, creator: str, *, create: bool) -> dict:
     }
 
 
-#   test('Works for simple event', async () => {
-#     const { testAccount } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txn = await app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount })
-
-#     const subscription = (
-#       await subscribeAndVerify(
-#         {
-#           sender: testAccount.addr,
-#           appId: Number(app1.creation.appId),
-#         },
-#         txn,
-#         [
-#           {
-#             groupName: 'group1',
-#             events: [swappedEvent],
-#           },
-#         ],
-#       )
-#     ).subscribedTransactions[0]
-
-
-#     invariant(subscription.arc28Events)
-#     expect(subscription.arc28Events.length).toBe(1)
-#     expect(subscription.arc28Events[0].args.length).toEqual(2)
-#     expect(subscription.arc28Events[0].args[0]).toEqual(1n)
-#     expect(subscription.arc28Events[0].args[1]).toEqual(2n)
-#     expect(subscription.arc28Events[0].argsByName).toEqual({ a: 1n, b: 2n })
-#     expect(subscription.arc28Events[0].eventName).toBe('Swapped')
-#     expect(subscription.arc28Events[0].eventPrefix).toBe('1ccbd925')
-#     expect(subscription.arc28Events[0].eventSignature).toBe('Swapped(uint64,uint64)')
-#     expect(subscription.arc28Events[0].groupName).toBe('group1')
-#   })
 def test_simple_event(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -135,33 +82,6 @@ def test_simple_event(filter_fixture: dict) -> None:
     assert subscription["arc28_events"][0]["group_name"] == "group1"
 
 
-# test('Processes multiple events', async () => {
-#     const { testAccount } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txn = await app1.app.emitSwappedTwice({ a: 1, b: 2 }, { sender: testAccount })
-
-#     const subscription = (
-#       await subscribeAndVerify(
-#         {
-#           sender: testAccount.addr,
-#           appId: Number(app1.creation.appId),
-#         },
-#         txn,
-#         [
-#           {
-#             groupName: 'group1',
-#             events: [swappedEvent],
-#           },
-#         ],
-#       )
-#     ).subscribedTransactions[0]
-
-
-#     invariant(subscription.arc28Events)
-#     expect(subscription.arc28Events.length).toBe(2)
-#     expect(subscription.arc28Events[1].argsByName).toEqual({ b: 1n, a: 2n })
-#     expect(subscription.arc28Events[1].groupName).toBe('group1')
-#   })
 def test_multiple_events(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -189,31 +109,6 @@ def test_multiple_events(filter_fixture: dict) -> None:
     assert subscription["arc28_events"][1]["group_name"] == "group1"
 
 
-#   test('Respects app ID filter exclusion', async () => {
-#     const { testAccount } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txn = await app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount })
-
-#     const subscription = (
-#       await subscribeAndVerify(
-#         {
-#           sender: testAccount.addr,
-#           appId: Number(app1.creation.appId),
-#         },
-#         txn,
-#         [
-#           {
-#             groupName: 'group1',
-#             events: [swappedEvent],
-#             processForAppIds: [Number(app1.creation.appId) + 1],
-#           },
-#         ],
-#       )
-#     ).subscribedTransactions[0]
-
-
-#     expect(subscription.arc28Events).toBeFalsy()
-#   })
 def test_app_id_filter_exclusion(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -239,32 +134,6 @@ def test_app_id_filter_exclusion(filter_fixture: dict) -> None:
     assert not subscription["arc28_events"]
 
 
-# test('Respects app predicate filter inclusion', async () => {
-#     const { testAccount } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txn = await app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount })
-
-#     const subscription = (
-#       await subscribeAndVerify(
-#         {
-#           sender: testAccount.addr,
-#           appId: Number(app1.creation.appId),
-#         },
-#         txn,
-#         [
-#           {
-#             groupName: 'group1',
-#             events: [swappedEvent],
-#             processTransaction: (transaction) => transaction.id === txn.transaction.txID(),
-#           },
-#         ],
-#       )
-#     ).subscribedTransactions[0]
-
-
-#     invariant(subscription.arc28Events)
-#     expect(subscription.arc28Events.length).toBe(1)
-#   })
 def test_app_predicate_filter_inclusion(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -292,31 +161,6 @@ def test_app_predicate_filter_inclusion(filter_fixture: dict) -> None:
     assert len(subscription["arc28_events"]) == 1
 
 
-#   test('Respects app predicate filter exclusion', async () => {
-#     const { testAccount } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txn = await app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount })
-
-#     const subscription = (
-#       await subscribeAndVerify(
-#         {
-#           sender: testAccount.addr,
-#           appId: Number(app1.creation.appId),
-#         },
-#         txn,
-#         [
-#           {
-#             groupName: 'group1',
-#             events: [swappedEvent],
-#             processTransaction: () => false,
-#           },
-#         ],
-#       )
-#     ).subscribedTransactions[0]
-
-
-#     expect(subscription.arc28Events).toBeFalsy()
-#   })
 def test_app_predicate_filter_exclusion(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -342,49 +186,6 @@ def test_app_predicate_filter_exclusion(filter_fixture: dict) -> None:
     assert not subscription["arc28_events"]
 
 
-#   test('Works for complex event / multiple events in group', async () => {
-#     const { testAccount } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txn = await app1.app.emitComplex({ a: 1, b: 2, array: [1, 2, 3] }, { sender: testAccount })
-
-#     const subscription = (
-#       await subscribeAndVerify(
-#         {
-#           sender: testAccount.addr,
-#           appId: Number(app1.creation.appId),
-#         },
-#         txn,
-#         [
-#           {
-#             groupName: 'group1',
-#             events: [swappedEvent, complexEvent],
-#           },
-#         ],
-#       )
-#     ).subscribedTransactions[0]
-
-#     invariant(subscription.arc28Events)
-#     expect(subscription.arc28Events.length).toBe(2)
-
-#     expect(subscription.arc28Events[0].args.length).toEqual(2)
-#     expect(subscription.arc28Events[0].args[0]).toEqual(1n)
-#     expect(subscription.arc28Events[0].args[1]).toEqual(2n)
-#     expect(subscription.arc28Events[0].argsByName).toEqual({ a: 1n, b: 2n })
-#     expect(subscription.arc28Events[0].eventName).toBe('Swapped')
-#     expect(subscription.arc28Events[0].eventPrefix).toBe('1ccbd925')
-#     expect(subscription.arc28Events[0].eventSignature).toBe('Swapped(uint64,uint64)')
-#     expect(subscription.arc28Events[0].groupName).toBe('group1')
-
-
-#     expect(subscription.arc28Events[1].args.length).toEqual(2)
-#     expect(subscription.arc28Events[1].args[0]).toEqual([1n, 2n, 3n])
-#     expect(subscription.arc28Events[1].args[1]).toEqual(2n)
-#     expect(subscription.arc28Events[1].argsByName).toEqual({ array: [1n, 2n, 3n], int: 2n })
-#     expect(subscription.arc28Events[1].eventName).toBe('Complex')
-#     expect(subscription.arc28Events[1].eventPrefix).toBe('18da5ea7')
-#     expect(subscription.arc28Events[1].eventSignature).toBe('Complex(uint32[],uint64)')
-#     expect(subscription.arc28Events[1].groupName).toBe('group1')
-#   })
 def test_multiple_events_in_group(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -435,41 +236,6 @@ def test_multiple_events_in_group(filter_fixture: dict) -> None:
     assert subscription["arc28_events"][1]["group_name"] == "group1"
 
 
-# test('Works for multiple groups', async () => {
-#     const { testAccount } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txn = await app1.app.emitComplex({ a: 1, b: 2, array: [1, 2, 3] }, { sender: testAccount })
-
-#     const subscription = (
-#       await subscribeAndVerify(
-#         {
-#           sender: testAccount.addr,
-#           appId: Number(app1.creation.appId),
-#         },
-#         txn,
-#         [
-#           {
-#             groupName: 'group1',
-#             events: [complexEvent],
-#           },
-#           {
-#             groupName: 'group2',
-#             events: [swappedEvent],
-#           },
-#         ],
-#       )
-#     ).subscribedTransactions[0]
-
-#     invariant(subscription.arc28Events)
-#     expect(subscription.arc28Events.length).toBe(2)
-
-#     expect(subscription.arc28Events[0].eventSignature).toBe('Swapped(uint64,uint64)')
-#     expect(subscription.arc28Events[0].groupName).toBe('group2')
-
-
-#     expect(subscription.arc28Events[1].eventSignature).toBe('Complex(uint32[],uint64)')
-#     expect(subscription.arc28Events[1].groupName).toBe('group1')
-#   })
 def test_multiple_groups(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -509,36 +275,6 @@ def test_multiple_groups(filter_fixture: dict) -> None:
     assert subscription["arc28_events"][1]["group_name"] == "group1"
 
 
-#   test('Allows ARC-28 event subscription', async () => {
-#     const { testAccount, algod } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txns = await sendGroupOfTransactions(
-#       {
-#         transactions: [
-#           app1.app.callAbi({ value: '1' }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           transferAlgos({ amount: (1).microAlgos(), from: testAccount, to: testAccount.addr, skipSending: true }, algod),
-#         ],
-#         signer: testAccount,
-#       },
-#       algod,
-#     )
-
-
-#     await subscribeAndVerifyFilter(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group1' }],
-#       },
-#       extractFromGroupResult(txns, 1),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#         },
-#       ],
-#     )
-#   })
 def test_arc28_event_subscription(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
@@ -571,219 +307,6 @@ def test_arc28_event_subscription(filter_fixture: dict) -> None:
     )
 
 
-# test('ARC-28 event subscription validates app ID (include)', async () => {
-#     const { testAccount, algod } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txns = await sendGroupOfTransactions(
-#       {
-#         transactions: [
-#           app1.app.callAbi({ value: '1' }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           transferAlgos({ amount: (1).microAlgos(), from: testAccount, to: testAccount.addr, skipSending: true }, algod),
-#         ],
-#         signer: testAccount,
-#       },
-#       algod,
-#     )
-
-#     await subscribeAndVerifyFilter(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group1' }],
-#       },
-#       extractFromGroupResult(txns, 1),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#           processForAppIds: [Number(app1.creation.appId)],
-#         },
-#       ],
-#     )
-#   })
-
-#   test('ARC-28 event subscription validates app ID (exclude)', async () => {
-#     const { testAccount, algod } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txns = await sendGroupOfTransactions(
-#       {
-#         transactions: [
-#           app1.app.callAbi({ value: '1' }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           transferAlgos({ amount: (1).microAlgos(), from: testAccount, to: testAccount.addr, skipSending: true }, algod),
-#         ],
-#         signer: testAccount,
-#       },
-#       algod,
-#     )
-
-#     const subscription = await subscribeAlgod(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group1' }],
-#       },
-#       extractFromGroupResult(txns, 0),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#           processForAppIds: [Number(app1.creation.appId) + 1],
-#         },
-#       ],
-#     )
-
-#     expect(subscription.subscribedTransactions.length).toBe(0)
-
-#     const subscription2 = await subscribeIndexer(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group1' }],
-#       },
-#       extractFromGroupResult(txns, 0),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#           processForAppIds: [Number(app1.creation.appId) + 1],
-#         },
-#       ],
-#     )
-
-#     expect(subscription2.subscribedTransactions.length).toBe(0)
-#   })
-
-#   test('ARC-28 event subscription validates predicate (include)', async () => {
-#     const { testAccount, algod } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txns = await sendGroupOfTransactions(
-#       {
-#         transactions: [
-#           app1.app.callAbi({ value: '1' }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           transferAlgos({ amount: (1).microAlgos(), from: testAccount, to: testAccount.addr, skipSending: true }, algod),
-#         ],
-#         signer: testAccount,
-#       },
-#       algod,
-#     )
-
-#     await subscribeAndVerifyFilter(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group1' }],
-#       },
-#       extractFromGroupResult(txns, 1),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#           processTransaction: (transaction) => transaction.id === txns.transactions[1].txID(),
-#         },
-#       ],
-#     )
-#   })
-
-#   test('ARC-28 event subscription validates predicate (exclude)', async () => {
-#     const { testAccount, algod } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txns = await sendGroupOfTransactions(
-#       {
-#         transactions: [
-#           app1.app.callAbi({ value: '1' }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           transferAlgos({ amount: (1).microAlgos(), from: testAccount, to: testAccount.addr, skipSending: true }, algod),
-#         ],
-#         signer: testAccount,
-#       },
-#       algod,
-#     )
-
-#     const subscription = await subscribeAlgod(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group1' }],
-#       },
-#       extractFromGroupResult(txns, 0),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#           processTransaction: (transaction) => transaction.id !== txns.transactions[1].txID(),
-#         },
-#       ],
-#     )
-
-#     expect(subscription.subscribedTransactions.length).toBe(0)
-
-#     const subscription2 = await subscribeIndexer(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group1' }],
-#       },
-#       extractFromGroupResult(txns, 0),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#           processTransaction: (transaction) => transaction.id !== txns.transactions[1].txID(),
-#         },
-#       ],
-#     )
-
-#     expect(subscription2.subscribedTransactions.length).toBe(0)
-#   })
-
-#   test('ARC-28 event subscription validates group', async () => {
-#     const { testAccount, algod } = localnet.context
-#     const app1 = await app({ create: true })
-#     const txns = await sendGroupOfTransactions(
-#       {
-#         transactions: [
-#           app1.app.callAbi({ value: '1' }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           app1.app.emitSwapped({ a: 1, b: 2 }, { sender: testAccount, sendParams: { skipSending: true } }),
-#           transferAlgos({ amount: (1).microAlgos(), from: testAccount, to: testAccount.addr, skipSending: true }, algod),
-#         ],
-#         signer: testAccount,
-#       },
-#       algod,
-#     )
-
-#     const subscription = await subscribeAlgod(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group2' }],
-#       },
-#       extractFromGroupResult(txns, 0),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#           processTransaction: (transaction) => transaction.id !== txns.transactions[1].txID(),
-#         },
-#       ],
-#     )
-
-#     expect(subscription.subscribedTransactions.length).toBe(0)
-
-#     const subscription2 = await subscribeIndexer(
-#       {
-#         sender: testAccount.addr,
-#         arc28Events: [{ eventName: 'Swapped', groupName: 'group2' }],
-#       },
-#       extractFromGroupResult(txns, 0),
-#       [
-#         {
-#           groupName: 'group1',
-#           events: [swappedEvent],
-#           processTransaction: (transaction) => transaction.id !== txns.transactions[1].txID(),
-#         },
-#       ],
-#     )
-
-
-#     expect(subscription2.subscribedTransactions.length).toBe(0)
-#   })
-# })
 def test_arc28_event_subscription_app_id_include(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
