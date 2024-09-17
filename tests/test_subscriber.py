@@ -151,9 +151,7 @@ def test_subscribes_correctly_with_poll_once() -> None:
     assert [t["id"] for t in result["subscribed_transactions"]] == tx_ids
 
     # Random transaction
-    results_2 = send_x_transactions(
-        1, generate_account(algorand, 3 * 10**6), algorand
-    )
+    results_2 = send_x_transactions(1, generate_account(algorand, 3 * 10**6), algorand)
     last_txn_round_2 = results_2["last_txn_round"]
     subscriber["subscriber"].poll_once()
     assert len(subscriber["subscribed_test_account_txns"]) == 1

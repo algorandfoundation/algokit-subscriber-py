@@ -88,15 +88,19 @@ def lookup_asset_holdings(
         args: dict[str, Any] = {
             "asset-id": asset_id,
             "limit": pagination_limit or DEFAULT_INDEXER_MAX_API_RESOURCES_PER_ACCOUNT,
-            "include-all": options["include-all"]
-            if options and "include-all" in options
-            else None,
-            "currency-greater-than": options["currency-greater-than"]
-            if options and "currency-greater-than" in options
-            else None,
-            "currency-less-than": options["currency-less-than"]
-            if options and "currency-less-than" in options
-            else None,
+            "include-all": (
+                options["include-all"] if options and "include-all" in options else None
+            ),
+            "currency-greater-than": (
+                options["currency-greater-than"]
+                if options and "currency-greater-than" in options
+                else None
+            ),
+            "currency-less-than": (
+                options["currency-less-than"]
+                if options and "currency-less-than" in options
+                else None
+            ),
         }
 
         if next_token:
