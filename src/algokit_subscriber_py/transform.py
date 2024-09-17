@@ -270,13 +270,14 @@ def extract_transaction_from_block_transaction(
 
     Note: Doesn't currently support `keyreg` (Key Registration) or `stpf` (State Proof) transactions.
 
-    Args:
-        block_transaction (dict[str, Any]): The raw transaction from a block
-        genesis_hash (bytes): The genesis hash
-        genesis_id (str): The genesis ID
-
-    Returns:
-        dict[str, Any]: The `algosdk.Transaction` object along with key secondary information from the block.
+    :param block_transaction: The raw transaction from a block
+    :type block_transaction: BlockInnerTransaction
+    :param genesis_hash: The genesis hash
+    :type genesis_hash: bytes
+    :param genesis_id: The genesis ID
+    :type genesis_id: str
+    :return: The `algosdk.Transaction` object along with key secondary information from the block.
+    :rtype: ExtractedBlockTransaction
     """
     txn = extract_and_normalise_transaction(block_transaction, genesis_hash, genesis_id)
 
@@ -315,13 +316,14 @@ def extract_and_normalise_transaction(
     """
     Extract and normalize a transaction from a block transaction.
 
-    Args:
-        block_transaction (BlockTransaction): The raw transaction from a block
-        genesis_hash (bytes): The genesis hash
-        genesis_id (str): The genesis ID
-
-    Returns:
-        The normalized transaction
+    :param block_transaction: The raw transaction from a block
+    :type block_transaction: BlockTransaction
+    :param genesis_hash: The genesis hash
+    :type genesis_hash: bytes
+    :param genesis_id: The genesis ID
+    :type genesis_id: str
+    :return: The normalized transaction
+    :rtype: dict[str, Any]
     """
     txn: dict[str, Any] = block_transaction["txn"].copy()
     remove_nulls(txn)
@@ -346,11 +348,10 @@ def _sort_dict(d: dict) -> OrderedDict:
     """
     Sorts a dictionary recursively and removes all zero values.
 
-    Args:
-        d (dict): dictionary to be sorted
-
-    Returns:
-        OrderedDict: sorted dictionary with no zero values
+    :param d: dictionary to be sorted
+    :type d: dict
+    :return: sorted dictionary with no zero values
+    :rtype: OrderedDict
     """
     od = OrderedDict()
     for k, v in sorted(d.items()):
@@ -369,11 +370,14 @@ def get_tx_id_from_block_transaction(
     """
     Get the transaction ID from a block transaction.
 
-    Args:
-        block_transaction (BlockTransaction): The block transaction
-
-    Returns:
-        str: The transaction ID
+    :param block_transaction: The block transaction
+    :type block_transaction: BlockTransaction | BlockInnerTransaction
+    :param genesis_hash: The genesis hash
+    :type genesis_hash: bytes
+    :param genesis_id: The genesis ID
+    :type genesis_id: str
+    :return: The transaction ID
+    :rtype: str
     """
     txn = extract_and_normalise_transaction(block_transaction, genesis_hash, genesis_id)
 
@@ -393,11 +397,10 @@ def convert_bytes_to_base64(obj: Any) -> Any:  # noqa: ANN401
     """
     Recursively iterate over a nested dict and convert any bytes values to base64 strings.
 
-    Args:
-        obj: The object to convert (can be a dict, list, or any other type)
-
-    Returns:
-        The object with all bytes values converted to base64 strings
+    :param obj: The object to convert (can be a dict, list, or any other type)
+    :type obj: Any
+    :return: The object with all bytes values converted to base64 strings
+    :rtype: Any
     """
     if isinstance(obj, dict):
         return {key: convert_bytes_to_base64(value) for key, value in obj.items()}
@@ -676,11 +679,10 @@ def block_data_to_block_metadata(block_data: BlockData) -> BlockMetadata:
     """
     Extract key metadata from a block.
 
-    Args:
-        block_data (dict[str, Any]): The raw block data
-
-    Returns:
-        dict[str, Any]: The block metadata
+    :param block_data: The raw block data
+    :type block_data: BlockData
+    :return: The block metadata
+    :rtype: BlockMetadata
     """
     block = block_data["block"]
     cert = block_data.get("cert")

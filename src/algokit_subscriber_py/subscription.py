@@ -39,6 +39,12 @@ SearchForTransactions = dict[str, Any]
 def deduplicate_subscribed_transactions(
     txns: list[SubscribedTransaction],
 ) -> list[SubscribedTransaction]:
+    """
+    Deduplicate subscribed transactions based on their ID.
+
+    :param txns: List of subscribed transactions
+    :return: Deduplicated list of subscribed transactions
+    """
     result_dict: dict[str, SubscribedTransaction] = {}
 
     for txn in txns:
@@ -56,13 +62,10 @@ def transaction_is_in_arc28_event_group(
     """
     Check if a transaction is in an ARC-28 event group.
 
-    Args:
-    group (Arc28EventGroup): The ARC-28 event group to check against.
-    app_id (int): The application ID of the transaction.
-    transaction (Callable[[], TransactionResult]): A function that returns the transaction result.
-
-    Returns:
-    bool: True if the transaction is in the ARC-28 event group, False otherwise.
+    :param group: The ARC-28 event group to check against
+    :param app_id: The application ID of the transaction
+    :param transaction: A function that returns the transaction result
+    :return: True if the transaction is in the ARC-28 event group, False otherwise
     """
     in_group = (
         not group.get("process_for_app_ids") or app_id in group["process_for_app_ids"]
@@ -87,16 +90,13 @@ def has_emitted_matching_arc28_event(  # noqa: PLR0913
     """
     Check if a transaction has emitted a matching ARC-28 event.
 
-    Args:
-    logs (list[str]): The transaction logs encoded as bas64 strings.
-    all_events (list[Arc28EventToProcess]): All ARC-28 events to process.
-    event_groups (list[Arc28EventGroup]): All ARC-28 event groups.
-    event_filter (list[dict[str, str]]): The event filter to apply.
-    app_id (int): The application ID.
-    transaction (Callable[[], TransactionResult]): A function that returns the transaction result.
-
-    Returns:
-    bool: True if a matching ARC-28 event has been emitted, False otherwise.
+    :param logs: The transaction logs encoded as bas64 strings
+    :param all_events: All ARC-28 events to process
+    :param event_groups: All ARC-28 event groups
+    :param event_filter: The event filter to apply
+    :param app_id: The application ID
+    :param transaction: A function that returns the transaction result
+    :return: True if a matching ARC-28 event has been emitted, False otherwise
     """
     potential_events = [
         e
@@ -132,14 +132,11 @@ def extract_arc28_events(
     """
     Extract ARC-28 events from transaction logs.
 
-    Args:
-    transaction_id (str): The ID of the transaction.
-    logs (list[bytes]): The transaction logs.
-    events (list[Arc28EventToProcess]): The ARC-28 events to process.
-    continue_on_error (Callable[[str], bool]): A function that decides whether to continue on error for a given group name.
-
-    Returns:
-    Optional[list[EmittedArc28Event]]: A list of emitted ARC-28 events, or None if no events are found.
+    :param transaction_id: The ID of the transaction
+    :param logs: The transaction logs
+    :param events: The ARC-28 events to process
+    :param continue_on_error: A function that decides whether to continue on error for a given group name
+    :return: A list of emitted ARC-28 events, or an empty list if no events are found
     """
     if not events:
         return []
@@ -195,13 +192,10 @@ def indexer_pre_filter(
     """
     Create a pre-filter function for the Indexer client based on the subscription parameters.
 
-    Args:
-    subscription (TransactionFilter): The transaction filter parameters.
-    min_round (int): The minimum round number to search from.
-    max_round (int): The maximum round number to search to.
-
-    Returns:
-    Callable[[Indexer], Indexer]: A function that applies the pre-filter to an Indexer client.
+    :param subscription: The transaction filter parameters
+    :param min_round: The minimum round number to search from
+    :param max_round: The maximum round number to search to
+    :return: A dictionary of pre-filter arguments for the Indexer client
     """
     # NOTE: everything in this method needs to be mirrored to `indexer_pre_filter_in_memory` below
     args = dict[str, Any]()
@@ -259,11 +253,8 @@ def indexer_pre_filter_in_memory(  # noqa: C901
     it doesn't return that inner transaction, it returns the parent. We need to re-run these
     filters in-memory to identify the actual transaction(s) that were matched.
 
-    Args:
-    subscription (TransactionFilter): The transaction filter parameters.
-
-    Returns:
-    Callable[[dict], bool]: A function that applies the pre-filter to a transaction dictionary.
+    :param subscription: The transaction filter parameters
+    :return: A function that applies the pre-filter to a transaction dictionary
     """
 
     def filter_transaction(t: TransactionResult) -> bool:  # noqa: C901, PLR0912
@@ -367,6 +358,12 @@ def indexer_pre_filter_in_memory(  # noqa: C901
 
 
 def get_method_selector_base64(method_signature: str) -> str:
+    """
+    Get the base64-encoded method selector for a given method signature.
+
+    :param method_signature: The method signature
+    :return: The base64-encoded method selector
+    """
     signature_hash = hashlib.new("sha512_256", method_signature.encode()).digest()
     return base64.b64encode(signature_hash[:4]).decode("utf-8")
 
@@ -375,6 +372,13 @@ def has_balance_change_match(
     transaction_balance_changes: list[BalanceChange],
     filtered_balance_changes: list[dict[str, Any]] | None,
 ) -> bool:
+    """
+    Check if there's a match between the actual balance changes and the filtered balance changes.
+
+    :param transaction_balance_changes: The actual balance changes in the transaction
+    :param filtered_balance_changes: The filtered balance changes to match against
+    :return: True if there's a match, False otherwise
+    """
     if filtered_balance_changes is None:
         filtered_balance_changes = []
 
@@ -486,6 +490,11 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     """
     Executes a single pull/poll to subscribe to transactions on the configured Algorand
     blockchain for the given subscription context.
+
+    :param subscription: The subscription parameters
+    :param algod: The Algod client
+    :param indexer: The Indexer client (optional)
+    :return: The transaction subscription result
     """
     watermark = subscription["watermark"]
     filters = subscription["filters"]
@@ -677,6 +686,14 @@ def process_extra_fields(
     arc28_events: list[Arc28EventToProcess],
     arc28_groups: list[Arc28EventGroup],
 ) -> SubscribedTransaction:
+    """
+    Process extra fields for a transaction, including ARC-28 events and balance changes.
+
+    :param transaction: The transaction to process
+    :param arc28_events: The list of ARC-28 events to process
+    :param arc28_groups: The list of ARC-28 event groups
+    :return: The processed transaction with extra fields
+    """
     groups_to_apply = (
         []
         if transaction["tx-type"] != TransactionType.appl.value
@@ -732,6 +749,12 @@ def process_extra_fields(
 def extract_balance_changes_from_indexer_transaction(  # noqa: PLR0912, C901
     transaction: TransactionResult,
 ) -> list[BalanceChange]:
+    """
+    Extract balance changes from an indexer transaction.
+
+    :param transaction: The indexer transaction
+    :return: A list of balance changes
+    """
     changes: list[BalanceChange] = []
 
     if transaction["fee"]:
@@ -883,6 +906,10 @@ def get_filtered_indexer_transactions(
     """
     Process an indexer transaction and return that transaction or any of its inner transactions
     that meet the indexer pre-filter requirements; patching up transaction ID and intra-round-offset on the way through.
+
+    :param transaction: The indexer transaction to process
+    :param txn_filter: The named transaction filter to apply
+    :return: A list of filtered subscribed transactions
     """
     parent_offset = 0
 
@@ -905,6 +932,14 @@ def get_filtered_indexer_transactions(
 def get_indexer_inner_transactions(
     root: TransactionResult, parent: TransactionResult, offset: Callable
 ) -> list[SubscribedTransaction]:
+    """
+    Recursively get inner transactions from an indexer transaction.
+
+    :param root: The root transaction
+    :param parent: The parent transaction
+    :param offset: A callable to get the parent offset
+    :return: A list of subscribed inner transactions
+    """
     result = []
     for t in parent.get("inner-txns", []):
         parent_offset = offset()
@@ -933,6 +968,15 @@ def indexer_post_filter(  # noqa: C901
     arc28_events: list[Arc28EventToProcess],
     arc28_event_groups: list[Arc28EventGroup],
 ) -> Callable[[TransactionResult], bool]:
+    """
+    Create a post-filter function for indexer transactions based on the subscription parameters.
+
+    :param subscription: The transaction filter parameters
+    :param arc28_events: The list of ARC-28 events to process
+    :param arc28_event_groups: The list of ARC-28 event groups
+    :return: A function that applies the post-filter to a transaction
+    """
+
     def filter_function(t: TransactionResult) -> bool:  # noqa: C901, PLR0912
         result = True
         appl = t.get("application-transaction")
@@ -1016,6 +1060,15 @@ def transaction_filter(  # noqa: C901, PLR0915
     arc28_events: list[Arc28EventToProcess],
     arc28_event_groups: list[Arc28EventGroup],
 ) -> Callable[[TransactionInBlock], bool]:
+    """
+    Create a filter function for transactions based on the subscription parameters.
+
+    :param subscription: The transaction filter parameters
+    :param arc28_events: The list of ARC-28 events to process
+    :param arc28_event_groups: The list of ARC-28 event groups
+    :return: A function that applies the filter to a transaction in a block
+    """
+
     def filter_function(  # noqa: C901, PLR0912, PLR0915
         txn: TransactionInBlock,
     ) -> bool:
