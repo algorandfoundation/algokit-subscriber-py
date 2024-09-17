@@ -1,1 +1,4 @@
 __pycache__
+# coverage output
+.coverage
+coverage.xml
