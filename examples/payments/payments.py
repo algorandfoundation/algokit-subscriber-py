@@ -30,7 +30,7 @@ subscriber = AlgorandSubscriber(
                     # Match payment transactions
                     "type": "pay",
                     # We only want transactions that transferred at least 1 ALGO
-                    "min_amount": 1e6,
+                    "min_amount": int(1e6),
                 },
             }
         ],

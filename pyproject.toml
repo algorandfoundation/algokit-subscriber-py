@@ -105,7 +105,7 @@ allow-star-arg-any = true
 suppress-none-returning = true
 
 [tool.mypy]
-files = ["src"]
+files = ["src", "examples"]
 exclude = ["dist", "tests"]
 python_version = "3.10"
 warn_unused_ignores = true
