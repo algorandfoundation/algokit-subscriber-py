@@ -1,4 +1,12 @@
+.idea
 __pycache__
-# coverage output
+.DS_Store
+
+/docs/_build/
+/docs/apidocs/
+
 .coverage
 coverage.xml
+.venv*
+
+/dist

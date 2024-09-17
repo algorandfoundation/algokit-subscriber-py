@@ -14,13 +14,17 @@ algokit-utils = "^2.3.0"
 mypy = "^1.10.1"
 ruff = "^0.5.0"
 pytest = "^8.2.2"
-sphinx-copybutton = "^0.5.2"
-myst-parser = "^4.0.0"
-sphinx-autodoc2 = "^0.5.0"
-furo = "^2024.8.6"
 pre-commit = "^3.8.0"
 black = "^24.8.0"
 pytest-cov = "^5.0.0"
+sphinx = "^7.2.6"
+furo = "^2024.1.29"
+myst-parser = "^4.0.0"
+sphinx-autodoc2 = "^0.5.0"
+sphinx-copybutton = "^0.5.2"
+sphinx-autobuild = "^2024.4.16"
+sphinx-mermaid = "^0.0.8"
+poethepoet = "^0.24.4"
 
 [build-system]
 requires = ["poetry-core"]
@@ -126,3 +130,10 @@ pythonpath = ["src", "tests"]
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501", "T201", "PLR2004", "F811"]
 "examples/*" = ["T201"]
+
+
+[tool.poe.tasks]
+docs-test = { shell = "sphinx-build -b doctest docs docs/_build -W --keep-going -n -E" }
+docs-clear = { shell = "rm -rf docs/_build" }
+docs-build = { shell = "poetry run poe docs-clear && sphinx-build docs docs/_build -W --keep-going -n -E" }
+docs-dev = { shell = "poetry run poe docs-build && sphinx-autobuild docs docs/_build" }

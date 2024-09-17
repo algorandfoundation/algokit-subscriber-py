@@ -16,6 +16,10 @@ from .utils import logger
 
 
 class AlgorandSubscriber:
+    """
+    A subscriber for Algorand transactions.
+    """
+
     def __init__(
         self,
         config: AlgorandSubscriberConfig,
