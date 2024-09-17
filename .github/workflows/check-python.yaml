@@ -21,7 +21,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install --no-interaction --with cicd --with doc
+        run: poetry install --no-interaction
 
       - name: Check pre-commits
         run: |
@@ -59,7 +59,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install --no-interaction --with cicd
+        run: poetry install --no-interaction
 
       - name: Start LocalNet
         run: poetry run algokit localnet start

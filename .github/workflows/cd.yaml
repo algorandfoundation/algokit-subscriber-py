@@ -73,7 +73,7 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install --no-interaction --with cicd
+        run: poetry install --no-interaction
 
       - name: pre-commit and pytest
         if: inputs.run_checks
