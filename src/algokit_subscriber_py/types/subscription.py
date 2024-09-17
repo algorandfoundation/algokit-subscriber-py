@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from enum import Enum
-from typing import Any, TypedDict, Union
+from typing import Any, Literal, TypedDict, Union
 
 from typing_extensions import NotRequired  # noqa: UP035
 
@@ -296,10 +296,23 @@ class CoreTransactionSubscriptionParams(TypedDict):
     The maximum number of rounds to sync from indexer when using `sync_behaviour: 'catchup-with-indexer'`.
     """
 
-    sync_behaviour: str
+    sync_behaviour: Literal[
+        "catchup-with-algod",
+        "catchup-with-indexer",
+        "fail",
+        "skip-sync-newest",
+        "sync-oldest",
+        "sync-oldest-start-now",
+    ]
     """
     If the current tip of the configured Algorand blockchain is more than `max_rounds_to_sync`
     past `watermark` then how should that be handled.
+
+    `fail`: Immediately fail
+    `skip-sync-newest`: Skip catchup and start syncing from the latest block regardless of the watermark.
+    `sync-oldest`: Start syncing from the watermark
+    `sync-oldest-start-now`: If the watermark is 0, start syncing from round 0. Otherwise skip to the latest block.
+    `catchup-with-indexer`: Use indexer to get missing transactions that match the filters starting from the watermark. Filters will be used in the indexer request to reduce the total amount of requests needed (relative to getting every block)
     """
 
 
