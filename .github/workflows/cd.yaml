@@ -75,6 +75,9 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction
 
+      - name: Install algokit
+        run: pipx install algokit
+
       - name: pre-commit and pytest
         if: inputs.run_checks
         run: |
