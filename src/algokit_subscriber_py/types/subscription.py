@@ -338,6 +338,10 @@ class WatermarkPersistence(TypedDict):
 
 
 class AlgorandSubscriberConfig(CoreTransactionSubscriptionParams):
+    """
+    Configuration for the subscriber.
+    """
+
     filters: list["SubscriberConfigFilter"]  # type: ignore[misc]
     """The set of filters to subscribe to / emit events for, along with optional data mappers."""
 

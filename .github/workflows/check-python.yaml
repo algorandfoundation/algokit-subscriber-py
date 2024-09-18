@@ -28,10 +28,10 @@ jobs:
           set -o pipefail
           poetry run pre-commit run --all-files && git diff --exit-code
 
-      # - name: Check documentation
-      #   run: |
-      #     set -o pipefail
-      #     poetry run poe docs
+      - name: Check documentation
+        run: |
+          set -o pipefail
+          poetry run poe docs-test
 
       - name: Check wheels can be built
         run: |

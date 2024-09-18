@@ -131,7 +131,7 @@ Each filter you provide within this type will apply an AND logic between the spe
 
 ```typescript
 "filter": {
-  "type": "axfer,
+  "type": "axfer",
   "sender": "ABC..."
 }
 ```

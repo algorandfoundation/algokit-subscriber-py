@@ -2,37 +2,53 @@
 
 ## Quick start
 
-```python
-// Create subscriber
-const subscriber = AlgorandSubscriber(
-  {
-    "filters": [
-      {
-        "name": "filter1",
-        "filter": {
-          "type": "pay",
-          "sender": "ABC...",
+```{testcode}
+# Import necessary modules
+from algokit_subscriber_py import AlgorandSubscriber
+from algosdk.v2client import algod
+from algokit_utils import get_algod_client, get_algonode_config
+
+# Create an Algod client
+algod_client = get_algod_client(get_algonode_config("testnet", "algod", "")) # testnet used for demo purposes
+
+# Create subscriber (example with filters)
+subscriber = AlgorandSubscriber(
+    config={
+        "filters": [
+            {
+                "name": "filter1",
+                "filter": {
+                    "type": "pay",
+                    "sender": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ",
+                },
+            },
+        ],
+        "watermark_persistence": {
+            "get": lambda: 0,
+            "set": lambda x: None
         },
-      },
-    ],
-    # ... other options (use intellisense to explore)
-  },
-  algod,
-  optionalIndexer
-);
+        "sync_behaviour": "skip-sync-newest",
+        "max_rounds_to_sync": 100,
+    },
+    algod_client=algod_client,
+)
 
 # Set up subscription(s)
-subscriber.on("filter1", lambda: transaction ... )
-#...
+subscriber.on("filter1", lambda transaction, _: print(f"Received transaction: {transaction['id']}"))
 
 # Set up error handling
-subscriber.on_error(lambda: error ... )
+subscriber.on_error(lambda error, _: print(f"Error occurred: {error}"))
 
 # Either: Start the subscriber (if in long-running process)
-subscriber.start();
+# subscriber.start()
 
 # OR: Poll the subscriber (if in cron job / periodic lambda)
-subscriber.poll_once();
+result = subscriber.poll_once()
+print(f"Polled {len(result['subscribed_transactions'])} transactions")
+```
+
+```{testoutput}
+Polled 0 transactions
 ```
 
 ## Capabilities
@@ -424,4 +440,20 @@ method "MyEvent(byte[],uint64)"
 frame_dig 0 // or any other command to put the ARC-4 encoded bytes for the event on the stack
 concat
 log
+```
+
+## Next steps
+
+To dig deeper into the capabilities of `algorand-python-testing`, continue with the following sections.
+
+```{toctree}
+---
+maxdepth: 2
+caption: Contents
+hidden: true
+---
+
+subscriber
+subscriptions
+api
 ```
