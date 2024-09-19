@@ -7,7 +7,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Algorand Python Testing"
+project = "Algokit Subscriber"
 copyright = "2024, Algorand Foundation"  # noqa: A001
 author = "Algorand Foundation"
 

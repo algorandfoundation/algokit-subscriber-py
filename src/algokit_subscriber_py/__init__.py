@@ -1,15 +1,17 @@
 from .subscriber import AlgorandSubscriber
+from .subscription import get_subscribed_transactions
 from .types.arc28 import Arc28EventGroup
 from .types.event_emitter import EventListener
 from .types.subscription import (
     AlgorandSubscriberConfig,
+    BalanceChange,
+    BalanceChangeRole,
     NamedTransactionFilter,
-    TransactionFilter,
+    SubscribedTransaction,
     TransactionSubscriptionParams,
     TransactionSubscriptionResult,
 )
 
-# TODO: Refine user-facing API
 __all__ = [
     "AlgorandSubscriber",
     "AlgorandSubscriberConfig",
@@ -19,4 +21,8 @@ __all__ = [
     "TransactionFilter",
     "EventListener",
     "Arc28EventGroup",
+    "SubscribedTransaction",
+    "get_subscribed_transactions",
+    "BalanceChange",
+    "BalanceChangeRole",
 ]
