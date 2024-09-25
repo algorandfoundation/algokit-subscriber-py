@@ -1,43 +1,10 @@
 name: Continuous Delivery of Python package
 
 on:
-  workflow_dispatch:
-    inputs:
-      compiler_wheel:
-        description: "Include compiler wheel?"
-        type: boolean
-        required: true
-        default: true
-      bump_version:
-        description: "Bump version, set to false to re-publish with current version"
-        type: boolean
-        required: true
-        default: true
-      publish_github:
-        description: "Publish to Github?"
-        type: boolean
-        required: true
-        default: true
-      publish_pypi:
-        description: "Publish to PyPi?"
-        type: boolean
-        required: true
-        default: true
-      publish_docs:
-        description: "Publish Docs?"
-        type: boolean
-        required: true
-        default: true
-      run_checks:
-        description: "Run checks?"
-        type: boolean
-        required: true
-        default: true
-      dry_run:
-        description: "Dry Run? If true, won't commit or publish anything"
-        type: boolean
-        required: true
-        default: false
+  push:
+    branches:
+      - main
+      - release/*
 
 concurrency: release
 
@@ -54,8 +21,6 @@ jobs:
       id-token: write
       contents: write
       packages: read
-    env:
-      DRY_RUN: ${{ inputs.dry_run && '--noop' || '' }}
     steps:
       - uses: actions/create-github-app-token@v1
         id: app-token
@@ -84,7 +49,6 @@ jobs:
         run: pipx install algokit
 
       - name: pre-commit and pytest
-        if: inputs.run_checks
         run: |
           set -o pipefail
           source $(poetry env info --path)/bin/activate
@@ -92,22 +56,15 @@ jobs:
           algokit localnet start
           pytest
 
-      - name: Get branch name
-        shell: bash
-        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-        id: get_branch
-
       - name: Set Git user as GitHub actions
         run: git config --global user.email "actions@github.com" && git config --global user.name "github-actions"
 
       - name: Update release
-        if: inputs.bump_version
-        run: poetry run semantic-release $DRY_RUN --strict version
+        run: poetry run semantic-release --strict version
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Create Wheel
-        if: inputs.compiler_wheel
         run: poetry build --format wheel
 
       - uses: actions/upload-artifact@v4 # upload artifacts so they are retained on the job
@@ -115,18 +72,17 @@ jobs:
           path: dist
 
       - name: Publish to GitHub
-        if: steps.get_branch.outputs.branch == 'main' && !inputs.dry_run && inputs.publish_github
-        run: poetry run semantic-release $DRY_RUN publish
+        run: poetry run semantic-release publish
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Publish to PyPI
-        if: steps.get_branch.outputs.branch == 'main' && !inputs.dry_run && inputs.publish_pypi && inputs.compiler_wheel
         uses: pypa/gh-action-pypi-publish@release/v1
 
   publish-docs:
     name: Publish Docs
-    if: ${{ !inputs.dry_run && inputs.publish_docs }}
+    # Don't publish canary docs
+    if: github.ref != 'refs/heads/main'
     uses: ./.github/workflows/gh-pages.yaml
     permissions:
       contents: read
