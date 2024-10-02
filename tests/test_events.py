@@ -1,4 +1,4 @@
-from algokit_subscriber_py.types.arc28 import Arc28Event
+from algokit_subscriber.types.arc28 import Arc28Event
 from algokit_utils.beta.algorand_client import AlgorandClient
 from algokit_utils.beta.composer import PayParams
 from algosdk.atomic_transaction_composer import TransactionWithSigner

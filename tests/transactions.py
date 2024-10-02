@@ -3,11 +3,11 @@ import time
 from typing import cast
 from unittest.mock import MagicMock
 
-from algokit_subscriber_py.subscription import get_subscribed_transactions
-from algokit_subscriber_py.types.block import TransactionInBlock
-from algokit_subscriber_py.types.subscription import TransactionSubscriptionResult
-from algokit_subscriber_py.types.transaction import Transaction
-from algokit_subscriber_py.utils import encode_address
+from algokit_subscriber.subscription import get_subscribed_transactions
+from algokit_subscriber.types.block import TransactionInBlock
+from algokit_subscriber.types.subscription import TransactionSubscriptionResult
+from algokit_subscriber.types.transaction import Transaction
+from algokit_subscriber.utils import encode_address
 from algokit_utils.beta.algorand_client import AlgorandClient
 from algokit_utils.beta.composer import PayParams
 

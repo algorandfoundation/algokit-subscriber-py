@@ -1,7 +1,7 @@
 import contextlib
 import time
 
-from algokit_subscriber_py.subscriber import AlgorandSubscriber
+from algokit_subscriber.subscriber import AlgorandSubscriber
 from algokit_utils.beta.algorand_client import AlgorandClient
 
 from .accounts import generate_account

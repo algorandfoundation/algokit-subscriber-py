@@ -1,6 +1,6 @@
 import pytest
-from algokit_subscriber_py.types.subscription import BalanceChangeRole
-from algokit_subscriber_py.types.transaction import TransactionType
+from algokit_subscriber.types.subscription import BalanceChangeRole
+from algokit_subscriber.types.transaction import TransactionType
 from algokit_utils.beta.algorand_client import AlgorandClient
 
 from .transactions import get_subscribed_transactions_for_test, remove_none_values

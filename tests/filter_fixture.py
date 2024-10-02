@@ -1,7 +1,7 @@
 import time
 
 import pytest
-from algokit_subscriber_py.types.subscription import TransactionSubscriptionResult
+from algokit_subscriber.types.subscription import TransactionSubscriptionResult
 from algokit_utils.beta.algorand_client import AlgorandClient
 
 from .transactions import get_subscribed_transactions_for_test, send_x_transactions

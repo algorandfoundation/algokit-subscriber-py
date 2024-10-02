@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from algokit_subscriber_py.types.subscription import BalanceChangeRole
+from algokit_subscriber.types.subscription import BalanceChangeRole
 from algokit_utils.beta.composer import (
     AssetCreateParams,
     AssetDestroyParams,

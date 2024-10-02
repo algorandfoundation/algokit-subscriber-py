@@ -1,5 +1,5 @@
-from algokit_subscriber_py.subscriber import AlgorandSubscriber
-from algokit_subscriber_py.types.subscription import SubscribedTransaction
+from algokit_subscriber.subscriber import AlgorandSubscriber
+from algokit_subscriber.types.subscription import SubscribedTransaction
 from algokit_utils.beta.algorand_client import AlgorandClient
 
 algorand = AlgorandClient.main_net()

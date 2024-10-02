@@ -1,5 +1,5 @@
 import pytest
-from algokit_subscriber_py.types.subscription import BalanceChangeRole
+from algokit_subscriber.types.subscription import BalanceChangeRole
 from algokit_utils.beta.algorand_client import AlgorandClient
 
 from .transactions import (
