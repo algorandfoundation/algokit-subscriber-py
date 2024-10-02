@@ -255,7 +255,7 @@ class BlockMetadata(TypedDict):
 The common model used to expose a transaction that is returned from a subscription is a `SubscribedTransaction`, which can be imported like so:
 
 ```python
-from algokit_subscriber_py import SubscribedTransaction
+from algokit_subscriber import SubscribedTransaction
 ```
 
 This type is substantively, based on the Indexer [`TransactionResult`](https://github.com/algorandfoundation/algokit-utils-ts/blob/main/src/types/indexer.ts#L77) [model](https://developer.algorand.org/docs/rest-apis/indexer/#transaction) format. While the indexer type is used, the subscriber itself doesn't have to use indexer - any transactions it retrieves from algod are transformed to this common model type. Beyond the indexer type it has some modifications to:
@@ -389,7 +389,7 @@ If you ran the following code on a cron schedule of (say) every 5 seconds it wou
 it would drop old records and restart notifications from the new tip.
 
 ```python
-from algokit_subscriber_py import AlgorandSubscriber, SubscribedTransaction
+from algokit_subscriber import AlgorandSubscriber, SubscribedTransaction
 from algokit_utils.beta.algorand_client import AlgorandClient
 
 algorand = AlgorandClient.test_net()
@@ -434,7 +434,7 @@ If you ran the following code on a cron schedule of (say) every 5 seconds it wou
 it would pick up where it left off and catch up using algod (note: you need to connect it to a archival node).
 
 ```python
-from algokit_subscriber_py import AlgorandSubscriber, SubscribedTransaction
+from algokit_subscriber import AlgorandSubscriber, SubscribedTransaction
 from algokit_utils.beta.algorand_client import AlgorandClient
 
 algorand = AlgorandClient.test_net()
@@ -478,7 +478,7 @@ subscriber.start()
 If you ran the following code on a cron schedule of (say) every 30 - 60 seconds it would create a cached index of all assets created by the account (in this case the Data History Museum TestNet account `ER7AMZRPD5KDVFWTUUVOADSOWM4RQKEEV2EDYRVSA757UHXOIEKGMBQIVU`). Given it uses indexer to catch up you can deploy this into a fresh environment with an empty database and it will catch up in seconds rather than days.
 
 ```python
-from algokit_subscriber_py import AlgorandSubscriber, SubscribedTransaction
+from algokit_subscriber import AlgorandSubscriber, SubscribedTransaction
 from algokit_utils.beta.algorand_client import AlgorandClient
 
 algorand = AlgorandClient.test_net()

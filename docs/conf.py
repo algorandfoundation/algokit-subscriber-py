@@ -59,7 +59,7 @@ myst_enable_extensions = ["colon_fence", "fieldlist"]
 # -- Options for autodoc2
 autodoc2_packages = [
     {
-        "path": "../src/algokit_subscriber_py",
+        "path": "../src/algokit_subscriber",
         "auto_mode": True,
     },
 ]

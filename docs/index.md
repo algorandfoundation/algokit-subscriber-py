@@ -4,7 +4,7 @@
 
 ```{testcode}
 # Import necessary modules
-from algokit_subscriber_py import AlgorandSubscriber
+from algokit_subscriber import AlgorandSubscriber
 from algosdk.v2client import algod
 from algokit_utils import get_algod_client, get_algonode_config
 

@@ -100,7 +100,7 @@ If you call `on_batch` it will be called first, with the full set of transaction
 The default type that will be received is a `SubscribedTransaction`, which can be imported like so:
 
 ```python
-from algokit_subscriber_py import SubscribedTransaction
+from algokit_subscriber import SubscribedTransaction
 ```
 
 See the [detail about this type](subscriptions.md#subscribedtransaction).

@@ -1,10 +1,10 @@
 # API Reference
 
-```{py:module} algokit_subscriber_py
+```{py:module} algokit_subscriber
 :no-index:
 ```
 
-```{autodoc2-docstring} algokit_subscriber_py
+```{autodoc2-docstring} algokit_subscriber
 :allowtitles:
 ```
 
@@ -14,5 +14,5 @@
 :titlesonly:
 :maxdepth: 2
 
-apidocs/algokit_subscriber_py/algokit_subscriber_py
+apidocs/algokit_subscriber/algokit_subscriber
 ```
