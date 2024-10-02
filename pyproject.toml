@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "algokit-subscriber-py"
+name = "algokit-subscriber"
 version = "0.1.0"
 description = ""
 authors = ["Algorand Foundation"]

@@ -444,7 +444,7 @@ log
 
 ## Next steps
 
-To dig deeper into the capabilities of `algorand-subscriber-py`, continue with the following sections.
+To dig deeper into the capabilities of `algokit-subscriber`, continue with the following sections.
 
 ```{toctree}
 ---
