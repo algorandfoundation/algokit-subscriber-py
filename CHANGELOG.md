@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## v1.0.0-beta.2 (2024-10-04)
+
+### Documentation
+
+* docs: update README ([`d2aab1b`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/d2aab1bc25eefbf4ff6d3a2d4c19c0f1f695c5cd))
+
+### Unknown
+
+* Merge pull request #5 from algorandfoundation/docs/readme
+
+docs: update README ([`ecdb6b1`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/ecdb6b1b3ff3a917a9dca4abc673d4454d57894f))
+
 ## v1.0.0-beta.1 (2024-10-03)
 
 ### Documentation
