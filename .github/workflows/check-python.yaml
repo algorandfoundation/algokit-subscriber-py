@@ -11,17 +11,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install --no-interaction
+      - uses: ./.github/actions/setup-algokit-python
 
       - name: Check pre-commits
         run: |
@@ -44,23 +34,7 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install --no-interaction
-
-      - name: Install algokit
-        run: pipx install algokit
-
-      - name: Start LocalNet
-        run: algokit localnet start
+      - uses: ./.github/actions/setup-algokit-python
 
       - name: pytest + coverage
         shell: bash
