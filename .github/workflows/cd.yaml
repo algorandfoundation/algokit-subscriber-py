@@ -34,12 +34,12 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - uses: ./.github/actions/setup-algokit-python
+      - name: Setup Python and algokit
+        uses: ./.github/actions/setup-algokit-python
 
       - name: Check if version is already released
         id: check_version
         run: |
-          set -o pipefail
           poetry run semantic-release --strict --noop version
           rc=$?
           echo "return_code=$rc" >> $GITHUB_OUTPUT
