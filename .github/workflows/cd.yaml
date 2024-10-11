@@ -40,10 +40,10 @@ jobs:
       - name: Check if version is already released
         id: check_version
         run: |
-          poetry run semantic-release --strict --noop version
-          rc=$?
+          rc=0
+          poetry run semantic-release --strict --noop version || rc=$?
           echo "return_code=$rc" >> $GITHUB_OUTPUT
-          if [ $rc -ne 0 ] && [ $rc -ne 2 ]; then
+          if [ $rc -ne 2 ]; then
              exit $rc
           fi
 
