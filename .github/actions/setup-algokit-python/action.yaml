@@ -1,0 +1,26 @@
+name: "Setup Algokit Python Environment"
+description: "An action to setup the python environmen with algokit and poetry"
+runs:
+  using: "composite"
+  steps:
+    - name: Install poetry
+      shell: bash
+      run: pipx install poetry
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: "poetry"
+
+    - name: Install dependencies
+      shell: bash
+      run: poetry install --no-interaction
+
+    - name: Install algokit
+      shell: bash
+      run: pipx install algokit
+
+    - name: Run localnet
+      shell: bash
+      run: algokit localnet start

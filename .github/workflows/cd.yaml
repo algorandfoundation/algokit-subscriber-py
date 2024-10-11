@@ -1,0 +1,64 @@
+name: Continuous Delivery of Python package
+
+on:
+  push:
+    branches:
+      - main
+      - release/*
+
+concurrency: release
+
+permissions:
+  contents: write
+  packages: read
+
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+      contents: write
+      packages: read
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.BOT_ID }}
+          private-key: ${{ secrets.BOT_SK }}
+
+      - uses: actions/checkout@v4
+        with:
+          # Fetch entire repository history so we can determine version number from it
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Setup Python and algokit
+        uses: ./.github/actions/setup-algokit-python
+
+      - name: Check if version is already released
+        id: check_version
+        run: |
+          rc=0
+          poetry run semantic-release --strict --noop version || rc=$?
+          echo "return_code=$rc" >> $GITHUB_OUTPUT
+          if [ $rc -ne 2 ]; then
+             exit $rc
+          fi
+
+      - name: Semantic Release
+        if: steps.check_version.outputs.return_code == '0'
+        uses: ./.github/actions/python-semantic-release
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+
+  publish-docs:
+    name: Publish Docs
+    # Don't publish canary docs
+    if: github.ref != 'refs/heads/main'
+    uses: ./.github/workflows/gh-pages.yaml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
