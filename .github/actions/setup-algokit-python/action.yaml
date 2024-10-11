@@ -4,6 +4,7 @@ runs:
   using: "composite"
   steps:
     - name: Install poetry
+      shell: bash
       run: pipx install poetry
 
     - name: Set up Python
@@ -13,10 +14,13 @@ runs:
         cache: "poetry"
 
     - name: Install dependencies
+      shell: bash
       run: poetry install --no-interaction
 
     - name: Install algokit
+      shell: bash
       run: pipx install algokit
 
     - name: Run localnet
+      shell: bash
       run: algokit localnet start
