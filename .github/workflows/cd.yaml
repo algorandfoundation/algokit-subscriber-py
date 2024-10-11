@@ -27,57 +27,31 @@ jobs:
         with:
           app-id: ${{ secrets.BOT_ID }}
           private-key: ${{ secrets.BOT_SK }}
+
       - uses: actions/checkout@v4
         with:
           # Fetch entire repository history so we can determine version number from it
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Install poetry
-        run: pipx install poetry
+      - uses: ./.github/actions/setup-algokit-python
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install --no-interaction
-
-      - name: Install algokit
-        run: pipx install algokit
-
-      - name: pre-commit and pytest
+      - name: Check if version is already released
+        id: check_version
         run: |
           set -o pipefail
-          source $(poetry env info --path)/bin/activate
-          pre-commit run --all-files && git diff --exit-code
-          algokit localnet start
-          pytest
+          poetry run semantic-release --strict --noop version
+          rc=$?
+          echo "return_code=$rc" >> $GITHUB_OUTPUT
+          if [ $rc -ne 0 ] && [ $rc -ne 2 ]; then
+             exit $rc
+          fi
 
-      - name: Set Git user as GitHub actions
-        run: git config --global user.email "actions@github.com" && git config --global user.name "github-actions"
-
-      - name: Update release
-        run: poetry run semantic-release --strict version
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Create Wheel
-        run: poetry build --format wheel
-
-      - uses: actions/upload-artifact@v4 # upload artifacts so they are retained on the job
+      - name: Semantic Release
+        if: steps.check_version.outputs.return_code == '0'
+        uses: ./.github/actions/python-semantic-release
         with:
-          path: dist
-
-      - name: Publish to GitHub
-        run: poetry run semantic-release publish
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+          github_token: ${{ steps.app-token.outputs.token }}
 
   publish-docs:
     name: Publish Docs

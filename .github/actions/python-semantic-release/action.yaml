@@ -1,0 +1,42 @@
+name: "Python Semantic Release"
+description: "An action to run release a python package with semantic release"
+inputs:
+  github_token:
+    description: "The GitHub token to use for authentication"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: pre-commit and pytest
+      shell: bash
+      run: |
+        set -o pipefail
+        poetry run pre-commit run --all-files && git diff --exit-code
+        poetry run pytest
+
+    - name: Set Git user as GitHub actions
+      shell: bash
+      run: git config --global user.email "actions@github.com" && git config --global user.name "github-actions"
+
+    - name: Update release
+      shell: bash
+      run: poetry run semantic-release --strict version
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    - name: Create Wheel
+      shell: bash
+      run: poetry build --format wheel
+
+    - uses: actions/upload-artifact@v4 # upload artifacts so they are retained on the job
+      with:
+        path: dist
+
+    - name: Publish to GitHub
+      run: poetry run semantic-release publish
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
