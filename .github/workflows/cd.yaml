@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   release:
-    name: Release Library
+    name: Semantic Release
     runs-on: ubuntu-latest
     permissions:
       # IMPORTANT: this permission is mandatory for trusted publishing
