@@ -34,7 +34,8 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - uses: ./.github/actions/setup-algokit-python
+      - name: Setup Python and algokit
+        uses: ./.github/actions/setup-algokit-python
 
       - name: pytest + coverage
         shell: bash
