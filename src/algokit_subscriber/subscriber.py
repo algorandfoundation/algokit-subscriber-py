@@ -84,7 +84,7 @@ class AlgorandSubscriber:
                 matched_transactions = [
                     t
                     for t in poll_result["subscribed_transactions"]
-                    if filter_name in t.get("filters_matched", [])
+                    if filter_name in (t.get("filters_matched") or [])
                 ]
                 mapped_transactions = (
                     mapper(matched_transactions) if mapper else matched_transactions
