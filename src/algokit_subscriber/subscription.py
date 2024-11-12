@@ -186,7 +186,7 @@ def extract_arc28_events(
     return emitted_events if emitted_events else []
 
 
-def indexer_pre_filter(
+def indexer_pre_filter(  # noqa: C901
     subscription: TransactionFilter, min_round: int, max_round: int
 ) -> dict[str, Any]:
     """
@@ -212,9 +212,10 @@ def indexer_pre_filter(
         args["txn_type"] = subscription["type"]
 
     if subscription.get("note_prefix"):
-        args["note_prefix"] = base64.b64encode(
-            subscription["note_prefix"].encode()
-        ).decode()
+        if isinstance(subscription["note_prefix"], bytes):
+            args["note_prefix"] = base64.b64encode(subscription["note_prefix"])
+        elif isinstance(subscription["note_prefix"], str):
+            args["note_prefix"] = subscription["note_prefix"].encode()
 
     if subscription.get("app_id") and isinstance(subscription["app_id"], int):
         args["application_id"] = int(subscription["app_id"])
@@ -294,9 +295,14 @@ def indexer_pre_filter_in_memory(  # noqa: C901
                 result = result and t["tx-type"] in subscription["type"]
 
         if subscription.get("note_prefix"):
-            result = result and t.get("note", "").startswith(
-                subscription["note_prefix"]
-            )
+            if isinstance(subscription["note_prefix"], bytes):
+                result = result and t.get("note", "").startswith(
+                    subscription["note_prefix"]
+                )
+            else:
+                result = result and t.get("note", "").startswith(
+                    subscription["note_prefix"].encode()
+                )
 
         if subscription.get("app_id"):
             if isinstance(subscription["app_id"], int):
