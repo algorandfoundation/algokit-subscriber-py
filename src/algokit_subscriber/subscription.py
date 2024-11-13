@@ -296,12 +296,16 @@ def indexer_pre_filter_in_memory(  # noqa: C901
 
         if subscription.get("note_prefix"):
             if isinstance(subscription["note_prefix"], bytes):
-                result = result and t.get("note", "").startswith(
-                    subscription["note_prefix"]
+                note = t.get("note", b"")
+                result = (
+                    result
+                    and len(note) >= len(subscription["note_prefix"])
+                    and note[: len(subscription["note_prefix"])]
+                    == subscription["note_prefix"]
                 )
             else:
                 result = result and t.get("note", "").startswith(
-                    subscription["note_prefix"].encode()
+                    subscription["note_prefix"]
                 )
 
         if subscription.get("app_id"):
