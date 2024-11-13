@@ -54,35 +54,34 @@ jobs:
           poetry run pre-commit run --all-files && git diff --exit-code
           poetry run pytest
 
-    - name: Set Git user as GitHub actions
-      if: steps.check_version.outputs.return_code == '0'
-      run: git config --global user.email "actions@github.com" && git config --global user.name "github-actions"
+      - name: Set Git user as GitHub actions
+        if: steps.check_version.outputs.return_code == '0'
+        run: git config --global user.email "actions@github.com" && git config --global user.name "github-actions"
 
-    - name: Update release
-      if: steps.check_version.outputs.return_code == '0'
-      run: poetry run semantic-release --strict version
-      env:
-        GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Update release
+        if: steps.check_version.outputs.return_code == '0'
+        run: poetry run semantic-release --strict version
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-    - name: Create Wheel
-      if: steps.check_version.outputs.return_code == '0'
-      run: poetry build --format wheel
+      - name: Create Wheel
+        if: steps.check_version.outputs.return_code == '0'
+        run: poetry build --format wheel
 
-    - uses: actions/upload-artifact@v4 # upload artifacts so they are retained on the job
-      if: steps.check_version.outputs.return_code == '0'
-      with:
-        path: dist
+      - uses: actions/upload-artifact@v4 # upload artifacts so they are retained on the job
+        if: steps.check_version.outputs.return_code == '0'
+        with:
+          path: dist
 
-    - name: Publish to GitHub
-      if: steps.check_version.outputs.return_code == '0'
-      run: poetry run semantic-release publish
-      env:
-        GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Publish to GitHub
+        if: steps.check_version.outputs.return_code == '0'
+        run: poetry run semantic-release publish
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
-    - name: Publish to PyPI
-      if: steps.check_version.outputs.return_code == '0'
-      uses: pypa/gh-action-pypi-publish@release/v1
-
+      - name: Publish to PyPI
+        if: steps.check_version.outputs.return_code == '0'
+        uses: pypa/gh-action-pypi-publish@release/v1
 
   publish-docs:
     name: Publish Docs
