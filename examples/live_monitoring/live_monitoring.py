@@ -1,6 +1,14 @@
+from typing import TYPE_CHECKING
+
 from algokit_subscriber.subscriber import AlgorandSubscriber
 from algokit_subscriber.types.subscription import SubscribedTransaction
 from algokit_utils.beta.algorand_client import AlgorandClient
+
+if TYPE_CHECKING:
+    from algokit_subscriber.types.indexer import (
+        AssetTransferTransactionResult,
+        PaymentTransactionResult,
+    )
 
 algorand = AlgorandClient.main_net()
 
@@ -70,6 +78,7 @@ def print_transfer(transaction: SubscribedTransaction, filter_name: str) -> None
     * The transaction data
     * The filter name (from the 'filters' list) that the transaction matched
     """
+    details: PaymentTransactionResult | AssetTransferTransactionResult
     if filter_name == "USDC":
         details = transaction["asset-transfer-transaction"]
     elif filter_name == "ALGO":

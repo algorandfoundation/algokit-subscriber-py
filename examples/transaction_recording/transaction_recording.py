@@ -10,7 +10,7 @@ algorand = AlgorandClient.main_net()
 track_address = "PDS6KDTDQBBIL34FZSZWL3CEO454VKAMGWRPPP2D52W52WJW2OBDUQJRZM"
 
 # The list of balance changes to write to the CSV file
-balance_changes = []
+balance_changes: list[tuple[int, str, int, int]] = []
 
 # The directory of this file
 this_dir = Path(__file__).parent
@@ -89,12 +89,12 @@ def record_transaction(transaction: SubscribedTransaction, _: str) -> None:
 
     for bc in transaction["balance_changes"]:
         balance_changes.append(
-            [
+            (
                 transaction["confirmed-round"],
                 transaction["id"],
                 bc["asset_id"],
                 bc["amount"],
-            ]
+            )
         )
 
 
