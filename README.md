@@ -15,7 +15,7 @@ This library a simple, but flexible / configurable Algorand transaction subscrip
 
 > pip install algokit_subscriber
 
-[Documentation](./docs/README.md)
+[Documentation](./docs/index.md)
 
 ## Quick start
 
