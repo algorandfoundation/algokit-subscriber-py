@@ -13,9 +13,9 @@
 
 This library a simple, but flexible / configurable Algorand transaction subscription / indexing mechanism. It allows you to quickly create Python services that follow or subscribe to the Algorand Blockchain.
 
-> npm install @algorandfoundation/algokit-subscriber
+> pip install algokit_subscriber
 
-[Documentation](./docs/README.md)
+[Documentation](./docs/index.md)
 
 ## Quick start
 
