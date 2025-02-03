@@ -206,7 +206,8 @@ class AlgorandSubscriber:
 
     def on_error(self, listener: EventListener) -> "AlgorandSubscriber":
         """
-        Register an event handler to run when an error occurs.
+        Register an event handler to run when an error occurs. This will only catch errors thrown during .start()
+        If you are manually polling, errors will be thrown without getting caught and not be handled by this callback
         """
         self.event_emitter.off("error", self.default_error_handler)
         self.event_emitter.on("error", listener)
