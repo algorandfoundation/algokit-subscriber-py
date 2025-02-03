@@ -149,7 +149,7 @@ def process_dhm_assets(transactions: list[SubscribedTransaction], filter_name: s
 # Attach our callback to the 'dhm-asset' filter
 subscriber.on_batch("dhm-asset", process_dhm_assets)
 
-def handle_error(error: Exception) -> None:
+def handle_error(error: Exception, _event_name: str) -> None:
     print(f"An error occurred: {error}")
 
 # Attach the error handler
@@ -210,7 +210,7 @@ def process_usdc_transfer(transfer: SubscribedTransaction, filter_name: str) -> 
 # Attach our callback to the 'usdc' filter
 subscriber.on("usdc", process_usdc_transfer)
 
-def handle_error(error: Exception) -> None:
+def handle_error(error: Exception, _event_name: str) -> None:
     print(f"An error occurred: {error}")
 
 # Attach the error handler
