@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-py-algorand-sdk = "^2.6.1"
+py-algorand-sdk = "^2.7.0"
 algokit-utils = "^2.3.0"
 python-semantic-release = "^9.8.8"
 
@@ -154,13 +154,28 @@ prerelease_token = "beta"
 prerelease = true
 
 [tool.semantic_release.commit_parser_options]
-allowed_tags = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "style", "refactor", "test"]
+allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "style",
+    "refactor",
+    "test",
+]
 minor_tags = ["feat"]
 patch_tags = ["fix", "perf", "docs"]
 
 [tool.semantic_release.publish]
-dist_glob_patterns = ["dist/*", "stubs/dist/*"] # order here is important to ensure compiler wheel is published first
+dist_glob_patterns = [
+    "dist/*",
+    "stubs/dist/*",
+] # order here is important to ensure compiler wheel is published first
 upload_to_vcs_release = true
 
 [tool.semantic_release.remote.token]
 env = "GITHUB_TOKEN"
+
