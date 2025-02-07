@@ -1,5 +1,5 @@
 import pytest
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
 from .accounts import generate_account
 from .transactions import get_subscribe_transactions_from_sender, send_x_transactions
@@ -7,7 +7,7 @@ from .transactions import get_subscribe_transactions_from_sender, send_x_transac
 
 @pytest.fixture()
 def algorand() -> AlgorandClient:
-    return AlgorandClient.default_local_net()
+    return AlgorandClient.default_localnet()
 
 
 def test_only_processes_first_chain_round_when_starting_from_beginning(
@@ -65,7 +65,7 @@ def test_only_processes_first_transaction_after_watermark(algorand: AlgorandClie
     assert subscribed["new_watermark"] == older_txn_round
     assert subscribed["synced_round_range"] == (older_txn_round, older_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 1
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[1]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[1].tx_id
 
 
 def test_process_multiple_transactions(algorand: AlgorandClient):
@@ -92,5 +92,5 @@ def test_process_multiple_transactions(algorand: AlgorandClient):
     assert subscribed["new_watermark"] == rounds[1]
     assert subscribed["synced_round_range"] == (rounds[0], rounds[1])
     assert len(subscribed["subscribed_transactions"]) == 2
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[0]["tx_id"]
-    assert subscribed["subscribed_transactions"][1]["id"] == txns[1]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[0].tx_id
+    assert subscribed["subscribed_transactions"][1]["id"] == txns[1].tx_id

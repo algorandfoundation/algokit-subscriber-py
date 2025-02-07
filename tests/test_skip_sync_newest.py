@@ -1,11 +1,11 @@
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
 from .accounts import generate_account
 from .transactions import get_subscribe_transactions_from_sender, send_x_transactions
 
 
 def test_only_processes_latest_txn() -> None:
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     test_account = generate_account(algorand)
 
     results = send_x_transactions(2, test_account, algorand)
@@ -28,11 +28,11 @@ def test_only_processes_latest_txn() -> None:
     assert subscribed["new_watermark"] == last_txn_round
     assert subscribed["synced_round_range"] == (last_txn_round, last_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 1
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[1]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[1].tx_id
 
 
 def test_only_processes_latest_txn_with_earlier_round_start() -> None:
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     test_account = generate_account(algorand)
 
     older_txn_results = send_x_transactions(2, test_account, algorand)
@@ -58,11 +58,11 @@ def test_only_processes_latest_txn_with_earlier_round_start() -> None:
     assert subscribed["new_watermark"] == current_txn_round
     assert subscribed["synced_round_range"] == (current_txn_round, current_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 1
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[0]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[0].tx_id
 
 
 def test_process_multiple_txns() -> None:
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     test_account = generate_account(algorand)
 
     results = send_x_transactions(3, test_account, algorand)
@@ -86,5 +86,5 @@ def test_process_multiple_txns() -> None:
     assert subscribed["new_watermark"] == last_txn_round
     assert subscribed["synced_round_range"] == (rounds[1], last_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 2
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[1]["tx_id"]
-    assert subscribed["subscribed_transactions"][1]["id"] == txns[2]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[1].tx_id
+    assert subscribed["subscribed_transactions"][1]["id"] == txns[2].tx_id

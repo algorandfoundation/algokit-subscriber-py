@@ -8,8 +8,7 @@ from algokit_subscriber.types.block import TransactionInBlock
 from algokit_subscriber.types.subscription import TransactionSubscriptionResult
 from algokit_subscriber.types.transaction import Transaction
 from algokit_subscriber.utils import encode_address
-from algokit_utils.beta.algorand_client import AlgorandClient
-from algokit_utils.beta.composer import PayParams
+from algokit_utils import AlgoAmount, AlgorandClient, PaymentParams
 
 
 def send_x_transactions(x: int, sender: str, algorand: AlgorandClient) -> dict:
@@ -19,17 +18,17 @@ def send_x_transactions(x: int, sender: str, algorand: AlgorandClient) -> dict:
     for i in range(x):
         txns.append(
             algorand.send.payment(
-                PayParams(
+                PaymentParams(
                     sender=sender,
                     receiver=sender,
-                    amount=0,
+                    amount=AlgoAmount(micro_algo=0),
                     note=f"{i} {time.time()}".encode(),
                 )
             )
         )
 
-        rounds.append(txns[-1]["confirmation"]["confirmed-round"])
-        tx_ids.append(txns[-1]["tx_id"])
+        rounds.append(txns[-1].confirmation["confirmed-round"])
+        tx_ids.append(txns[-1].tx_id)
 
     last_txn_round = rounds[-1]
 

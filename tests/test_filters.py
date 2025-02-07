@@ -1,9 +1,10 @@
-from algokit_utils.beta.algorand_client import AlgorandClient
-from algokit_utils.beta.composer import (
+from algokit_utils import (
+    AlgoAmount,
+    AlgorandClient,
     AssetCreateParams,
     AssetOptInParams,
     AssetTransferParams,
-    PayParams,
+    PaymentParams,
 )
 from algosdk.atomic_transaction_composer import AtomicTransactionComposer
 
@@ -36,7 +37,7 @@ def app(localnet: AlgorandClient, creator: str, *, create: bool) -> dict:
 
 
 def algo_transfers_fixture() -> dict:
-    algorand: AlgorandClient = AlgorandClient.default_local_net()
+    algorand: AlgorandClient = AlgorandClient.default_localnet()
 
     test_account = generate_account(algorand, 10_000_000)
     account2 = generate_account(algorand, 3_000_000)
@@ -45,24 +46,30 @@ def algo_transfers_fixture() -> dict:
     txns = (
         algorand.new_group()
         .add_payment(
-            PayParams(
-                sender=test_account, receiver=account2, amount=1_000_000, note=b"a"
+            PaymentParams(
+                sender=test_account,
+                receiver=account2,
+                amount=AlgoAmount(micro_algo=1_000_000),
+                note=b"a",
             )
         )
         .add_payment(
-            PayParams(
+            PaymentParams(
                 sender=test_account,
                 receiver=account3.address,
-                amount=2_000_000,
+                amount=AlgoAmount(micro_algo=2_000_000),
                 note=b"b",
             )
         )
         .add_payment(
-            PayParams(
-                sender=account2, receiver=test_account, amount=1_000_000, note=b"c"
+            PaymentParams(
+                sender=account2,
+                receiver=test_account,
+                amount=AlgoAmount(micro_algo=1_000_000),
+                note=b"c",
             )
         )
-        .execute()
+        .send()
     )
 
     return {
@@ -74,15 +81,15 @@ def algo_transfers_fixture() -> dict:
 
 
 def asset_transfers_fixture() -> dict:
-    algorand: AlgorandClient = AlgorandClient.default_local_net()
+    algorand: AlgorandClient = AlgorandClient.default_localnet()
 
     test_account = generate_account(algorand, 10_000_000)
     asset1 = algorand.send.asset_create(
         AssetCreateParams(sender=test_account, total=100)
-    )["confirmation"]["asset-index"]
+    ).confirmation["asset-index"]
     asset2 = algorand.send.asset_create(
         AssetCreateParams(sender=test_account, total=101)
-    )["confirmation"]["asset-index"]
+    ).confirmation["asset-index"]
     txns = (
         algorand.new_group()
         .add_asset_opt_in(AssetOptInParams(sender=test_account, asset_id=asset1))
@@ -98,7 +105,7 @@ def asset_transfers_fixture() -> dict:
                 sender=test_account, receiver=test_account, asset_id=asset1, amount=2
             )
         )
-        .execute()
+        .send()
     )
     return {
         "asset1": asset1,
@@ -109,7 +116,7 @@ def asset_transfers_fixture() -> dict:
 
 
 def apps_fixture() -> dict:
-    algorand: AlgorandClient = AlgorandClient.default_local_net()
+    algorand: AlgorandClient = AlgorandClient.default_localnet()
 
     test_account = generate_account(algorand, 10_000_000)
     app1: TestingAppClient = app(algorand, test_account, create=True)["app"]
@@ -127,7 +134,7 @@ def apps_fixture() -> dict:
     atc.add_transaction(app_create)
     atc.add_transaction(app1_opt_in)
 
-    txns = algorand.new_group().add_atc(atc).execute()
+    txns = algorand.new_group().add_atc(atc).send()
 
     return {
         "app1": app1,

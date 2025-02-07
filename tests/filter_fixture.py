@@ -2,14 +2,14 @@ import time
 
 import pytest
 from algokit_subscriber.types.subscription import TransactionSubscriptionResult
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
 from .transactions import get_subscribed_transactions_for_test, send_x_transactions
 
 
 @pytest.fixture()
 def filter_fixture() -> dict:
-    localnet = AlgorandClient.default_local_net()
+    localnet = AlgorandClient.default_localnet()
     localnet.set_default_validity_window(1000)
 
     def subscribe_algod(
