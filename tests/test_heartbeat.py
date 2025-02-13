@@ -1,11 +1,15 @@
+from typing import TYPE_CHECKING
+
 from algokit_utils.beta.algorand_client import AlgorandClient
+
 from algokit_subscriber import AlgorandSubscriber
-from algokit_subscriber.types.indexer import TransactionResult
-from algokit_subscriber.types.subscription import AlgorandSubscriberConfig, NamedTransactionFilter
 from algokit_subscriber.types.transaction import TransactionType
 
+if TYPE_CHECKING:
+    from algokit_subscriber.types.subscription import AlgorandSubscriberConfig
 
-def poll_heartbeat_round(use_indexer: bool) -> None:
+
+def poll_heartbeat_round(*, use_indexer: bool) -> None:
     algorand = AlgorandClient.main_net()
     hb_round = 46914103
     watermark: int = hb_round - 1
