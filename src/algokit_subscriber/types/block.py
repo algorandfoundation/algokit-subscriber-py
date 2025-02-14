@@ -307,6 +307,7 @@ class Block(TypedDict):
     proposer ineligibility.
     """
 
+
 class BlockData(TypedDict):
     """
     Data that is returned in a raw Algorand block.

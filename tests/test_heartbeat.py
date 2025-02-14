@@ -1,9 +1,8 @@
 from typing import TYPE_CHECKING
 
-from algokit_utils.beta.algorand_client import AlgorandClient
-
 from algokit_subscriber import AlgorandSubscriber
 from algokit_subscriber.types.transaction import TransactionType
+from algokit_utils.beta.algorand_client import AlgorandClient
 
 if TYPE_CHECKING:
     from algokit_subscriber.types.subscription import AlgorandSubscriberConfig
@@ -13,6 +12,7 @@ def poll_heartbeat_round(*, use_indexer: bool) -> None:
     algorand = AlgorandClient.main_net()
     hb_round = 46914103
     watermark: int = hb_round - 1
+
     def get_watermark() -> int | None:
         return watermark
 
@@ -21,12 +21,14 @@ def poll_heartbeat_round(*, use_indexer: bool) -> None:
         watermark = n
 
     config: AlgorandSubscriberConfig = {
-        "filters": [{
-            "name": "heartbeat",
-            "filter": {
-                "type": TransactionType.hb.value,
-            },
-        }],
+        "filters": [
+            {
+                "name": "heartbeat",
+                "filter": {
+                    "type": TransactionType.hb.value,
+                },
+            }
+        ],
         "max_rounds_to_sync": 1,
         "max_indexer_rounds_to_sync": 1,
         "sync_behaviour": "sync-oldest",
@@ -39,16 +41,20 @@ def poll_heartbeat_round(*, use_indexer: bool) -> None:
     if use_indexer:
         config["sync_behaviour"] = "catchup-with-indexer"
 
-    subscriber = AlgorandSubscriber(config=config, algod_client=algorand.client.algod, indexer_client=algorand.client.indexer)
+    subscriber = AlgorandSubscriber(
+        config=config,
+        algod_client=algorand.client.algod,
+        indexer_client=algorand.client.indexer,
+    )
 
     result = subscriber.poll_once()
 
     assert len(result["subscribed_transactions"]) == 52
 
+
 def test_algod_heartbeat() -> None:
     poll_heartbeat_round(use_indexer=False)
 
+
 def test_indexer_heartbeat() -> None:
     poll_heartbeat_round(use_indexer=True)
-
-

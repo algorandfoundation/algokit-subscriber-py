@@ -1,3 +1,9 @@
+from algokit_subscriber.subscriber import AlgorandSubscriber
+from algokit_subscriber.types.indexer import TransactionResult
+from algokit_subscriber.types.subscription import (
+    AlgorandSubscriberConfig,
+    BalanceChangeRole,
+)
 from algokit_utils.beta.algorand_client import AlgorandClient
 from algokit_utils.beta.composer import (
     AssetCreateParams,
@@ -6,10 +12,6 @@ from algokit_utils.beta.composer import (
     AssetTransferParams,
     PayParams,
 )
-
-from algokit_subscriber.subscriber import AlgorandSubscriber
-from algokit_subscriber.types.indexer import TransactionResult
-from algokit_subscriber.types.subscription import AlgorandSubscriberConfig, BalanceChangeRole
 
 from .accounts import generate_account
 from .filter_fixture import filter_fixture  # noqa: F401
@@ -862,6 +864,7 @@ def test_block_payouts() -> None:
     algorand = AlgorandClient.main_net()
     payout_round = 46838092
     watermark: int = payout_round - 1
+
     def get_watermark() -> int | None:
         return watermark
 
@@ -870,15 +873,18 @@ def test_block_payouts() -> None:
         watermark = n
 
     def synthetic_filter(txn: TransactionResult) -> bool:
-        return txn["sender"] == "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA"
+        return (
+            txn["sender"]
+            == "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA"
+        )
 
     config: AlgorandSubscriberConfig = {
-        "filters": [{
-            "name": "payout",
-            "filter": {
-                "custom_filter": synthetic_filter
-            },
-        }],
+        "filters": [
+            {
+                "name": "payout",
+                "filter": {"custom_filter": synthetic_filter},
+            }
+        ],
         "max_rounds_to_sync": 1,
         "max_indexer_rounds_to_sync": 1,
         "sync_behaviour": "sync-oldest",
@@ -888,16 +894,28 @@ def test_block_payouts() -> None:
         },
     }
 
-
-    algod_subscriber = AlgorandSubscriber(config=config, algod_client=algorand.client.algod, indexer_client=algorand.client.indexer)
+    algod_subscriber = AlgorandSubscriber(
+        config=config,
+        algod_client=algorand.client.algod,
+        indexer_client=algorand.client.indexer,
+    )
     algod_result = algod_subscriber.poll_once()
     assert len(algod_result["subscribed_transactions"]) == 1
 
     watermark = payout_round - 1
     config["sync_behaviour"] = "catchup-with-indexer"
-    indexer_subscriber = AlgorandSubscriber(config=config, algod_client=algorand.client.algod, indexer_client=algorand.client.indexer)
+    indexer_subscriber = AlgorandSubscriber(
+        config=config,
+        algod_client=algorand.client.algod,
+        indexer_client=algorand.client.indexer,
+    )
     indexer_result = indexer_subscriber.poll_once()
 
     assert len(indexer_result["subscribed_transactions"]) == 1
-    assert algod_result["subscribed_transactions"][0]["id"] == indexer_result["subscribed_transactions"][0]["id"]
-    assert algod_result["subscribed_transactions"][0].get("intra-round-offset") == indexer_result["subscribed_transactions"][0].get("intra-round-offset")
+    assert (
+        algod_result["subscribed_transactions"][0]["id"]
+        == indexer_result["subscribed_transactions"][0]["id"]
+    )
+    assert algod_result["subscribed_transactions"][0].get(
+        "intra-round-offset"
+    ) == indexer_result["subscribed_transactions"][0].get("intra-round-offset")

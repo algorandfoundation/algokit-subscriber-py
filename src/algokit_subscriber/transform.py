@@ -5,7 +5,17 @@ from collections.abc import Callable, Sequence
 from typing import Any, TypedDict, cast
 
 import msgpack  # type: ignore[import-untyped]
-from algosdk.transaction import ApplicationCallTxn, AssetConfigTxn, AssetFreezeTxn, AssetTransferTxn, KeyregTxn, PaymentTxn, StateProofTxn, SuggestedParams, Transaction
+from algosdk.transaction import (
+    ApplicationCallTxn,
+    AssetConfigTxn,
+    AssetFreezeTxn,
+    AssetTransferTxn,
+    KeyregTxn,
+    PaymentTxn,
+    StateProofTxn,
+    SuggestedParams,
+    Transaction,
+)
 from typing_extensions import NotRequired  # noqa: UP035
 
 from .types.block import (
@@ -61,28 +71,29 @@ def remove_nulls(obj: dict) -> dict:
     return obj
 
 
-
-def get_transaction_from_block_payout(block: Block, round_offset: int) -> TransactionInBlock:
+def get_transaction_from_block_payout(
+    block: Block, round_offset: int
+) -> TransactionInBlock:
     """
     Gets the synthetic transaction for the block payout as defined in the indexer
 
     See https://github.com/algorand/indexer/blob/084577338ad4882f5797b3e1b30b84718ad40333/idb/postgres/internal/writer/write_txn.go?plain=1#L180-L202
     """
 
-    pay = PaymentTxn(
+    pay = PaymentTxn(  # type: ignore[no-untyped-call]
         sender=encode_address(block["fees"]),
-        receiver=encode_address(block["prp"]),
+        receiver=encode_address(block.get("prp") or b""),
         amt=block.get("pp", 0),
         note=f"ProposerPayout for Round {block['rnd']}",
-        sp=SuggestedParams(
+        sp=SuggestedParams(  # type: ignore[no-untyped-call]
             first=block["rnd"],
             last=block["rnd"],
             fee=0,
             gh=base64.b64encode(block["gh"]).decode(),
             gen=block["gen"],
             flat_fee=True,
-            min_fee=0
-        )
+            min_fee=0,
+        ),
     )
 
     txn: TransactionInBlock = {
@@ -91,7 +102,7 @@ def get_transaction_from_block_payout(block: Block, round_offset: int) -> Transa
         "round_number": block["rnd"],
         "round_index": 0,
         "block_transaction": {
-            "txn": pay.dictify()
+            "txn": pay.dictify()  # type: ignore[typeddict-item, misc, no-untyped-call]
         },
         "genesis_hash": block["gh"],
         "genesis_id": block["gen"],
@@ -99,6 +110,7 @@ def get_transaction_from_block_payout(block: Block, round_offset: int) -> Transa
     }
 
     return txn
+
 
 def get_block_transactions(block: Block) -> list[TransactionInBlock]:
     txns: list[TransactionInBlock] = []
@@ -160,10 +172,8 @@ def get_block_transactions(block: Block) -> list[TransactionInBlock]:
                 )
             )
 
-    if block.get("pp") is not None:
-        txns.append(
-            get_transaction_from_block_payout(block, get_offset())
-        )
+    if block.get("pp") and block.get("prp"):
+        txns.append(get_transaction_from_block_payout(block, get_offset()))
 
     return txns
 
@@ -413,12 +423,12 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
 ) -> SubscribedTransaction:
     transaction = t["transaction"]
     created_asset_id = t.get("created_asset_id")
-    block_transaction = t.get("block_transaction")
+    block_transaction = t["block_transaction"]
     asset_close_amount = t.get("asset_close_amount")
     close_amount = t.get("close_amount")
     created_app_id = t.get("created_app_id")
     round_offset = t["round_offset"]
-    parent_offset = t.get("parent_offset", 0)
+    parent_offset = t.get("parent_offset") or 0
     parent_transaction_id = t.get("parent_transaction_id")
     round_index = t["round_index"]
     round_number = t["round_number"]
@@ -536,7 +546,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                 "extra-program-pages": transaction.extra_pages or None,
                 "foreign-apps": transaction.foreign_apps,
                 "foreign-assets": transaction.foreign_assets,
-                "accounts": transaction.accounts,
+                "accounts": transaction.accounts,  # type: ignore[typeddict-item]
             }
         elif isinstance(transaction, PaymentTxn):
             result["payment-transaction"] = {
