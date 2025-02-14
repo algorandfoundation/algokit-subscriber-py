@@ -279,6 +279,33 @@ class Block(TypedDict):
     The transactions within the block.
     """
 
+    prp: NotRequired[None | bytes]
+    """
+    Proposer is the proposer of this block. Like the Seed, agreement adds
+    this after the block is assembled by the transaction pool, so that the same block can be prepared
+    for multiple participating accounts in the same node. Therefore, it can not be used
+    to influence block evaluation. Populated if proto.Payouts.Enabled
+    """
+
+    fc: NotRequired[None | int]
+    """
+    FeesCollected is the sum of all fees paid by transactions in this
+    block. Populated if proto.Payouts.Enabled
+    """
+
+    bi: NotRequired[None | int]
+    """
+    Bonus is the bonus incentive to be paid for proposing this block.  It
+	begins as a consensus parameter value, and decays periodically.
+    """
+
+    pp: NotRequired[None | int]
+    """
+    ProposerPayout is the amount that is moved from the FeeSink to
+    the Proposer in this block.  It is basically the
+    bonus + the payouts percent of FeesCollected, but may be zero'd by
+    proposer ineligibility.
+    """
 
 class BlockData(TypedDict):
     """

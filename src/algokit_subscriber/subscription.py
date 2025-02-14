@@ -1084,9 +1084,9 @@ def transaction_filter(  # noqa: C901, PLR0915
     ) -> bool:
         t = txn["transaction"].dictify()  # type: ignore[no-untyped-call]
         created_app_id, created_asset_id, logs = (
-            txn["created_app_id"],
-            txn["created_asset_id"],
-            txn["logs"],
+            txn.get("created_app_id"),
+            txn.get("created_asset_id"),
+            txn.get("logs"),
         )
         result: bool = True
 
