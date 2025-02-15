@@ -49,6 +49,9 @@ class TransactionType(Enum):
     # State proof transaction
     stpf = "stpf"
 
+    # Heartbeat transaction
+    hb = "hb"
+
 
 class AlgodOnComplete(IntEnum):
     """
