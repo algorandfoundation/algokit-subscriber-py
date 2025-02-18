@@ -10,7 +10,7 @@ python = "^3.12"
 py-algorand-sdk = "^2.7.0"
 
 [tool.poetry.group.dev.dependencies]
-algokit-utils = "^3.0.0b7"
+algokit-utils = "^3.0.0"
 python-semantic-release = "^9.8.8"
 mypy = "^1.10.1"
 ruff = "^0.5.0"
