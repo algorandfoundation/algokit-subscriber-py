@@ -168,7 +168,7 @@ from algokit_subscriber import AlgorandSubscriber
 from algokit_subscriber.types import SubscribedTransaction
 from algokit_utils import AlgorandClient
 
-algorand = AlgorandClient.main_net()
+algorand = AlgorandClient.mainnet()
 
 # The watermark is used to track how far the subscriber has processed transactions
 watermark = 0
