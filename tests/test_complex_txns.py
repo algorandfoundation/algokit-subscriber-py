@@ -1,6 +1,6 @@
 import pytest
 from algokit_subscriber.types.subscription import BalanceChangeRole
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
 from .transactions import (
     get_subscribed_transactions_for_test,
@@ -14,7 +14,7 @@ NESTED_INNER_ID = "QLYC4KMQW5RZRA7W5GYCJ4CUVWWSZKMK2V4X3XFQYSGYCJH6LI4Q/inner/5"
 
 @pytest.fixture()
 def algorand_mainnet() -> AlgorandClient:
-    return AlgorandClient.main_net()
+    return AlgorandClient.mainnet()
 
 
 def test_nested_inners_from_indexer(algorand_mainnet: AlgorandClient) -> None:

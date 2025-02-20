@@ -1,6 +1,6 @@
 import pytest
 from algokit_subscriber.types.transaction import TransactionType
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
 from .transactions import get_subscribed_transactions_for_test, remove_none_values
 
@@ -10,7 +10,7 @@ STPF_TXN_ID = "G2U5DWQRQV7EGQDAHH62EDY22VYPP4VWM3V2S5BLDNXNWFNKRXMQ"
 
 @pytest.fixture()
 def algorand_mainnet() -> AlgorandClient:
-    return AlgorandClient.main_net()
+    return AlgorandClient.mainnet()
 
 
 def test_stpf_from_indexer(algorand_mainnet: AlgorandClient) -> None:

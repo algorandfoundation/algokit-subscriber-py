@@ -1,13 +1,13 @@
 import time
 
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
 from .accounts import generate_account
 from .transactions import get_subscribed_transactions_for_test, send_x_transactions
 
 
 def test_multiple_filters_with_indexer() -> None:
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     algorand.set_default_validity_window(1000)
     senders = [
         generate_account(algorand),
