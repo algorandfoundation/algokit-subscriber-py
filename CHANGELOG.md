@@ -1,9 +1,45 @@
 # CHANGELOG
 
 
+## v1.0.0-beta.6 (2025-03-25)
+
+### Chores
+
+- Bump to prod
+  ([`7e70bf1`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/7e70bf148179c4760cf211e800d4736ddfa2e9c4))
+
+- Utils-v3 migration ([#18](https://github.com/algorandfoundation/algokit-subscriber-py/pull/18),
+  [`09a58fd`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/09a58fd4519a82749931c2e055e75a91044b617c))
+
+## Proposed Changes
+
+- Updating tests to rely on utils-v3
+
+## TODO
+
+- Update to production release after prod utils v3 is available on pypi - @lempira no major bumps in
+  semantic version needed, as it doesn't affect production code, only the testing stack itself.
+  However note, that I also removed semantic releases dependency as well as dependency on
+  algokit_utils from the prod dependencies list -> i assume they were added there by accident.
+  Algokit utils isn't utilized within the src codebase, only the testing stack.
+
+### Documentation
+
+- Ak-194: Updated dev portal links
+  ([#22](https://github.com/algorandfoundation/algokit-subscriber-py/pull/22),
+  [`9c4ae12`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/9c4ae1228463a65bd0a861c1c0629718facd0f36))
+
+## Proposed Changes
+
+- - -
+
+
 ## v1.0.0-beta.5 (2025-02-15)
 
 ### Chores
+
+- Bump to latest beta
+  ([`c405386`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c405386502b0c963fc6dbe59c57fae26975e5653))
 
 - Update python semantic release
   ([#20](https://github.com/algorandfoundation/algokit-subscriber-py/pull/20),
@@ -11,6 +47,9 @@
 
 Noting that there are CI failures, but they are fixed in #19. I want to merge this first to avoid
   noise in the changelog once #19 is merged
+
+- Utils-v3 migration
+  ([`a099d68`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/a099d684b902bd37888f95821bdd8d956cdcba81))
 
 ### Features
 
