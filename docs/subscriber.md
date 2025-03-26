@@ -17,38 +17,7 @@ class AlgorandSubscriber:
         """
 ```
 
-**TODO: Link to config type**
-
-`watermark_persistence` allows you to ensure reliability against your code having outages since you can persist the last block your code processed up to and then provide it again the next time your code runs.
-
-`max_rounds_to_sync` and `sync_behaviour` allow you to control the subscription semantics as your code falls behind the tip of the chain (either on first run or after an outage).
-
-`frequency_in_seconds` allows you to control the polling frequency and by association your latency tolerance for new events once you've caught up to the tip of the chain. Alternatively, you can set `wait_for_block_when_at_tip` to get the subscriber to ask algod to tell it when there is a new block ready to reduce latency when it's caught up to the tip of the chain.
-
-`arc28_events` are any [ARC-28 event definitions](subscriptions.md#arc-28-events).
-
-Filters defines the different subscription(s) you want to make, and is defined by the following interface:
-
-```python
-class NamedTransactionFilter(TypedDict):
-    """Specify a named filter to apply to find transactions of interest."""
-
-    name: str
-    """The name to give the filter."""
-
-    filter: TransactionFilter
-    """The filter itself."""
-
-class SubscriberConfigFilter(NamedTransactionFilter):
-    """A single event to subscribe to / emit."""
-
-    mapper: NotRequired[Callable[[list['SubscribedTransaction']], list[Any]]]
-    """
-    An optional data mapper if you want the event data to take a certain shape when subscribing to events with this filter name.
-    """
-```
-
-The event name is a unique name that describes the event you are subscribing to. The [filter](subscriptions.md#transactionfilter) defines how to interpret transactions on the chain as being "collected" by that event and the mapper is an optional ability to map from the raw transaction to a more targeted type for your event subscribers to consume.
+The `config` parameter is an instance of `AlgorandSubscriberConfig` (see the documentation [here](apidocs/algokit_subscriber/algokit_subscriber.types.subscription.md#algokit_subscriber.types.subscription.AlgorandSubscriberConfig)).
 
 ## Subscribing to events
 
