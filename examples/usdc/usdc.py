@@ -6,7 +6,7 @@ from algokit_subscriber.types.subscription import SubscribedTransaction
 algorand = AlgorandClient.mainnet()
 
 # The watermark is used to track how far the subscriber has processed transactions
-# In this example, we are starting at round 41651683
+# In this example, we are starting at round 41651683.
 watermark = 0
 
 
@@ -55,9 +55,7 @@ def print_usdc(transaction: SubscribedTransaction, filter_name: str) -> None:
     Here we are only using this EventListener callback for one filter, but if we had multiple filters we could use the filter name to determine which filter the transaction matched.
     """
     axfer = transaction["asset-transfer-transaction"]
-    print(
-        f"{filter_name}: {transaction['sender']} sent {axfer['receiver']} {axfer['amount'] * 1e-6} USDC"
-    )
+    print(f"{filter_name}: {transaction['sender']} sent {axfer['receiver']} {axfer['amount'] * 1e-6} USDC")
 
 
 subscriber.on("usdc", print_usdc)
