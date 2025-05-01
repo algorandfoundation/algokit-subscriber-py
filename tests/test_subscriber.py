@@ -62,7 +62,9 @@ def test_subscribes_correctly_with_poll_once() -> None:
     results = send_x_transactions(1, test_account, algorand)
     last_txn_round = results["last_txn_round"]
     tx_ids = results["tx_ids"]
-    subscriber = get_subscriber(algorand, test_account, initial_watermark=last_txn_round - 1)
+    subscriber = get_subscriber(
+        algorand, test_account, initial_watermark=last_txn_round - 1
+    )
 
     # Initial catch up with indexer
     result = subscriber["subscriber"].poll_once()
@@ -139,9 +141,13 @@ def test_subscribes_correctly_with_multiple_filters() -> None:  # noqa: PLR0915
         },
         initial_watermark=first_txn_round - 1,
     )
-    subscriber["subscriber"].on_batch("sender1", lambda r, _: sender_1_txn_ids_from_batch.extend(r))
+    subscriber["subscriber"].on_batch(
+        "sender1", lambda r, _: sender_1_txn_ids_from_batch.extend(r)
+    )
     subscriber["subscriber"].on("sender1", lambda r, _: sender_1_txn_ids.append(r))
-    subscriber["subscriber"].on_batch("sender2", lambda r, _: sender_2_rounds_from_batch.extend(r))
+    subscriber["subscriber"].on_batch(
+        "sender2", lambda r, _: sender_2_rounds_from_batch.extend(r)
+    )
     subscriber["subscriber"].on("sender2", lambda r, _: sender_2_rounds.append(r))
 
     # Initial catch up
@@ -159,7 +165,9 @@ def test_subscribes_correctly_with_multiple_filters() -> None:  # noqa: PLR0915
     assert subscriber["get_watermark"]() >= result["current_round"]
     assert result["synced_round_range"] == (first_txn_round, result["current_round"])
     assert len(result["subscribed_transactions"]) == 5
-    assert [t["id"] for t in result["subscribed_transactions"]] == tx_ids + tx_ids_1 + tx_ids_2
+    assert [
+        t["id"] for t in result["subscribed_transactions"]
+    ] == tx_ids + tx_ids_1 + tx_ids_2
     assert sender_1_txn_ids == tx_ids_1
     assert sender_1_txn_ids_from_batch == sender_1_txn_ids
     assert sender_2_rounds == [int(t.confirmation["confirmed-round"]) for t in txns_2]
@@ -202,15 +210,23 @@ def test_subscribes_correctly_with_multiple_filters() -> None:  # noqa: PLR0915
         result_3["current_round"],
     )
     assert len(result_3["subscribed_transactions"]) == 5
-    assert [t["id"] for t in result_3["subscribed_transactions"]] == tx_ids_3 + tx_ids_13 + tx_ids_23
+    assert [
+        t["id"] for t in result_3["subscribed_transactions"]
+    ] == tx_ids_3 + tx_ids_13 + tx_ids_23
     assert sender_1_txn_ids == tx_ids_1 + tx_ids_13
     assert len(sender_1_txn_ids_from_batch) == len(tx_ids_13)
     assert sender_1_txn_ids_from_batch == tx_ids_13
-    assert sender_2_rounds == [int(t.confirmation["confirmed-round"]) for t in txns_2] + [int(t.confirmation["confirmed-round"]) for t in txns_23]
-    assert sender_2_rounds_from_batch == [int(t.confirmation["confirmed-round"]) for t in txns_23]
+    assert sender_2_rounds == [
+        int(t.confirmation["confirmed-round"]) for t in txns_2
+    ] + [int(t.confirmation["confirmed-round"]) for t in txns_23]
+    assert sender_2_rounds_from_batch == [
+        int(t.confirmation["confirmed-round"]) for t in txns_23
+    ]
 
 
-def test_subscribes_correctly_with_regular_intervals_when_started_and_can_be_stopped() -> None:
+def test_subscribes_correctly_with_regular_intervals_when_started_and_can_be_stopped() -> (
+    None
+):
     algorand = AlgorandClient.default_localnet()
     test_account = generate_account(algorand)
     results = send_x_transactions(1, test_account, algorand)
@@ -372,10 +388,14 @@ def test_correctly_fires_various_on_methods() -> None:
         events_emitted.append(f"before:poll:{metadata['watermark']}")
 
     def on_poll(result: dict, _: str) -> None:
-        events_emitted.append(f"poll:{':'.join([b['id'] for b in result['subscribed_transactions']])}")
+        events_emitted.append(
+            f"poll:{':'.join([b['id'] for b in result['subscribed_transactions']])}"
+        )
 
     def inspect(result: dict) -> None:
-        events_emitted.append(f"inspect:{':'.join([b['id'] for b in result['subscribed_transactions']])}")
+        events_emitted.append(
+            f"inspect:{':'.join([b['id'] for b in result['subscribed_transactions']])}"
+        )
         subscriber["subscriber"].stop("TEST")
 
     subscriber["subscriber"].on_batch("account1", on_batch_account_1)
@@ -418,7 +438,9 @@ def test_on_error():
         algod_client=algorand.client.algod,
         indexer_client=algorand.client.indexer,
         config={
-            "filters": [{"name": "pay txns", "filter": {"type": "pay", "min_amount": 0}}],
+            "filters": [
+                {"name": "pay txns", "filter": {"type": "pay", "min_amount": 0}}
+            ],
             "wait_for_block_when_at_tip": True,
             "sync_behaviour": "catchup-with-indexer",
             "watermark_persistence": {"get": get_watermark, "set": set_watermark},

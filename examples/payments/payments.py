@@ -59,7 +59,9 @@ def print_payment(transaction: SubscribedTransaction, filter_name: str) -> None:
     Here we are only using this EventListener callback for one filter, but if we had multiple filters we could use the filter name to determine which filter the transaction matched.
     """
     pay = transaction["payment-transaction"]
-    print(f"{filter_name}: {transaction['sender']} sent {pay['receiver']} {pay['amount'] * 1e-6} ALGO")
+    print(
+        f"{filter_name}: {transaction['sender']} sent {pay['receiver']} {pay['amount'] * 1e-6} ALGO"
+    )
 
 
 # Attach our callback to the 'pay txns' filter

@@ -56,7 +56,9 @@ def deduplicate_subscribed_transactions(
     return list(result_dict.values())
 
 
-def transaction_is_in_arc28_event_group(group: Arc28EventGroup, app_id: int, transaction: Callable[[], TransactionResult]) -> bool:
+def transaction_is_in_arc28_event_group(
+    group: Arc28EventGroup, app_id: int, transaction: Callable[[], TransactionResult]
+) -> bool:
     """
     Check if a transaction is in an ARC-28 event group.
 
@@ -65,7 +67,9 @@ def transaction_is_in_arc28_event_group(group: Arc28EventGroup, app_id: int, tra
     :param transaction: A function that returns the transaction result
     :return: True if the transaction is in the ARC-28 event group, False otherwise
     """
-    in_group = not group.get("process_for_app_ids") or app_id in group["process_for_app_ids"]
+    in_group = (
+        not group.get("process_for_app_ids") or app_id in group["process_for_app_ids"]
+    )
 
     if in_group and group.get("process_transaction") is not None:
         # Lazily evaluate transaction so it's only evaluated if needed
@@ -97,7 +101,10 @@ def has_emitted_matching_arc28_event(  # noqa: PLR0913
     potential_events = [
         e
         for e in all_events
-        if any(f["event_name"] == e["event_name"] and f["group_name"] == e["group_name"] for f in event_filter)
+        if any(
+            f["event_name"] == e["event_name"] and f["group_name"] == e["group_name"]
+            for f in event_filter
+        )
         if transaction_is_in_arc28_event_group(
             next(g for g in event_groups if g["group_name"] == e["group_name"]),
             app_id,
@@ -147,7 +154,9 @@ def extract_arc28_events(
                 continue
 
             try:
-                abi_type = algosdk.abi.ABIType.from_string(f"({','.join(a['type'] for a in e['event_definition']['args'])})")
+                abi_type = algosdk.abi.ABIType.from_string(
+                    f"({','.join(a['type'] for a in e['event_definition']['args'])})"
+                )
                 value = abi_type.decode(log[4:])
 
                 args: list[Any] = []
@@ -168,7 +177,9 @@ def extract_arc28_events(
 
             except Exception as error:
                 if continue_on_error(e["group_name"]):
-                    logger.warn(f"Warning: Encountered error while processing {e['group_name']}.{e['group_name']} on transaction {transaction_id}: {error}")
+                    logger.warn(
+                        f"Warning: Encountered error while processing {e['group_name']}.{e['group_name']} on transaction {transaction_id}: {error}"
+                    )
                 else:
                     raise
 
@@ -215,11 +226,16 @@ def indexer_pre_filter(  # noqa: C901
     # Indexer only supports min_amount and maxAmount for non-payments if an asset ID is provided so check
     # we are looking for just payments, or we have provided asset ID before adding to pre-filter
     # if they aren't added here they will be picked up in the in-memory pre-filter
-    if subscription.get("min_amount") and (subscription["type"] == "pay" or subscription["asset_id"]):
+    if subscription.get("min_amount") and (
+        subscription["type"] == "pay" or subscription["asset_id"]
+    ):
         # Indexer only supports numbers, but even though this is less precise the in-memory indexer pre-filter will remove any false positives
         args["min_amount"] = min(subscription["min_amount"] - 1, 2**53 - 1)
 
-    if subscription.get("max_amount") and (subscription["type"] == "pay" or (subscription.get("asset_id") and (subscription.get("min_amount", 0)) > 0)):
+    if subscription.get("max_amount") and (
+        subscription["type"] == "pay"
+        or (subscription.get("asset_id") and (subscription.get("min_amount", 0)) > 0)
+    ):
         args["max_amount"](subscription["max_amount"]) + 1
 
     args["min_round"] = min_round
@@ -258,9 +274,15 @@ def indexer_pre_filter_in_memory(  # noqa: C901
 
         if subscription.get("receiver"):
             if isinstance(subscription["receiver"], str):
-                result = result and bool((axfer and axfer.get("receiver") == subscription["receiver"]) or (pay and pay.get("receiver") == subscription["receiver"]))
+                result = result and bool(
+                    (axfer and axfer.get("receiver") == subscription["receiver"])
+                    or (pay and pay.get("receiver") == subscription["receiver"])
+                )
             else:
-                result = result and bool((axfer and axfer.get("receiver") in subscription["receiver"]) or (pay and pay.get("receiver") in subscription["receiver"]))
+                result = result and bool(
+                    (axfer and axfer.get("receiver") in subscription["receiver"])
+                    or (pay and pay.get("receiver") in subscription["receiver"])
+                )
 
         if subscription.get("type"):
             if isinstance(subscription["type"], str):
@@ -271,29 +293,68 @@ def indexer_pre_filter_in_memory(  # noqa: C901
         if subscription.get("note_prefix"):
             if isinstance(subscription["note_prefix"], bytes):
                 note = t.get("note", b"")
-                result = result and len(note) >= len(subscription["note_prefix"]) and note[: len(subscription["note_prefix"])] == subscription["note_prefix"]
+                result = (
+                    result
+                    and len(note) >= len(subscription["note_prefix"])
+                    and note[: len(subscription["note_prefix"])]
+                    == subscription["note_prefix"]
+                )
             else:
-                result = result and t.get("note", "").startswith(subscription["note_prefix"])
+                result = result and t.get("note", "").startswith(
+                    subscription["note_prefix"]
+                )
 
         if subscription.get("app_id"):
             if isinstance(subscription["app_id"], int):
-                result = result and bool(t.get("created-application-index") == int(subscription["app_id"]) or (appl and appl.get("application-id") == int(subscription["app_id"])))
+                result = result and bool(
+                    t.get("created-application-index") == int(subscription["app_id"])
+                    or (
+                        appl
+                        and appl.get("application-id") == int(subscription["app_id"])
+                    )
+                )
             else:
-                result = result and bool(((t.get("created-application-index") or 0) in map(int, subscription["app_id"])) or (appl and appl.get("application-id", 0) in map(int, subscription["app_id"])))
+                result = result and bool(
+                    (
+                        (t.get("created-application-index") or 0)
+                        in map(int, subscription["app_id"])
+                    )
+                    or (
+                        appl
+                        and appl.get("application-id", 0)
+                        in map(int, subscription["app_id"])
+                    )
+                )
 
         if subscription.get("asset_id"):
             if isinstance(subscription["asset_id"], int | float):
                 asset_id = int(subscription["asset_id"])
-                result = result and bool(t.get("created-asset-index") == asset_id or (acfg and acfg.get("asset-id") == asset_id) or (acfg and acfg.get("asset-id") == asset_id) or (axfer and axfer.get("asset-id") == asset_id))
+                result = result and bool(
+                    t.get("created-asset-index") == asset_id
+                    or (acfg and acfg.get("asset-id") == asset_id)
+                    or (acfg and acfg.get("asset-id") == asset_id)
+                    or (axfer and axfer.get("asset-id") == asset_id)
+                )
             else:
                 asset_ids = set(map(int, subscription["asset_id"]))
-                result = result and bool(t.get("created-asset-index") in asset_ids or (axfer and axfer.get("asset-id") in asset_ids) or (acfg and acfg.get("asset-id") in asset_ids) or (afrz and afrz.get("asset-id") in asset_ids))
+                result = result and bool(
+                    t.get("created-asset-index") in asset_ids
+                    or (axfer and axfer.get("asset-id") in asset_ids)
+                    or (acfg and acfg.get("asset-id") in asset_ids)
+                    or (afrz and afrz.get("asset-id") in asset_ids)
+                )
 
         if subscription.get("min_amount"):
-            result = result and bool((pay and pay.get("amount", 0) >= subscription["min_amount"]) or (axfer and axfer.get("amount", 0) >= subscription["min_amount"]))
+            result = result and bool(
+                (pay and pay.get("amount", 0) >= subscription["min_amount"])
+                or (axfer and axfer.get("amount", 0) >= subscription["min_amount"])
+            )
 
         if subscription.get("max_amount"):
-            result = result and bool((pay and pay.get("amount", 0) <= subscription["max_amount"]) or (axfer and axfer.get("amount", 0) <= subscription["max_amount"]))
+            result = result and bool(
+                (pay and pay.get("amount", 0) <= subscription["max_amount"])
+                or (axfer and axfer.get("amount", 0) <= subscription["max_amount"])
+            )
 
         return result
 
@@ -329,34 +390,78 @@ def has_balance_change_match(
         # Address check
         address_check = (
             not change_filter.get("address")
-            or (isinstance(change_filter.get("address"), list) and len(change_filter["address"]) == 0)
-            or (actual_change.get("address") in (change_filter["address"] if isinstance(change_filter.get("address"), list) else [change_filter.get("address")]))
+            or (
+                isinstance(change_filter.get("address"), list)
+                and len(change_filter["address"]) == 0
+            )
+            or (
+                actual_change.get("address")
+                in (
+                    change_filter["address"]
+                    if isinstance(change_filter.get("address"), list)
+                    else [change_filter.get("address")]
+                )
+            )
         )
 
         # Minimum absolute amount check
-        min_abs_amount_check = change_filter.get("min_absolute_amount") is None or abs(actual_change.get("amount", 0)) >= change_filter["min_absolute_amount"]
+        min_abs_amount_check = (
+            change_filter.get("min_absolute_amount") is None
+            or abs(actual_change.get("amount", 0))
+            >= change_filter["min_absolute_amount"]
+        )
 
         # Maximum absolute amount check
-        max_abs_amount_check = change_filter.get("max_absolute_amount") is None or abs(actual_change.get("amount", 0)) <= change_filter["max_absolute_amount"]
+        max_abs_amount_check = (
+            change_filter.get("max_absolute_amount") is None
+            or abs(actual_change.get("amount", 0))
+            <= change_filter["max_absolute_amount"]
+        )
 
         # Minimum amount check
-        min_amount_check = change_filter.get("min_amount") is None or actual_change.get("amount", 0) >= change_filter["min_amount"]
+        min_amount_check = (
+            change_filter.get("min_amount") is None
+            or actual_change.get("amount", 0) >= change_filter["min_amount"]
+        )
 
         # Maximum amount check
-        max_amount_check = change_filter.get("max_amount") is None or actual_change.get("amount", 0) <= change_filter["max_amount"]
+        max_amount_check = (
+            change_filter.get("max_amount") is None
+            or actual_change.get("amount", 0) <= change_filter["max_amount"]
+        )
 
         # Asset ID check
         asset_id_check = (
             change_filter.get("asset_id") is None
-            or (isinstance(change_filter.get("asset_id"), list) and len(change_filter["asset_id"]) == 0)
-            or (actual_change.get("asset_id") in (change_filter["asset_id"] if isinstance(change_filter.get("asset_id"), list) else [change_filter.get("asset_id")]))
+            or (
+                isinstance(change_filter.get("asset_id"), list)
+                and len(change_filter["asset_id"]) == 0
+            )
+            or (
+                actual_change.get("asset_id")
+                in (
+                    change_filter["asset_id"]
+                    if isinstance(change_filter.get("asset_id"), list)
+                    else [change_filter.get("asset_id")]
+                )
+            )
         )
 
         # Role check
         role_check = (
             change_filter.get("role") is None
-            or (isinstance(change_filter.get("role"), list) and len(change_filter["role"]) == 0)
-            or any(r in actual_change.get("roles", []) for r in (change_filter["role"] if isinstance(change_filter.get("role"), list) else [change_filter.get("role")]))
+            or (
+                isinstance(change_filter.get("role"), list)
+                and len(change_filter["role"]) == 0
+            )
+            or any(
+                r in actual_change.get("roles", [])
+                for r in (
+                    change_filter["role"]
+                    if isinstance(change_filter.get("role"), list)
+                    else [change_filter.get("role")]
+                )
+            )
         )
 
         # Combine all checks
@@ -372,7 +477,13 @@ def has_balance_change_match(
             ]
         )
 
-    return any(any(check_single_change(cast("dict", actual_change), change_filter) for actual_change in transaction_balance_changes) for change_filter in filtered_balance_changes)
+    return any(
+        any(
+            check_single_change(cast("dict", actual_change), change_filter)
+            for actual_change in transaction_balance_changes
+        )
+        for change_filter in filtered_balance_changes
+    )
 
 
 def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
@@ -393,7 +504,9 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     filters = subscription["filters"]
     max_rounds_to_sync = subscription.get("max_rounds_to_sync") or 500
     sync_behaviour = subscription["sync_behaviour"]
-    current_round = subscription.get("current_round") or cast("dict[str, Any]", algod.status()).get("last-round", 0)
+    current_round = subscription.get("current_round") or cast(
+        "dict[str, Any]", algod.status()
+    ).get("last-round", 0)
     block_metadata: list[BlockMetadata] | None = None
 
     # Pre-calculate a flat list of all ARC-28 events to process
@@ -436,7 +549,9 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     # If we are less than `max_rounds_to_sync` from the tip of the chain then we consult the `sync_behaviour` to determine what to do
     if current_round - watermark > max_rounds_to_sync:
         if sync_behaviour == "fail":
-            raise ValueError(f"Invalid round number to subscribe from {algod_sync_from_round_number}; current round number is {current_round}")
+            raise ValueError(
+                f"Invalid round number to subscribe from {algod_sync_from_round_number}; current round number is {current_round}"
+            )
         elif sync_behaviour == "skip-sync-newest":  # noqa: RET506
             algod_sync_from_round_number = current_round - max_rounds_to_sync + 1
             start_round = algod_sync_from_round_number
@@ -469,7 +584,9 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
             else:
                 algod_sync_from_round_number = indexer_sync_to_round_number + 1
 
-            logger.debug(f"Catching up from round {start_round} to round {indexer_sync_to_round_number} via indexer; this may take a few seconds")
+            logger.debug(
+                f"Catching up from round {start_round} to round {indexer_sync_to_round_number} via indexer; this may take a few seconds"
+            )
 
             catchup_transactions = []
 
@@ -479,7 +596,9 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
                     # Retrieve all pre-filtered transactions from the indexer
                     transactions = search_transactions(
                         indexer,
-                        indexer_pre_filter(f["filter"], start_round, indexer_sync_to_round_number),
+                        indexer_pre_filter(
+                            f["filter"], start_round, indexer_sync_to_round_number
+                        ),
                     )
 
                     # Process each transaction
@@ -502,12 +621,18 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
                         catchup_transactions.extend(post_filtered_transactions)
 
             # Sort by transaction order
-            catchup_transactions.sort(key=lambda x: (x["confirmed-round"], x["intra-round-offset"]))
+            catchup_transactions.sort(
+                key=lambda x: (x["confirmed-round"], x["intra-round-offset"])
+            )
 
             # Collapse duplicate transactions
-            catchup_transactions = deduplicate_subscribed_transactions(catchup_transactions)
+            catchup_transactions = deduplicate_subscribed_transactions(
+                catchup_transactions
+            )
 
-            logger.debug(f"Retrieved {len(catchup_transactions)} transactions from round {start_round} to round {algod_sync_from_round_number - 1} via indexer in {(time.time() - start):.3f}s")
+            logger.debug(
+                f"Retrieved {len(catchup_transactions)} transactions from round {start_round} to round {algod_sync_from_round_number - 1} via indexer in {(time.time() - start):.3f}s"
+            )
         else:
             raise NotImplementedError("Not implemented")
 
@@ -515,12 +640,18 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     algod_transactions: list[SubscribedTransaction] = []
     if not skip_algod_sync:
         start = time.time()
-        blocks = get_blocks_bulk({"start_round": algod_sync_from_round_number, "max_round": end_round}, algod)
-        block_transactions = [t for b in blocks for t in get_block_transactions(b["block"])]
+        blocks = get_blocks_bulk(
+            {"start_round": algod_sync_from_round_number, "max_round": end_round}, algod
+        )
+        block_transactions = [
+            t for b in blocks for t in get_block_transactions(b["block"])
+        ]
         algod_transactions = []
         for f in filters:
             for t in block_transactions:  # type: ignore[assignment]
-                if transaction_filter(f["filter"], arc28_events, subscription.get("arc28_events") or [])(
+                if transaction_filter(
+                    f["filter"], arc28_events, subscription.get("arc28_events") or []
+                )(
                     t  # type: ignore[arg-type]
                 ):
                     algod_transactions.append(
@@ -531,9 +662,13 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
 
         block_metadata = [block_data_to_block_metadata(b) for b in blocks]
 
-        logger.debug(f"Retrieved {len(block_transactions)} transactions from algod via round(s) {algod_sync_from_round_number}-{end_round} in {(time.time() - start):.3f}s")
+        logger.debug(
+            f"Retrieved {len(block_transactions)} transactions from algod via round(s) {algod_sync_from_round_number}-{end_round} in {(time.time() - start):.3f}s"
+        )
     else:
-        logger.debug(f"Skipping algod sync since we have more than {subscription['max_indexer_rounds_to_sync']} rounds to sync from indexer.")
+        logger.debug(
+            f"Skipping algod sync since we have more than {subscription['max_indexer_rounds_to_sync']} rounds to sync from indexer."
+        )
 
     return TransactionSubscriptionResult(
         synced_round_range=(start_round, end_round),
@@ -541,7 +676,10 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
         new_watermark=end_round,
         current_round=current_round,
         block_metadata=block_metadata or [],
-        subscribed_transactions=[process_extra_fields(t, arc28_events, subscription.get("arc28_events", [])) for t in catchup_transactions + algod_transactions],
+        subscribed_transactions=[
+            process_extra_fields(t, arc28_events, subscription.get("arc28_events", []))
+            for t in catchup_transactions + algod_transactions
+        ],
     )
 
 
@@ -566,24 +704,40 @@ def process_extra_fields(
             for g in arc28_groups
             if transaction_is_in_arc28_event_group(
                 g,
-                transaction.get("created-application-index") or transaction.get("application-transaction", {}).get("application-id", 0),
+                transaction.get("created-application-index")
+                or transaction.get("application-transaction", {}).get(
+                    "application-id", 0
+                ),
                 lambda: transaction,
             )
         ]
     )
 
-    events_to_apply = [e for e in arc28_events if any(g["group_name"] == e["group_name"] for g in groups_to_apply)] if groups_to_apply else []
+    events_to_apply = (
+        [
+            e
+            for e in arc28_events
+            if any(g["group_name"] == e["group_name"] for g in groups_to_apply)
+        ]
+        if groups_to_apply
+        else []
+    )
 
     arc28_events = extract_arc28_events(
         transaction.get("id", ""),
         [base64.b64decode(log) for log in transaction.get("logs") or []],
         events_to_apply,
-        lambda group_name: next(g for g in groups_to_apply if g["group_name"] == group_name)["continue_on_error"],
+        lambda group_name: next(
+            g for g in groups_to_apply if g["group_name"] == group_name
+        )["continue_on_error"],
     )  # type: ignore[assignment]
 
     balance_changes = extract_balance_changes_from_indexer_transaction(transaction)
 
-    inner_txns = [process_extra_fields(inner, arc28_events, arc28_groups) for inner in (transaction.get("inner-txns") or [])]
+    inner_txns = [
+        process_extra_fields(inner, arc28_events, arc28_groups)
+        for inner in (transaction.get("inner-txns") or [])
+    ]
 
     return {
         **transaction,
@@ -730,7 +884,10 @@ def extract_balance_changes_from_indexer_transaction(  # noqa: PLR0912, C901
     for change in changes:
         existing = None
         for c in consolidated_changes:
-            if c["address"] == change["address"] and c["asset_id"] == change["asset_id"]:
+            if (
+                c["address"] == change["address"]
+                and c["asset_id"] == change["asset_id"]
+            ):
                 existing = c
                 break
 
@@ -745,7 +902,9 @@ def extract_balance_changes_from_indexer_transaction(  # noqa: PLR0912, C901
     return consolidated_changes
 
 
-def get_filtered_indexer_transactions(transaction: TransactionResult, txn_filter: NamedTransactionFilter) -> list[SubscribedTransaction]:
+def get_filtered_indexer_transactions(
+    transaction: TransactionResult, txn_filter: NamedTransactionFilter
+) -> list[SubscribedTransaction]:
     """
     Process an indexer transaction and return that transaction or any of its inner transactions
     that meet the indexer pre-filter requirements; patching up transaction ID and intra-round-offset on the way through.
@@ -772,7 +931,9 @@ def get_filtered_indexer_transactions(transaction: TransactionResult, txn_filter
     )
 
 
-def get_indexer_inner_transactions(root: TransactionResult, parent: TransactionResult, offset: Callable) -> list[SubscribedTransaction]:
+def get_indexer_inner_transactions(
+    root: TransactionResult, parent: TransactionResult, offset: Callable
+) -> list[SubscribedTransaction]:
     """
     Recursively get inner transactions from an indexer transaction.
 
@@ -791,7 +952,9 @@ def get_indexer_inner_transactions(root: TransactionResult, parent: TransactionR
                     **t,
                     "parent_transaction_id": root["id"],
                     "id": f"{root['id']}/inner/{parent_offset + 1}",
-                    "intra-round-offset": root["intra-round-offset"] + parent_offset + 1,
+                    "intra-round-offset": root["intra-round-offset"]
+                    + parent_offset
+                    + 1,
                 },
             )
         )
@@ -844,15 +1007,24 @@ def indexer_post_filter(  # noqa: C901
                 return False
             method_signature = subscription["method_signature"]
             if isinstance(method_signature, str):
-                result &= bool(appl.get("application-args")) and appl["application-args"][0] == get_method_selector_base64(method_signature)
+                result &= bool(appl.get("application-args")) and appl[
+                    "application-args"
+                ][0] == get_method_selector_base64(method_signature)
             else:
-                result &= any(appl.get("application-args") and appl["application-args"][0] == get_method_selector_base64(method) for method in method_signature)
+                result &= any(
+                    appl.get("application-args")
+                    and appl["application-args"][0]
+                    == get_method_selector_base64(method)
+                    for method in method_signature
+                )
 
         if subscription.get("app_call_arguments_match"):
             if not appl:
                 return False
 
-            result &= subscription["app_call_arguments_match"]([bytes.fromhex(a) for a in appl.get("application-args", [])])
+            result &= subscription["app_call_arguments_match"](
+                [bytes.fromhex(a) for a in appl.get("application-args", [])]
+            )
 
         if subscription.get("arc28_events"):
             if not appl:
@@ -873,7 +1045,9 @@ def indexer_post_filter(  # noqa: C901
 
         if subscription.get("balance_changes"):
             balance_changes = extract_balance_changes_from_indexer_transaction(t)
-            result &= has_balance_change_match(balance_changes, subscription["balance_changes"])
+            result &= has_balance_change_match(
+                balance_changes, subscription["balance_changes"]
+            )
 
         if subscription.get("custom_filter"):
             result &= subscription["custom_filter"](t)
@@ -911,18 +1085,30 @@ def transaction_filter(  # noqa: C901, PLR0915
         if subscription.get("sender"):
             sender = subscription["sender"]
             if isinstance(sender, str):
-                result = result and bool(t.get("snd")) and encode_address(t["snd"]) == sender
+                result = (
+                    result and bool(t.get("snd")) and encode_address(t["snd"]) == sender
+                )
             else:
-                result = result and bool(t.get("snd")) and encode_address(t["snd"]) in sender
+                result = (
+                    result and bool(t.get("snd")) and encode_address(t["snd"]) in sender
+                )
 
         if subscription.get("receiver"):
             receiver = subscription["receiver"]
             txn_receiver = t.get("rcv") or t.get("arcv")
 
             if isinstance(receiver, str):
-                result = result and bool(txn_receiver) and encode_address(txn_receiver) == receiver
+                result = (
+                    result
+                    and bool(txn_receiver)
+                    and encode_address(txn_receiver) == receiver
+                )
             else:
-                result = result and bool(txn_receiver) and encode_address(txn_receiver) in receiver
+                result = (
+                    result
+                    and bool(txn_receiver)
+                    and encode_address(txn_receiver) in receiver
+                )
 
         if subscription.get("type"):
             txn_type = subscription["type"]
@@ -932,23 +1118,37 @@ def transaction_filter(  # noqa: C901, PLR0915
                 result = result and bool(t.get("type")) and t["type"] in txn_type
 
         if subscription.get("note_prefix"):
-            result = result and bool(t.get("note")) and t["note"].decode("utf-8").startswith(subscription["note_prefix"])
+            result = (
+                result
+                and bool(t.get("note"))
+                and t["note"].decode("utf-8").startswith(subscription["note_prefix"])
+            )
 
         if subscription.get("app_id"):
             app_id = subscription["app_id"]
             if isinstance(app_id, int | float):
-                result = result and (t.get("apid") == int(app_id) or created_app_id == int(app_id))
+                result = result and (
+                    t.get("apid") == int(app_id) or created_app_id == int(app_id)
+                )
             else:
                 app_ids = [int(i) for i in app_id]
-                result = result and bool((t.get("apid") and t["apid"] in app_ids) or bool(created_app_id and created_app_id in app_ids))
+                result = result and bool(
+                    (t.get("apid") and t["apid"] in app_ids)
+                    or bool(created_app_id and created_app_id in app_ids)
+                )
 
         if subscription.get("asset_id"):
             asset_id = subscription["asset_id"]
             if isinstance(asset_id, int):
-                result = result and (t.get("xaid") == asset_id or created_asset_id == asset_id)
+                result = result and (
+                    t.get("xaid") == asset_id or created_asset_id == asset_id
+                )
             else:
                 asset_ids = [int(i) for i in asset_id]
-                result = result and bool((t.get("xaid") and t["xaid"] in asset_ids) or bool(created_asset_id and created_asset_id in asset_ids))
+                result = result and bool(
+                    (t.get("xaid") and t["xaid"] in asset_ids)
+                    or bool(created_asset_id and created_asset_id in asset_ids)
+                )
 
         txn_amt = t.get("amt") or t.get("aamt", 0)
         if subscription.get("min_amount"):
@@ -969,15 +1169,34 @@ def transaction_filter(  # noqa: C901, PLR0915
 
         if subscription.get("app_on_complete"):
             app_on_complete = subscription["app_on_complete"]
-            on_complete = algod_on_complete_to_indexer_on_complete(t.get("apan", 0)).value
-            result = result and (on_complete in ([app_on_complete] if isinstance(app_on_complete, str) else app_on_complete))
+            on_complete = algod_on_complete_to_indexer_on_complete(
+                t.get("apan", 0)
+            ).value
+            result = result and (
+                on_complete
+                in (
+                    [app_on_complete]
+                    if isinstance(app_on_complete, str)
+                    else app_on_complete
+                )
+            )
 
         if subscription.get("method_signature"):
             method_signature = subscription["method_signature"]
             if isinstance(method_signature, str):
-                result = result and bool(t.get("apaa")) and base64.b64encode(t["apaa"][0]).decode("utf-8") == get_method_selector_base64(method_signature)
+                result = (
+                    result
+                    and bool(t.get("apaa"))
+                    and base64.b64encode(t["apaa"][0]).decode("utf-8")
+                    == get_method_selector_base64(method_signature)
+                )
             else:
-                result = result and any(bool(t.get("apaa")) and base64.b64encode(t["apaa"][0]).decode("utf-8") == get_method_selector_base64(method) for method in method_signature)
+                result = result and any(
+                    bool(t.get("apaa"))
+                    and base64.b64encode(t["apaa"][0]).decode("utf-8")
+                    == get_method_selector_base64(method)
+                    for method in method_signature
+                )
 
         if subscription.get("arc28_events"):
             # convert logs (currently utf8 encoded strings) to base64 encoded bytes
@@ -986,7 +1205,12 @@ def transaction_filter(  # noqa: C901, PLR0915
                 t.get("type") == TransactionType.appl.value
                 and logs is not None
                 and has_emitted_matching_arc28_event(
-                    [base64.b64encode(log.encode("utf-8", errors="surrogateescape")).decode("utf-8") for log in logs],
+                    [
+                        base64.b64encode(
+                            log.encode("utf-8", errors="surrogateescape")
+                        ).decode("utf-8")
+                        for log in logs
+                    ],
                     arc28_events,
                     arc28_event_groups,
                     subscription["arc28_events"],
@@ -999,11 +1223,17 @@ def transaction_filter(  # noqa: C901, PLR0915
             result = result and subscription["app_call_arguments_match"](t.get("apaa"))
 
         if subscription.get("balance_changes"):
-            balance_changes = extract_balance_changes_from_block_transaction(txn["block_transaction"])
-            result = result and has_balance_change_match(balance_changes, subscription["balance_changes"])
+            balance_changes = extract_balance_changes_from_block_transaction(
+                txn["block_transaction"]
+            )
+            result = result and has_balance_change_match(
+                balance_changes, subscription["balance_changes"]
+            )
 
         if subscription.get("custom_filter"):
-            result = result and subscription["custom_filter"](get_indexer_transaction_from_algod_transaction(txn))
+            result = result and subscription["custom_filter"](
+                get_indexer_transaction_from_algod_transaction(txn)
+            )
 
         return result
 
