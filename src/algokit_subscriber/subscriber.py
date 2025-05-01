@@ -42,12 +42,12 @@ class AlgorandSubscriber:
         self.filter_names = [f["name"] for f in self.config["filters"]]
 
         if config["sync_behaviour"] == "catchup-with-indexer" and not indexer_client:
-            raise ValueError(
-                "Received sync behaviour of catchup-with-indexer, but didn't receive an indexer instance."
-            )
+            raise ValueError("Received sync behaviour of catchup-with-indexer, but didn't receive an indexer instance.")
 
     def default_error_handler(
-        self, error: Any, _str: str | None = None  # noqa: ANN401
+        self,
+        error: Any,  # noqa: ANN401
+        _str: str | None = None,
     ) -> None:
         raise error
 
@@ -56,15 +56,13 @@ class AlgorandSubscriber:
         Execute a single subscription poll.
         """
         watermark = self.config["watermark_persistence"]["get"]() or 0
-        current_round = cast(dict, self.algod.status())["last-round"]
+        current_round = cast("dict", self.algod.status())["last-round"]
 
-        self.event_emitter.emit(
-            "before:poll", {"watermark": watermark, "current_round": current_round}
-        )
+        self.event_emitter.emit("before:poll", {"watermark": watermark, "current_round": current_round})
 
         poll_result = get_subscribed_transactions(
             subscription=cast(
-                TransactionSubscriptionParams,
+                "TransactionSubscriptionParams",
                 {"watermark": watermark, "current_round": current_round, **self.config},
             ),
             algod=self.algod,
@@ -74,21 +72,11 @@ class AlgorandSubscriber:
         try:
             for filter_name in self.filter_names:
                 mapper = next(
-                    (
-                        f.get("mapper")
-                        for f in self.config["filters"]
-                        if f["name"] == filter_name
-                    ),
+                    (f.get("mapper") for f in self.config["filters"] if f["name"] == filter_name),
                     None,
                 )
-                matched_transactions = [
-                    t
-                    for t in poll_result["subscribed_transactions"]
-                    if filter_name in (t.get("filters_matched") or [])
-                ]
-                mapped_transactions = (
-                    mapper(matched_transactions) if mapper else matched_transactions
-                )
+                matched_transactions = [t for t in poll_result["subscribed_transactions"] if filter_name in (t.get("filters_matched") or [])]
+                mapped_transactions = mapper(matched_transactions) if mapper else matched_transactions
 
                 self.event_emitter.emit(f"batch:{filter_name}", mapped_transactions)
                 for transaction in mapped_transactions:
@@ -124,16 +112,12 @@ class AlgorandSubscriber:
                 duration_in_seconds = time.time() - start_time
 
                 if not suppress_log:
-                    logger.info(
-                        f"Subscription poll completed in {duration_in_seconds:.2f}s"
-                    )
+                    logger.info(f"Subscription poll completed in {duration_in_seconds:.2f}s")
                     logger.info(f"Current round: {result['current_round']}")
                     logger.info(f"Starting watermark: {result['starting_watermark']}")
                     logger.info(f"New watermark: {result['new_watermark']}")
                     logger.info(f"Synced round range: {result['synced_round_range']}")
-                    logger.info(
-                        f"Subscribed transactions: {len(result['subscribed_transactions'])}"
-                    )
+                    logger.info(f"Subscribed transactions: {len(result['subscribed_transactions'])}")
 
                 if inspect:
                     inspect(result)
@@ -142,9 +126,7 @@ class AlgorandSubscriber:
                 if self.stop_requested:
                     break  # type: ignore[unreachable]
 
-                if result["current_round"] > result[
-                    "new_watermark"
-                ] or not self.config.get("wait_for_block_when_at_tip", False):
+                if result["current_round"] > result["new_watermark"] or not self.config.get("wait_for_block_when_at_tip", False):
                     sleep_time = self.config.get("frequency_in_seconds", 1)
                     if not suppress_log:
                         logger.info(f"Sleeping for {sleep_time}s")
@@ -156,9 +138,7 @@ class AlgorandSubscriber:
                     wait_start = time.time()
                     self.algod.status_after_block(result["current_round"])
                     if not suppress_log:
-                        logger.info(
-                            f"Waited for {time.time() - wait_start:.2f}s until next block"
-                        )
+                        logger.info(f"Waited for {time.time() - wait_start:.2f}s until next block")
             except Exception as e:
                 self.event_emitter.emit("error", e)
         self.started = False
@@ -174,15 +154,11 @@ class AlgorandSubscriber:
         Register an event handler to run on every subscribed transaction matching the given filter name.
         """
         if filter_name == "error":
-            raise ValueError(
-                "'error' is reserved, please supply a different filter_name."
-            )
+            raise ValueError("'error' is reserved, please supply a different filter_name.")
         self.event_emitter.on(filter_name, listener)
         return self
 
-    def on_batch(
-        self, filter_name: str, listener: EventListener
-    ) -> "AlgorandSubscriber":
+    def on_batch(self, filter_name: str, listener: EventListener) -> "AlgorandSubscriber":
         """
         Register an event handler to run on all subscribed transactions matching the given filter name
         for each subscription poll.

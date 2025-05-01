@@ -1,8 +1,9 @@
 from typing import TYPE_CHECKING
 
+from algokit_utils import AlgorandClient
+
 from algokit_subscriber import AlgorandSubscriber
 from algokit_subscriber.types.transaction import TransactionType
-from algokit_utils import AlgorandClient
 
 if TYPE_CHECKING:
     from algokit_subscriber.types.subscription import AlgorandSubscriberConfig

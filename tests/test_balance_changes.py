@@ -1,9 +1,3 @@
-from algokit_subscriber.subscriber import AlgorandSubscriber
-from algokit_subscriber.types.indexer import TransactionResult
-from algokit_subscriber.types.subscription import (
-    AlgorandSubscriberConfig,
-    BalanceChangeRole,
-)
 from algokit_utils import (
     AlgoAmount,
     AlgorandClient,
@@ -12,6 +6,13 @@ from algokit_utils import (
     AssetOptInParams,
     AssetTransferParams,
     PaymentParams,
+)
+
+from algokit_subscriber.subscriber import AlgorandSubscriber
+from algokit_subscriber.types.indexer import TransactionResult
+from algokit_subscriber.types.subscription import (
+    AlgorandSubscriberConfig,
+    BalanceChangeRole,
 )
 
 from .accounts import generate_account
@@ -23,15 +24,7 @@ def test_asset_create_txns(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
 
     sender = generate_account(localnet)
-    txns = (
-        localnet.new_group()
-        .add_asset_create(
-            AssetCreateParams(
-                sender=sender, static_fee=AlgoAmount(micro_algo=2000), total=100_000_000
-            )
-        )
-        .send()
-    )
+    txns = localnet.new_group().add_asset_create(AssetCreateParams(sender=sender, static_fee=AlgoAmount(micro_algo=2000), total=100_000_000)).send()
     confirmations = get_confirmations(localnet, txns.tx_ids)
     asset = confirmations[0]["asset-index"]
 
@@ -53,9 +46,7 @@ def test_asset_create_txns(filter_fixture: dict) -> None:
 
     assert transaction["balance_changes"][1]["address"] == sender
     assert transaction["balance_changes"][1]["amount"] == 100_000_000
-    assert transaction["balance_changes"][1]["roles"] == [
-        BalanceChangeRole.AssetCreator
-    ]
+    assert transaction["balance_changes"][1]["roles"] == [BalanceChangeRole.AssetCreator]
     assert transaction["balance_changes"][1]["asset_id"] == asset
 
 
@@ -77,15 +68,7 @@ def test_asset_destroy_txns(filter_fixture: dict) -> None:
     )
     asset = get_confirmations(localnet, create_asset_txns.tx_ids)[0]["asset-index"]
 
-    txns = (
-        localnet.new_group()
-        .add_asset_destroy(
-            AssetDestroyParams(
-                sender=sender, static_fee=AlgoAmount(micro_algo=2000), asset_id=asset
-            )
-        )
-        .send()
-    )
+    txns = localnet.new_group().add_asset_destroy(AssetDestroyParams(sender=sender, static_fee=AlgoAmount(micro_algo=2000), asset_id=asset)).send()
 
     subscription = filter_fixture["subscribe_and_verify"](
         {
@@ -105,9 +88,7 @@ def test_asset_destroy_txns(filter_fixture: dict) -> None:
 
     assert transaction["balance_changes"][1]["address"] == sender
     assert transaction["balance_changes"][1]["amount"] == 0
-    assert transaction["balance_changes"][1]["roles"] == [
-        BalanceChangeRole.AssetDestroyer
-    ]
+    assert transaction["balance_changes"][1]["roles"] == [BalanceChangeRole.AssetDestroyer]
     assert transaction["balance_changes"][1]["asset_id"] == asset
 
 
@@ -119,26 +100,10 @@ def test_balance_change_filter_on_fee(filter_fixture: dict) -> None:
 
     txns = (
         localnet.new_group()
-        .add_asset_create(
-            AssetCreateParams(
-                sender=random_account, static_fee=AlgoAmount(micro_algo=3000), total=1
-            )
-        )
-        .add_asset_create(
-            AssetCreateParams(
-                sender=test_account, static_fee=AlgoAmount(micro_algo=1000), total=1
-            )
-        )
-        .add_asset_create(
-            AssetCreateParams(
-                sender=test_account, static_fee=AlgoAmount(micro_algo=3000), total=1
-            )
-        )
-        .add_asset_create(
-            AssetCreateParams(
-                sender=test_account, static_fee=AlgoAmount(micro_algo=5000), total=1
-            )
-        )
+        .add_asset_create(AssetCreateParams(sender=random_account, static_fee=AlgoAmount(micro_algo=3000), total=1))
+        .add_asset_create(AssetCreateParams(sender=test_account, static_fee=AlgoAmount(micro_algo=1000), total=1))
+        .add_asset_create(AssetCreateParams(sender=test_account, static_fee=AlgoAmount(micro_algo=3000), total=1))
+        .add_asset_create(AssetCreateParams(sender=test_account, static_fee=AlgoAmount(micro_algo=5000), total=1))
         .send()
     )
 
@@ -451,18 +416,10 @@ def test_various_filters_on_payments(filter_fixture: dict) -> None:
 
     result = filter_fixture["subscribe_algod"](
         {"balance_changes": [{"min_amount": 0}]},
-        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])[
-            "confirmed-round"
-        ],
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"],
     )
 
-    balance_changes = [
-        [
-            f"{address[b['address']]}: {b['amount']} ({', '.join([r.value for r in b['roles']])})"
-            for b in sorted(s["balance_changes"], key=lambda x: address[x["address"]])
-        ]
-        for s in result["subscribed_transactions"]
-    ]
+    balance_changes = [[f"{address[b['address']]}: {b['amount']} ({', '.join([r.value for r in b['roles']])})" for b in sorted(s["balance_changes"], key=lambda x: address[x["address"]])] for s in result["subscribed_transactions"]]
 
     expected_balance_changes = [
         [
@@ -520,12 +477,8 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
     account2 = generate_account(localnet, 1_000_000)
     account3 = generate_account(localnet, 1_000_000)
 
-    asset1 = localnet.send.asset_create(
-        AssetCreateParams(sender=test_account, total=1000, clawback=test_account)
-    ).confirmation["asset-index"]
-    asset2 = localnet.send.asset_create(
-        AssetCreateParams(sender=test_account, total=1001, clawback=test_account)
-    ).confirmation["asset-index"]
+    asset1 = localnet.send.asset_create(AssetCreateParams(sender=test_account, total=1000, clawback=test_account)).confirmation["asset-index"]
+    asset2 = localnet.send.asset_create(AssetCreateParams(sender=test_account, total=1001, clawback=test_account)).confirmation["asset-index"]
 
     localnet.send.asset_opt_in(AssetOptInParams(sender=account, asset_id=asset1))
     localnet.send.asset_opt_in(AssetOptInParams(sender=account2, asset_id=asset1))
@@ -534,54 +487,18 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
     localnet.send.asset_opt_in(AssetOptInParams(sender=account2, asset_id=asset2))
     localnet.send.asset_opt_in(AssetOptInParams(sender=account3, asset_id=asset2))
 
-    localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account, asset_id=asset1, amount=10
-        )
-    )
-    localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account2, asset_id=asset1, amount=10
-        )
-    )
-    localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account3, asset_id=asset1, amount=20
-        )
-    )
-    localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account, asset_id=asset2, amount=10
-        )
-    )
-    localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account2, asset_id=asset2, amount=23
-        )
-    )
+    localnet.send.asset_transfer(AssetTransferParams(sender=test_account, receiver=account, asset_id=asset1, amount=10))
+    localnet.send.asset_transfer(AssetTransferParams(sender=test_account, receiver=account2, asset_id=asset1, amount=10))
+    localnet.send.asset_transfer(AssetTransferParams(sender=test_account, receiver=account3, asset_id=asset1, amount=20))
+    localnet.send.asset_transfer(AssetTransferParams(sender=test_account, receiver=account, asset_id=asset2, amount=10))
+    localnet.send.asset_transfer(AssetTransferParams(sender=test_account, receiver=account2, asset_id=asset2, amount=23))
 
     txns = (
         localnet.new_group()
-        .add_asset_transfer(
-            AssetTransferParams(
-                sender=account, receiver=account2, asset_id=asset1, amount=1
-            )
-        )
-        .add_asset_transfer(
-            AssetTransferParams(
-                sender=account2, receiver=account, asset_id=asset1, amount=1
-            )
-        )
-        .add_asset_transfer(
-            AssetTransferParams(
-                sender=account, receiver=account2, asset_id=asset1, amount=2
-            )
-        )
-        .add_asset_transfer(
-            AssetTransferParams(
-                sender=account2, receiver=account, asset_id=asset1, amount=2
-            )
-        )
+        .add_asset_transfer(AssetTransferParams(sender=account, receiver=account2, asset_id=asset1, amount=1))
+        .add_asset_transfer(AssetTransferParams(sender=account2, receiver=account, asset_id=asset1, amount=1))
+        .add_asset_transfer(AssetTransferParams(sender=account, receiver=account2, asset_id=asset1, amount=2))
+        .add_asset_transfer(AssetTransferParams(sender=account2, receiver=account, asset_id=asset1, amount=2))
         .add_asset_transfer(
             AssetTransferParams(
                 sender=test_account,
@@ -629,16 +546,8 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
                 close_asset_to=account,
             )
         )
-        .add_asset_transfer(
-            AssetTransferParams(
-                sender=account, receiver=account2, asset_id=asset2, amount=1
-            )
-        )
-        .add_asset_transfer(
-            AssetTransferParams(
-                sender=account2, receiver=account, asset_id=asset2, amount=23
-            )
-        )
+        .add_asset_transfer(AssetTransferParams(sender=account, receiver=account2, asset_id=asset2, amount=1))
+        .add_asset_transfer(AssetTransferParams(sender=account2, receiver=account, asset_id=asset2, amount=23))
         .send()
     )
 
@@ -830,9 +739,7 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
 
     result = filter_fixture["subscribe_algod"](
         {"balance_changes": [{"min_amount": 0}]},
-        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])[
-            "confirmed-round"
-        ],
+        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])["confirmed-round"],
     )
 
     assets = {}
@@ -846,9 +753,7 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
             if b["asset_id"] != 0:
                 roles = ", ".join([role.value for role in b["roles"]])
                 asset_id = assets[b["asset_id"]]
-                change_str = (
-                    f"{address[b['address']]}: {b['amount']} x {asset_id} ({roles})"
-                )
+                change_str = f"{address[b['address']]}: {b['amount']} x {asset_id} ({roles})"
                 transaction_changes.append(change_str)
         balance_changes.append(sorted(transaction_changes))
 
@@ -924,10 +829,7 @@ def test_block_payouts() -> None:
         watermark = n
 
     def synthetic_filter(txn: TransactionResult) -> bool:
-        return (
-            txn["sender"]
-            == "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA"
-        )
+        return txn["sender"] == "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA"
 
     config: AlgorandSubscriberConfig = {
         "filters": [
@@ -963,10 +865,5 @@ def test_block_payouts() -> None:
     indexer_result = indexer_subscriber.poll_once()
 
     assert len(indexer_result["subscribed_transactions"]) == 1
-    assert (
-        algod_result["subscribed_transactions"][0]["id"]
-        == indexer_result["subscribed_transactions"][0]["id"]
-    )
-    assert algod_result["subscribed_transactions"][0].get(
-        "intra-round-offset"
-    ) == indexer_result["subscribed_transactions"][0].get("intra-round-offset")
+    assert algod_result["subscribed_transactions"][0]["id"] == indexer_result["subscribed_transactions"][0]["id"]
+    assert algod_result["subscribed_transactions"][0].get("intra-round-offset") == indexer_result["subscribed_transactions"][0].get("intra-round-offset")

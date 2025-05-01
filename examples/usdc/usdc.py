@@ -1,6 +1,7 @@
+from algokit_utils import AlgorandClient
+
 from algokit_subscriber.subscriber import AlgorandSubscriber
 from algokit_subscriber.types.subscription import SubscribedTransaction
-from algokit_utils import AlgorandClient
 
 algorand = AlgorandClient.mainnet()
 
@@ -54,9 +55,7 @@ def print_usdc(transaction: SubscribedTransaction, filter_name: str) -> None:
     Here we are only using this EventListener callback for one filter, but if we had multiple filters we could use the filter name to determine which filter the transaction matched.
     """
     axfer = transaction["asset-transfer-transaction"]
-    print(
-        f"{filter_name}: {transaction['sender']} sent {axfer['receiver']} {axfer['amount'] * 1e-6} USDC"
-    )
+    print(f"{filter_name}: {transaction['sender']} sent {axfer['receiver']} {axfer['amount'] * 1e-6} USDC")
 
 
 subscriber.on("usdc", print_usdc)

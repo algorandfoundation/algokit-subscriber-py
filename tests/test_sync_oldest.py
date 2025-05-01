@@ -5,7 +5,7 @@ from .accounts import generate_account
 from .transactions import get_subscribe_transactions_from_sender, send_x_transactions
 
 
-@pytest.fixture()
+@pytest.fixture
 def algorand() -> AlgorandClient:
     return AlgorandClient.default_localnet()
 
