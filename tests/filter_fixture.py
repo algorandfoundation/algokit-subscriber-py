@@ -1,11 +1,12 @@
 import time
 
 import pytest
+from algokit_utils import AlgorandClient
+
 from algokit_subscriber.types.subscription import (
     SubscribedTransaction,
     TransactionSubscriptionResult,
 )
-from algokit_utils import AlgorandClient
 
 from .transactions import get_subscribed_transactions_for_test, send_x_transactions
 
@@ -19,7 +20,7 @@ def filter_synthetic_transactions(t: SubscribedTransaction) -> bool:
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def filter_fixture() -> dict:
     localnet = AlgorandClient.default_localnet()
     localnet.set_default_validity_window(1000)

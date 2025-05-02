@@ -1,6 +1,7 @@
+from algokit_utils import AlgorandClient
+
 from algokit_subscriber.subscriber import AlgorandSubscriber
 from algokit_subscriber.types.subscription import SubscribedTransaction
-from algokit_utils import AlgorandClient
 
 algorand = AlgorandClient.mainnet()
 

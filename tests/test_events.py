@@ -1,6 +1,7 @@
-from algokit_subscriber.types.arc28 import Arc28Event
 from algokit_utils import AlgoAmount, AlgorandClient, PaymentParams
 from algosdk.atomic_transaction_composer import TransactionWithSigner
+
+from algokit_subscriber.types.arc28 import Arc28Event
 
 from .contracts.testing_app_client import TestingAppClient
 from .filter_fixture import filter_fixture  # noqa: F401

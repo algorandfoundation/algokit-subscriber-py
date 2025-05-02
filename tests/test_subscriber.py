@@ -1,8 +1,9 @@
 import contextlib
 import time
 
-from algokit_subscriber.subscriber import AlgorandSubscriber
 from algokit_utils import AlgorandClient
+
+from algokit_subscriber.subscriber import AlgorandSubscriber
 
 from .accounts import generate_account
 from .transactions import send_x_transactions

@@ -275,17 +275,13 @@ def indexer_pre_filter_in_memory(  # noqa: C901
         if subscription.get("receiver"):
             if isinstance(subscription["receiver"], str):
                 result = result and bool(
-                    axfer
-                    and axfer.get("receiver") == subscription["receiver"]
-                    or pay
-                    and pay.get("receiver") == subscription["receiver"]
+                    (axfer and axfer.get("receiver") == subscription["receiver"])
+                    or (pay and pay.get("receiver") == subscription["receiver"])
                 )
             else:
                 result = result and bool(
-                    axfer
-                    and axfer.get("receiver") in subscription["receiver"]
-                    or pay
-                    and pay.get("receiver") in subscription["receiver"]
+                    (axfer and axfer.get("receiver") in subscription["receiver"])
+                    or (pay and pay.get("receiver") in subscription["receiver"])
                 )
 
         if subscription.get("type"):
@@ -312,8 +308,10 @@ def indexer_pre_filter_in_memory(  # noqa: C901
             if isinstance(subscription["app_id"], int):
                 result = result and bool(
                     t.get("created-application-index") == int(subscription["app_id"])
-                    or appl
-                    and appl.get("application-id") == int(subscription["app_id"])
+                    or (
+                        appl
+                        and appl.get("application-id") == int(subscription["app_id"])
+                    )
                 )
             else:
                 result = result and bool(
@@ -321,9 +319,11 @@ def indexer_pre_filter_in_memory(  # noqa: C901
                         (t.get("created-application-index") or 0)
                         in map(int, subscription["app_id"])
                     )
-                    or appl
-                    and appl.get("application-id", 0)
-                    in map(int, subscription["app_id"])
+                    or (
+                        appl
+                        and appl.get("application-id", 0)
+                        in map(int, subscription["app_id"])
+                    )
                 )
 
         if subscription.get("asset_id"):
@@ -331,23 +331,17 @@ def indexer_pre_filter_in_memory(  # noqa: C901
                 asset_id = int(subscription["asset_id"])
                 result = result and bool(
                     t.get("created-asset-index") == asset_id
-                    or acfg
-                    and acfg.get("asset-id") == asset_id
-                    or acfg
-                    and acfg.get("asset-id") == asset_id
-                    or axfer
-                    and axfer.get("asset-id") == asset_id
+                    or (acfg and acfg.get("asset-id") == asset_id)
+                    or (acfg and acfg.get("asset-id") == asset_id)
+                    or (axfer and axfer.get("asset-id") == asset_id)
                 )
             else:
                 asset_ids = set(map(int, subscription["asset_id"]))
                 result = result and bool(
                     t.get("created-asset-index") in asset_ids
-                    or axfer
-                    and axfer.get("asset-id") in asset_ids
-                    or acfg
-                    and acfg.get("asset-id") in asset_ids
-                    or afrz
-                    and afrz.get("asset-id") in asset_ids
+                    or (axfer and axfer.get("asset-id") in asset_ids)
+                    or (acfg and acfg.get("asset-id") in asset_ids)
+                    or (afrz and afrz.get("asset-id") in asset_ids)
                 )
 
         if subscription.get("min_amount"):
@@ -485,7 +479,7 @@ def has_balance_change_match(
 
     return any(
         any(
-            check_single_change(cast(dict, actual_change), change_filter)
+            check_single_change(cast("dict", actual_change), change_filter)
             for actual_change in transaction_balance_changes
         )
         for change_filter in filtered_balance_changes
@@ -511,7 +505,7 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     max_rounds_to_sync = subscription.get("max_rounds_to_sync") or 500
     sync_behaviour = subscription["sync_behaviour"]
     current_round = subscription.get("current_round") or cast(
-        dict[str, Any], algod.status()
+        "dict[str, Any]", algod.status()
     ).get("last-round", 0)
     block_metadata: list[BlockMetadata] | None = None
 
@@ -637,8 +631,7 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
             )
 
             logger.debug(
-                f"Retrieved {len(catchup_transactions)} transactions from round {start_round} to round "
-                f"{algod_sync_from_round_number - 1} via indexer in {(time.time() - start):.3f}s"
+                f"Retrieved {len(catchup_transactions)} transactions from round {start_round} to round {algod_sync_from_round_number - 1} via indexer in {(time.time() - start):.3f}s"
             )
         else:
             raise NotImplementedError("Not implemented")
@@ -670,8 +663,7 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
         block_metadata = [block_data_to_block_metadata(b) for b in blocks]
 
         logger.debug(
-            f"Retrieved {len(block_transactions)} transactions from algod via round(s) {algod_sync_from_round_number}-{end_round} "
-            f"in {(time.time() - start):.3f}s"
+            f"Retrieved {len(block_transactions)} transactions from algod via round(s) {algod_sync_from_round_number}-{end_round} in {(time.time() - start):.3f}s"
         )
     else:
         logger.debug(
@@ -955,7 +947,7 @@ def get_indexer_inner_transactions(
         parent_offset = offset()
         result.append(
             cast(
-                SubscribedTransaction,
+                "SubscribedTransaction",
                 {
                     **t,
                     "parent_transaction_id": root["id"],

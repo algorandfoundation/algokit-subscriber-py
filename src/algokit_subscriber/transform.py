@@ -154,8 +154,7 @@ def get_block_transactions(block: Block) -> list[TransactionInBlock]:
         )
 
         if (
-            block_transaction.get("dt") is None
-            or block_transaction["dt"].get("itx") is None  # type: ignore[union-attr]
+            block_transaction.get("dt") is None or block_transaction["dt"].get("itx") is None  # type: ignore[union-attr]
         ):
             continue
 
@@ -447,7 +446,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
         return child_offset + 1
 
     if "get_child_offset" in t:
-        get_child_offset = cast(TransactionInBlockWithChildOffset, t)[
+        get_child_offset = cast("TransactionInBlockWithChildOffset", t)[
             "get_child_offset"
         ]
 
@@ -496,7 +495,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
             "closing-amount": close_amount,
             "created-application-index": created_app_id,
             "auth-addr": (
-                encode_address(cast(bytes, block_transaction.get("sgnr")))
+                encode_address(cast("bytes", block_transaction.get("sgnr")))
                 if block_transaction.get("sgnr")
                 else None
             ),
@@ -671,7 +670,7 @@ def get_indexer_transaction_from_algod_transaction(  # noqa: C901
                 for ibt in block_transaction["dt"].get("itx", [])  # type: ignore[union-attr]
             ]
 
-        return cast(SubscribedTransaction, convert_bytes_to_base64(result))
+        return cast("SubscribedTransaction", convert_bytes_to_base64(result))
 
     except Exception as e:
         logger.error(

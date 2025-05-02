@@ -47,7 +47,9 @@ class AlgorandSubscriber:
             )
 
     def default_error_handler(
-        self, error: Any, _str: str | None = None  # noqa: ANN401
+        self,
+        error: Any,  # noqa: ANN401
+        _str: str | None = None,
     ) -> None:
         raise error
 
@@ -56,7 +58,7 @@ class AlgorandSubscriber:
         Execute a single subscription poll.
         """
         watermark = self.config["watermark_persistence"]["get"]() or 0
-        current_round = cast(dict, self.algod.status())["last-round"]
+        current_round = cast("dict", self.algod.status())["last-round"]
 
         self.event_emitter.emit(
             "before:poll", {"watermark": watermark, "current_round": current_round}
@@ -64,7 +66,7 @@ class AlgorandSubscriber:
 
         poll_result = get_subscribed_transactions(
             subscription=cast(
-                TransactionSubscriptionParams,
+                "TransactionSubscriptionParams",
                 {"watermark": watermark, "current_round": current_round, **self.config},
             ),
             algod=self.algod,

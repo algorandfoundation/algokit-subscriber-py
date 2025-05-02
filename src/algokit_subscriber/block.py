@@ -10,7 +10,7 @@ from .utils import chunk_array, logger, range_inclusive
 
 def block_response_to_block_data(response: bytes) -> BlockData:
     return cast(
-        BlockData,
+        "BlockData",
         msgpack.unpackb(
             response, strict_map_key=False, unicode_errors="surrogateescape"
         ),
@@ -41,7 +41,7 @@ def get_blocks_bulk(context: dict[str, int], client: AlgodClient) -> list[BlockD
                 params={"format": "msgpack"},
                 response_format="msgpack",
             )
-            decoded = block_response_to_block_data(cast(bytes, response))
+            decoded = block_response_to_block_data(cast("bytes", response))
             blocks.append(decoded)
 
         elapsed_time = time.time() - start_time
