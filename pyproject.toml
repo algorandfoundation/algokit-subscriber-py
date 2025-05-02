@@ -10,7 +10,7 @@ python = "^3.12"
 py-algorand-sdk = "^2.7.0"
 
 [tool.poetry.group.dev.dependencies]
-algokit-utils = "^3.0.0"
+algokit-utils = "^4.0.1"
 python-semantic-release = "^9.8.8"
 mypy = "^1.10.1"
 ruff = "^0.11.7"
@@ -27,6 +27,7 @@ sphinx-autobuild = "^2024.4.16"
 sphinx-mermaid = "^0.0.8"
 poethepoet = "^0.34.0"
 pytest-sugar = "^1.0.0"
+pip-audit = "^2.9.0"
 
 [build-system]
 requires = ["poetry-core"]
