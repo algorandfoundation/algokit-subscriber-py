@@ -17,7 +17,8 @@ this_dir = Path(__file__).parent
 
 watermark_file = this_dir / "watermark"
 
-# If watermark file doesn't exist, create it with a value of 0
+# If watermark file doesn't exist, create it with our desired starting round
+# In this case, we are starting from the round that we know this address started sending transactions
 if not watermark_file.exists():
     watermark_file.write_text("43932536")
 

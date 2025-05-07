@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 algorand = AlgorandClient.main_net()
 
-# Every subscriber instance uses a water to track what block it processed last.
+# Every subscriber instance uses a watermark to track what block it processed last.
 # In this example we are using a variable to track the watermark
 
 watermark = 0
@@ -84,9 +84,7 @@ def print_transfer(transaction: SubscribedTransaction, filter_name: str) -> None
     elif filter_name == "ALGO":
         details = transaction["payment-transaction"]
 
-    print(
-        f"{transaction['sender']} sent {details['receiver']} {details['amount'] * 1e-6} {filter_name} in transaction {transaction['id']}"
-    )
+    print(f"{transaction['sender']} sent {details['receiver']} {details['amount'] * 1e-6} {filter_name} in transaction {transaction['id']}")
 
 
 # Attach the callback to the events we are interested in
