@@ -84,7 +84,9 @@ def print_transfer(transaction: SubscribedTransaction, filter_name: str) -> None
     elif filter_name == "ALGO":
         details = transaction["payment-transaction"]
 
-    print(f"{transaction['sender']} sent {details['receiver']} {details['amount'] * 1e-6} {filter_name} in transaction {transaction['id']}")
+    print(
+        f"{transaction['sender']} sent {details['receiver']} {details['amount'] * 1e-6} {filter_name} in transaction {transaction['id']}"
+    )
 
 
 # Attach the callback to the events we are interested in
