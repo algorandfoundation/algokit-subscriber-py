@@ -1363,14 +1363,14 @@ virtualenv = ">=20.10.0"
 
 [[package]]
 name = "py-algorand-sdk"
-version = "2.8.0"
+version = "2.9.0"
 description = "Algorand SDK in Python"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "py-algorand-sdk-2.8.0.tar.gz", hash = "sha256:2a2ddc94ab5c0989ed90f1b97eebb9857531b1e9c9d0d3437a57c17539ed6367"},
-    {file = "py_algorand_sdk-2.8.0-py3-none-any.whl", hash = "sha256:0647a5aae4c87f0780048f98c1ee1b57a6c8fcec2c38306e3a50e42f0a81eb37"},
+    {file = "py_algorand_sdk-2.9.0-py3-none-any.whl", hash = "sha256:f6363cd57e108d9327d09ab669e8ea535f5068e185e6bad7ac9123b9804996ec"},
+    {file = "py_algorand_sdk-2.9.0.tar.gz", hash = "sha256:f269074b8ca35902e0ce8f523ba11d242454db7b7802a848b90e8bd21d9f689f"},
 ]
 
 [package.dependencies]
@@ -2602,4 +2602,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "7674dbd7d9ba89524fb4ea694c1f29c5c8e09dbae79bb45362a848da395f1784"
+content-hash = "767713c6af5a1d83a32b41a0b168e270d7f85220d0f18fed58ee2047a87e26fa"
