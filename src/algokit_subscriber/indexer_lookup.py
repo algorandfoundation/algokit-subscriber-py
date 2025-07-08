@@ -38,7 +38,7 @@ def lookup_account_by_address(
 def lookup_account_created_application_by_address(
     indexer: IndexerClient,
     address: str,
-    get_all: bool | None = None,
+    get_all: bool | None = None,  # noqa: FBT001
     pagination_limit: int | None = None,
 ) -> list[ApplicationResult]:
     """
