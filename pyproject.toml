@@ -25,7 +25,7 @@ sphinx-autodoc2 = "^0.5.0"
 sphinx-copybutton = "^0.5.2"
 sphinx-autobuild = "^2024.4.16"
 sphinx-mermaid = "^0.0.8"
-poethepoet = "^0.34.0"
+poethepoet = "^0.36.0"
 pytest-sugar = "^1.0.0"
 pip-audit = "^2.9.0"
 
