@@ -53,6 +53,7 @@ def test_nested_inners_from_indexer(algorand_mainnet: AlgorandClient) -> None:
             ],
             "application-id": 1390675395,
             "foreign-apps": [],
+            "box-references": [],
             "foreign-assets": [
                 1390638935,
             ],
