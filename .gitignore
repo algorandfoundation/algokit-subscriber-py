@@ -10,3 +10,5 @@ coverage.xml
 .venv*
 
 /dist
+
+.dmypy.json

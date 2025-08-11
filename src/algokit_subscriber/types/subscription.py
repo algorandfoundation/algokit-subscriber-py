@@ -202,7 +202,7 @@ class TransactionFilter(TypedDict):
     receiver: NotRequired[str | list[str]]
     """Filter to transactions being received by the specified address(es)."""
 
-    note_prefix: NotRequired[str]
+    note_prefix: NotRequired[str | bytes]
     """Filter to transactions with a note having the given prefix."""
 
     app_id: NotRequired[int | list[int]]

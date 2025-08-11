@@ -3,13 +3,13 @@ import time
 from typing import cast
 from unittest.mock import MagicMock
 
+from algokit_utils import AlgoAmount, AlgorandClient, PaymentParams
+
 from algokit_subscriber.subscription import get_subscribed_transactions
 from algokit_subscriber.types.block import TransactionInBlock
 from algokit_subscriber.types.subscription import TransactionSubscriptionResult
 from algokit_subscriber.types.transaction import Transaction
 from algokit_subscriber.utils import encode_address
-from algokit_utils.beta.algorand_client import AlgorandClient
-from algokit_utils.beta.composer import PayParams
 
 
 def send_x_transactions(x: int, sender: str, algorand: AlgorandClient) -> dict:
@@ -19,17 +19,17 @@ def send_x_transactions(x: int, sender: str, algorand: AlgorandClient) -> dict:
     for i in range(x):
         txns.append(
             algorand.send.payment(
-                PayParams(
+                PaymentParams(
                     sender=sender,
                     receiver=sender,
-                    amount=0,
+                    amount=AlgoAmount(micro_algo=0),
                     note=f"{i} {time.time()}".encode(),
                 )
             )
         )
 
-        rounds.append(txns[-1]["confirmation"]["confirmed-round"])
-        tx_ids.append(txns[-1]["tx_id"])
+        rounds.append(txns[-1].confirmation["confirmed-round"])
+        tx_ids.append(txns[-1].tx_id)
 
     last_txn_round = rounds[-1]
 
@@ -52,7 +52,7 @@ def get_subscribed_transactions_for_test(
     # Create a new mock function
     def mock_status() -> dict:
         # Call the original status method and get its result
-        status = cast(dict, existing_status())
+        status = cast("dict", existing_status())
 
         # Modify the 'last-round' key
         status["last-round"] = sub_info["current_round"]
@@ -102,7 +102,7 @@ def get_subscribe_transactions_from_sender(
 
 def get_confirmations(algorand: AlgorandClient, txids: list[str]) -> list[dict]:
     return [
-        cast(dict, algorand.client.algod.pending_transaction_info(txid))
+        cast("dict", algorand.client.algod.pending_transaction_info(txid))
         for txid in txids
     ]
 

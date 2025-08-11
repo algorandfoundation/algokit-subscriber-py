@@ -1,15 +1,28 @@
 import time
 
 import pytest
-from algokit_subscriber.types.subscription import TransactionSubscriptionResult
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
+
+from algokit_subscriber.types.subscription import (
+    SubscribedTransaction,
+    TransactionSubscriptionResult,
+)
 
 from .transactions import get_subscribed_transactions_for_test, send_x_transactions
 
 
-@pytest.fixture()
+def filter_synthetic_transactions(t: SubscribedTransaction) -> bool:
+    return not (
+        t.get("tx-type") == "pay"
+        and t.get("fee", 0) == 0
+        and t.get("parent_transaction_id") is None
+        and t.get("group") is None
+    )
+
+
+@pytest.fixture
 def filter_fixture() -> dict:
-    localnet = AlgorandClient.default_local_net()
+    localnet = AlgorandClient.default_localnet()
     localnet.set_default_validity_window(1000)
 
     def subscribe_algod(
@@ -41,7 +54,7 @@ def filter_fixture() -> dict:
                 )
                 time.sleep(1)
 
-        return get_subscribed_transactions_for_test(
+        result = get_subscribed_transactions_for_test(
             {
                 "max_rounds_to_sync": 1,
                 "sync_behaviour": "catchup-with-indexer",
@@ -52,6 +65,12 @@ def filter_fixture() -> dict:
             },
             algorand=localnet,
         )
+
+        # filter out txns with 0 fee, no parent, and no group
+        result["subscribed_transactions"] = list(
+            filter(filter_synthetic_transactions, result["subscribed_transactions"])
+        )
+        return result
 
     def subscribe_and_verify(
         txn_filter: dict, tx_id: str, arc28_events: list | None = None

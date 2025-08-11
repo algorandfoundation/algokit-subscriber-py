@@ -1,16 +1,19 @@
-from typing import TYPE_CHECKING
-
-from algokit_subscriber.types.subscription import BalanceChangeRole
-from algokit_utils.beta.composer import (
+from algokit_utils import (
+    AlgoAmount,
+    AlgorandClient,
     AssetCreateParams,
     AssetDestroyParams,
     AssetOptInParams,
     AssetTransferParams,
-    PayParams,
+    PaymentParams,
 )
 
-if TYPE_CHECKING:
-    from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_subscriber.subscriber import AlgorandSubscriber
+from algokit_subscriber.types.indexer import TransactionResult
+from algokit_subscriber.types.subscription import (
+    AlgorandSubscriberConfig,
+    BalanceChangeRole,
+)
 
 from .accounts import generate_account
 from .filter_fixture import filter_fixture  # noqa: F401
@@ -24,9 +27,11 @@ def test_asset_create_txns(filter_fixture: dict) -> None:
     txns = (
         localnet.new_group()
         .add_asset_create(
-            AssetCreateParams(sender=sender, static_fee=2000, total=100_000_000)
+            AssetCreateParams(
+                sender=sender, static_fee=AlgoAmount(micro_algo=2000), total=100_000_000
+            )
         )
-        .execute()
+        .send()
     )
     confirmations = get_confirmations(localnet, txns.tx_ids)
     asset = confirmations[0]["asset-index"]
@@ -63,19 +68,24 @@ def test_asset_destroy_txns(filter_fixture: dict) -> None:
         localnet.new_group()
         .add_asset_create(
             AssetCreateParams(
-                sender=sender, static_fee=2000, total=100_000_000, manager=sender
+                sender=sender,
+                static_fee=AlgoAmount(micro_algo=2000),
+                total=100_000_000,
+                manager=sender,
             )
         )
-        .execute()
+        .send()
     )
     asset = get_confirmations(localnet, create_asset_txns.tx_ids)[0]["asset-index"]
 
     txns = (
         localnet.new_group()
         .add_asset_destroy(
-            AssetDestroyParams(sender=sender, static_fee=2000, asset_id=asset)
+            AssetDestroyParams(
+                sender=sender, static_fee=AlgoAmount(micro_algo=2000), asset_id=asset
+            )
         )
-        .execute()
+        .send()
     )
 
     subscription = filter_fixture["subscribe_and_verify"](
@@ -111,18 +121,26 @@ def test_balance_change_filter_on_fee(filter_fixture: dict) -> None:
     txns = (
         localnet.new_group()
         .add_asset_create(
-            AssetCreateParams(sender=random_account, static_fee=3000, total=1)
+            AssetCreateParams(
+                sender=random_account, static_fee=AlgoAmount(micro_algo=3000), total=1
+            )
         )
         .add_asset_create(
-            AssetCreateParams(sender=test_account, static_fee=1000, total=1)
+            AssetCreateParams(
+                sender=test_account, static_fee=AlgoAmount(micro_algo=1000), total=1
+            )
         )
         .add_asset_create(
-            AssetCreateParams(sender=test_account, static_fee=3000, total=1)
+            AssetCreateParams(
+                sender=test_account, static_fee=AlgoAmount(micro_algo=3000), total=1
+            )
         )
         .add_asset_create(
-            AssetCreateParams(sender=test_account, static_fee=5000, total=1)
+            AssetCreateParams(
+                sender=test_account, static_fee=AlgoAmount(micro_algo=5000), total=1
+            )
         )
-        .execute()
+        .send()
     )
 
     filter_fixture["subscribe_and_verify_filter"](
@@ -154,54 +172,89 @@ def test_various_filters_on_payments(filter_fixture: dict) -> None:
     txns = (
         localnet.new_group()
         .add_payment(
-            PayParams(amount=1000, sender=account, receiver=account2, static_fee=1000)
-        )
-        .add_payment(
-            PayParams(amount=1000, sender=account2, receiver=account, static_fee=1000)
-        )
-        .add_payment(
-            PayParams(amount=2000, sender=account, receiver=account2, static_fee=1000)
-        )
-        .add_payment(
-            PayParams(amount=2000, sender=account2, receiver=account, static_fee=1000)
-        )
-        .add_payment(
-            PayParams(amount=3000, sender=account, receiver=account2, static_fee=1000)
-        )
-        .add_payment(
-            PayParams(amount=3000, sender=account2, receiver=account, static_fee=1000)
-        )
-        .add_payment(
-            PayParams(
-                amount=100_000,
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=1000),
                 sender=account,
                 receiver=account2,
-                static_fee=1000,
+                static_fee=AlgoAmount(micro_algo=1000),
+            )
+        )
+        .add_payment(
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=1000),
+                sender=account2,
+                receiver=account,
+                static_fee=AlgoAmount(micro_algo=1000),
+            )
+        )
+        .add_payment(
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=2000),
+                sender=account,
+                receiver=account2,
+                static_fee=AlgoAmount(micro_algo=1000),
+            )
+        )
+        .add_payment(
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=2000),
+                sender=account2,
+                receiver=account,
+                static_fee=AlgoAmount(micro_algo=1000),
+            )
+        )
+        .add_payment(
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=3000),
+                sender=account,
+                receiver=account2,
+                static_fee=AlgoAmount(micro_algo=1000),
+            )
+        )
+        .add_payment(
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=3000),
+                sender=account2,
+                receiver=account,
+                static_fee=AlgoAmount(micro_algo=1000),
+            )
+        )
+        .add_payment(
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=100_000),
+                sender=account,
+                receiver=account2,
+                static_fee=AlgoAmount(micro_algo=1000),
                 close_remainder_to=account3,
             )
         )
         .add_payment(
-            PayParams(
-                amount=100_000,
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=100_000),
                 sender=account2,
                 receiver=account,
-                static_fee=1000,
+                static_fee=AlgoAmount(micro_algo=1000),
                 close_remainder_to=account,
             )
         )
         .add_payment(
-            PayParams(
-                amount=100_000,
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=100_000),
                 sender=account3,
                 receiver=account2,
-                static_fee=2000,
+                static_fee=AlgoAmount(micro_algo=2000),
                 close_remainder_to=account,
             )
         )
         .add_payment(
-            PayParams(amount=0, sender=account, receiver=account, static_fee=0)
+            PaymentParams(
+                amount=AlgoAmount(micro_algo=0),
+                sender=account,
+                receiver=account,
+                static_fee=AlgoAmount(micro_algo=0),
+            )
         )
-        .execute()
+        .send()
     )
 
     subscribe_and_verify_filter(
@@ -470,10 +523,10 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
 
     asset1 = localnet.send.asset_create(
         AssetCreateParams(sender=test_account, total=1000, clawback=test_account)
-    )["confirmation"]["asset-index"]
+    ).confirmation["asset-index"]
     asset2 = localnet.send.asset_create(
         AssetCreateParams(sender=test_account, total=1001, clawback=test_account)
-    )["confirmation"]["asset-index"]
+    ).confirmation["asset-index"]
 
     localnet.send.asset_opt_in(AssetOptInParams(sender=account, asset_id=asset1))
     localnet.send.asset_opt_in(AssetOptInParams(sender=account2, asset_id=asset1))
@@ -587,7 +640,7 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
                 sender=account2, receiver=account, asset_id=asset2, amount=23
             )
         )
-        .execute()
+        .send()
     )
 
     subscribe_and_verify_filter(
@@ -857,3 +910,64 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
 
     for i, bc in enumerate(balance_changes):
         assert bc == expected_balance_changes[i]
+
+
+def test_block_payouts() -> None:
+    algorand = AlgorandClient.mainnet()
+    payout_round = 46838092
+    watermark: int = payout_round - 1
+
+    def get_watermark() -> int | None:
+        return watermark
+
+    def set_watermark(n: int) -> None:
+        global watermark  # noqa: PLW0603
+        watermark = n
+
+    def synthetic_filter(txn: TransactionResult) -> bool:
+        return (
+            txn["sender"]
+            == "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA"
+        )
+
+    config: AlgorandSubscriberConfig = {
+        "filters": [
+            {
+                "name": "payout",
+                "filter": {"custom_filter": synthetic_filter},
+            }
+        ],
+        "max_rounds_to_sync": 1,
+        "max_indexer_rounds_to_sync": 1,
+        "sync_behaviour": "sync-oldest",
+        "watermark_persistence": {
+            "get": get_watermark,
+            "set": set_watermark,
+        },
+    }
+
+    algod_subscriber = AlgorandSubscriber(
+        config=config,
+        algod_client=algorand.client.algod,
+        indexer_client=algorand.client.indexer,
+    )
+    algod_result = algod_subscriber.poll_once()
+    assert len(algod_result["subscribed_transactions"]) == 1
+
+    watermark = payout_round - 1
+    config["sync_behaviour"] = "catchup-with-indexer"
+    indexer_subscriber = AlgorandSubscriber(
+        config=config,
+        algod_client=algorand.client.algod,
+        indexer_client=algorand.client.indexer,
+    )
+    indexer_result = indexer_subscriber.poll_once()
+
+    assert len(indexer_result["subscribed_transactions"]) == 1
+    assert (
+        algod_result["subscribed_transactions"][0]["id"]
+        == indexer_result["subscribed_transactions"][0]["id"]
+    )
+    assert algod_result["subscribed_transactions"][0].get(
+        "intra-round-offset"
+    ) == indexer_result["subscribed_transactions"][0].get("intra-round-offset")

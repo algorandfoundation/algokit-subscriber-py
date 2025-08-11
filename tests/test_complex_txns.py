@@ -1,6 +1,7 @@
 import pytest
+from algokit_utils import AlgorandClient
+
 from algokit_subscriber.types.subscription import BalanceChangeRole
-from algokit_utils.beta.algorand_client import AlgorandClient
 
 from .transactions import (
     get_subscribed_transactions_for_test,
@@ -12,9 +13,9 @@ NESTED_INNER_APP = 1390675395
 NESTED_INNER_ID = "QLYC4KMQW5RZRA7W5GYCJ4CUVWWSZKMK2V4X3XFQYSGYCJH6LI4Q/inner/5"
 
 
-@pytest.fixture()
+@pytest.fixture
 def algorand_mainnet() -> AlgorandClient:
-    return AlgorandClient.main_net()
+    return AlgorandClient.mainnet()
 
 
 def test_nested_inners_from_indexer(algorand_mainnet: AlgorandClient) -> None:
@@ -52,6 +53,7 @@ def test_nested_inners_from_indexer(algorand_mainnet: AlgorandClient) -> None:
             ],
             "application-id": 1390675395,
             "foreign-apps": [],
+            "box-references": [],
             "foreign-assets": [
                 1390638935,
             ],

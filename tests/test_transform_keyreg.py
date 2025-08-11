@@ -1,7 +1,8 @@
 import pytest
+from algokit_utils import AlgorandClient
+
 from algokit_subscriber.types.subscription import BalanceChangeRole
 from algokit_subscriber.types.transaction import TransactionType
-from algokit_utils.beta.algorand_client import AlgorandClient
 
 from .transactions import get_subscribed_transactions_for_test, remove_none_values
 
@@ -9,9 +10,9 @@ KEYREG_ROUND = 34418662
 KEYREG_TXN_ID = "LSTIW7IBLO4SFPLFAI45WAV3NPXYPX6RWPTZ5KYDL3NX2LTJFXNA"
 
 
-@pytest.fixture()
+@pytest.fixture
 def algorand_mainnet() -> AlgorandClient:
-    return AlgorandClient.main_net()
+    return AlgorandClient.mainnet()
 
 
 def test_keyreg_from_indexer(algorand_mainnet: AlgorandClient) -> None:

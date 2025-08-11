@@ -4,18 +4,18 @@
 
 <p align="center">
     <a target="_blank" href="https://algorandfoundation.github.io/algokit-subscriber-py/"><img src="https://img.shields.io/badge/docs-repository-74dfdc?logo=github&style=flat.svg" /></a>
-    <a target="_blank" href="https://developer.algorand.org/algokit/"><img src="https://img.shields.io/badge/learn-AlgoKit-74dfdc?logo=algorand&mac=flat.svg" /></a>
+    <a target="_blank" href="https://algorand.co/algokit"><img src="https://img.shields.io/badge/learn-AlgoKit-74dfdc?logo=algorand&mac=flat.svg" /></a>
     <a target="_blank" href="https://github.com/algorandfoundation/algokit-subscriber-py"><img src="https://img.shields.io/github/stars/algorandfoundation/algokit-subscriber-py?color=74dfdc&logo=star&style=flat" /></a>
-    <a target="_blank" href="https://developer.algorand.org/algokit/"><img  src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Falgorandfoundation%2Falgokit-subscriber-py&countColor=%2374dfdc&style=flat" /></a>
+    <a target="_blank" href="https://algorand.co/algokit"><img  src="https://api.visitorbadge.io/api/visitors?path=https%3A%2F%2Fgithub.com%2Falgorandfoundation%2Falgokit-subscriber-py&countColor=%2374dfdc&style=flat" /></a>
 </p>
 
 ---
 
 This library a simple, but flexible / configurable Algorand transaction subscription / indexing mechanism. It allows you to quickly create Python services that follow or subscribe to the Algorand Blockchain.
 
-> npm install @algorandfoundation/algokit-subscriber
+> pip install algokit_subscriber
 
-[Documentation](./docs/README.md)
+[Documentation](./docs/index.md)
 
 ## Quick start
 
@@ -168,7 +168,7 @@ from algokit_subscriber import AlgorandSubscriber
 from algokit_subscriber.types import SubscribedTransaction
 from algokit_utils import AlgorandClient
 
-algorand = AlgorandClient.main_net()
+algorand = AlgorandClient.mainnet()
 
 # The watermark is used to track how far the subscriber has processed transactions
 watermark = 0

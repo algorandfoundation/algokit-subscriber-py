@@ -1,13 +1,13 @@
 import time
 
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
 from .accounts import generate_account
 from .transactions import get_subscribe_transactions_from_sender, send_x_transactions
 
 
 def test_start_to_now() -> None:
-    localnet = AlgorandClient.default_local_net()
+    localnet = AlgorandClient.default_localnet()
     test_account = generate_account(localnet, 3_000_000)
     send_x_transactions(1, generate_account(localnet, 3_000_000), localnet)
     result = send_x_transactions(1, test_account, localnet)
@@ -30,11 +30,11 @@ def test_start_to_now() -> None:
     assert subscribed["new_watermark"] == last_txn_round
     assert subscribed["synced_round_range"] == (1, last_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 1
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[0]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[0].tx_id
 
 
 def test_max_indexer_rounds_to_sync() -> None:
-    localnet = AlgorandClient.default_local_net()
+    localnet = AlgorandClient.default_localnet()
     test_account = generate_account(localnet, 3_000_000)
     random_account = generate_account(localnet, 3_000_000)
     result = send_x_transactions(1, random_account, localnet)
@@ -51,7 +51,7 @@ def test_max_indexer_rounds_to_sync() -> None:
         except Exception:
             time.sleep(0.25)
 
-    expected_new_watermark = txns[2]["confirmation"]["confirmed-round"] - 1
+    expected_new_watermark = txns[2].confirmation["confirmed-round"] - 1
     indexer_rounds_to_sync = expected_new_watermark - initial_watermark
 
     subscribed = get_subscribe_transactions_from_sender(
@@ -74,12 +74,12 @@ def test_max_indexer_rounds_to_sync() -> None:
         expected_new_watermark,
     )
     assert len(subscribed["subscribed_transactions"]) == 2
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[0]["tx_id"]
-    assert subscribed["subscribed_transactions"][1]["id"] == txns[1]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[0].tx_id
+    assert subscribed["subscribed_transactions"][1]["id"] == txns[1].tx_id
 
 
 def test_process_all_txns_with_early_start() -> None:
-    localnet = AlgorandClient.default_local_net()
+    localnet = AlgorandClient.default_localnet()
     test_account = generate_account(localnet, 3_000_000)
     result = send_x_transactions(2, test_account, localnet)
     older_txn_round = result["last_txn_round"]
@@ -90,7 +90,7 @@ def test_process_all_txns_with_early_start() -> None:
 
     while True:
         try:
-            localnet.client.indexer.transaction(last_txns[0]["tx_id"])
+            localnet.client.indexer.transaction(last_txns[0].tx_id)
             break
         except Exception:
             time.sleep(0.25)
@@ -111,12 +111,12 @@ def test_process_all_txns_with_early_start() -> None:
     assert subscribed["new_watermark"] == current_round
     assert subscribed["synced_round_range"] == (older_txn_round, current_round)
     assert len(subscribed["subscribed_transactions"]) == 2
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[1]["tx_id"]
-    assert subscribed["subscribed_transactions"][1]["id"] == last_txns[0]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[1].tx_id
+    assert subscribed["subscribed_transactions"][1]["id"] == last_txns[0].tx_id
 
 
 def test_historic_txns_with_indexer_and_algod() -> None:
-    localnet = AlgorandClient.default_local_net()
+    localnet = AlgorandClient.default_localnet()
     test_account = generate_account(localnet, 3_000_000)
     result = send_x_transactions(3, test_account, localnet)
     txns = result["txns"]
@@ -145,6 +145,6 @@ def test_historic_txns_with_indexer_and_algod() -> None:
     assert subscribed["new_watermark"] == last_txn_round
     assert subscribed["synced_round_range"] == (1, last_txn_round)
     assert len(subscribed["subscribed_transactions"]) == 3
-    assert subscribed["subscribed_transactions"][0]["id"] == txns[0]["tx_id"]
-    assert subscribed["subscribed_transactions"][1]["id"] == txns[1]["tx_id"]
-    assert subscribed["subscribed_transactions"][2]["id"] == txns[2]["tx_id"]
+    assert subscribed["subscribed_transactions"][0]["id"] == txns[0].tx_id
+    assert subscribed["subscribed_transactions"][1]["id"] == txns[1].tx_id
+    assert subscribed["subscribed_transactions"][2]["id"] == txns[2].tx_id

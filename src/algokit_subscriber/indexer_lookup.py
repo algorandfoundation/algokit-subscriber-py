@@ -38,7 +38,7 @@ def lookup_account_by_address(
 def lookup_account_created_application_by_address(
     indexer: IndexerClient,
     address: str,
-    get_all: bool | None = None,
+    get_all: bool | None = None,  # noqa: FBT001
     pagination_limit: int | None = None,
 ) -> list[ApplicationResult]:
     """
@@ -127,8 +127,7 @@ def search_transactions(
         nonlocal current_round
         if "message" in response:
             raise Exception({"status": 404, **response})
-        if response["current-round"] > current_round:
-            current_round = response["current-round"]
+        current_round = max(current_round, response["current-round"])
         return response["transactions"]
 
     def build_request(next_token: str | None = None) -> dict[str, Any]:

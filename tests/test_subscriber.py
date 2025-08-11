@@ -1,8 +1,9 @@
 import contextlib
 import time
 
+from algokit_utils import AlgorandClient
+
 from algokit_subscriber.subscriber import AlgorandSubscriber
-from algokit_utils.beta.algorand_client import AlgorandClient
 
 from .accounts import generate_account
 from .transactions import send_x_transactions
@@ -56,7 +57,7 @@ def get_subscriber(
 
 
 def test_subscribes_correctly_with_poll_once() -> None:
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     test_account = generate_account(algorand)
     results = send_x_transactions(1, test_account, algorand)
     last_txn_round = results["last_txn_round"]
@@ -95,7 +96,7 @@ def test_subscribes_correctly_with_poll_once() -> None:
 
 
 def test_subscribes_correctly_with_multiple_filters() -> None:  # noqa: PLR0915
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     algorand.set_default_validity_window(1000)
     test_account = generate_account(algorand)
     random_account = generate_account(algorand, 3 * 10**6)
@@ -169,9 +170,7 @@ def test_subscribes_correctly_with_multiple_filters() -> None:  # noqa: PLR0915
     ] == tx_ids + tx_ids_1 + tx_ids_2
     assert sender_1_txn_ids == tx_ids_1
     assert sender_1_txn_ids_from_batch == sender_1_txn_ids
-    assert sender_2_rounds == [
-        int(t["confirmation"]["confirmed-round"]) for t in txns_2
-    ]
+    assert sender_2_rounds == [int(t.confirmation["confirmed-round"]) for t in txns_2]
     assert sender_2_rounds_from_batch == sender_2_rounds
 
     # Random transaction
@@ -218,17 +217,17 @@ def test_subscribes_correctly_with_multiple_filters() -> None:  # noqa: PLR0915
     assert len(sender_1_txn_ids_from_batch) == len(tx_ids_13)
     assert sender_1_txn_ids_from_batch == tx_ids_13
     assert sender_2_rounds == [
-        int(t["confirmation"]["confirmed-round"]) for t in txns_2
-    ] + [int(t["confirmation"]["confirmed-round"]) for t in txns_23]
+        int(t.confirmation["confirmed-round"]) for t in txns_2
+    ] + [int(t.confirmation["confirmed-round"]) for t in txns_23]
     assert sender_2_rounds_from_batch == [
-        int(t["confirmation"]["confirmed-round"]) for t in txns_23
+        int(t.confirmation["confirmed-round"]) for t in txns_23
     ]
 
 
 def test_subscribes_correctly_with_regular_intervals_when_started_and_can_be_stopped() -> (
     None
 ):
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     test_account = generate_account(algorand)
     results = send_x_transactions(1, test_account, algorand)
     last_txn_round = results["last_txn_round"]
@@ -279,7 +278,7 @@ def test_subscribes_correctly_with_regular_intervals_when_started_and_can_be_sto
 
 
 def test_waits_until_transaction_appears_by_default_when_started() -> None:
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     test_account = generate_account(algorand)
     current_round = algorand.client.algod.status().get("last-round")
     subscriber = get_subscriber(
@@ -337,7 +336,7 @@ def test_waits_until_transaction_appears_by_default_when_started() -> None:
 
 
 def test_correctly_fires_various_on_methods() -> None:
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     test_account = generate_account(algorand)
     random_account = generate_account(algorand, 3 * 10**6)
     results = send_x_transactions(2, test_account, algorand)
@@ -345,7 +344,7 @@ def test_correctly_fires_various_on_methods() -> None:
     tx_ids = results["tx_ids"]
     results_2 = send_x_transactions(2, random_account, algorand)
     tx_ids_2 = results_2["tx_ids"]
-    initial_watermark = int(txns[0]["confirmation"]["confirmed-round"]) - 1
+    initial_watermark = int(txns[0].confirmation["confirmed-round"]) - 1
     events_emitted = []
 
     subscriber = get_subscriber(
@@ -431,7 +430,7 @@ def test_on_error():
         nonlocal watermark
         watermark = new_watermark
 
-    algorand = AlgorandClient.default_local_net()
+    algorand = AlgorandClient.default_localnet()
     expected_error = Exception("BOOM")
     error_triggered = False
 

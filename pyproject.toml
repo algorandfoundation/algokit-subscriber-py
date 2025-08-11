@@ -1,31 +1,33 @@
 [tool.poetry]
 name = "algokit-subscriber"
-version = "1.0.0"
+version = "1.0.1-beta.1"
 description = ""
 authors = ["Algorand Foundation"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-py-algorand-sdk = "^2.6.1"
-algokit-utils = "^2.3.0"
-python-semantic-release = "^9.8.8"
+py-algorand-sdk = "^2.9.1"
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.10.1"
-ruff = "^0.5.0"
-pytest = "^8.2.2"
-pre-commit = "^3.8.0"
-black = "^24.8.0"
-pytest-cov = "^5.0.0"
-sphinx = "^7.2.6"
+algokit-utils = "^4.1.0"
+python-semantic-release = "^10.2.0"
+mypy = "^1.17.1"
+ruff = "^0.12.8"
+pytest = "^8.4.1"
+pre-commit = "^4.2.0"
+black = "^25.1.0"
+pytest-cov = "^6.2.1"
+sphinx = "^8.2.3"
 furo = "^2024.1.29"
 myst-parser = "^4.0.0"
 sphinx-autodoc2 = "^0.5.0"
 sphinx-copybutton = "^0.5.2"
 sphinx-autobuild = "^2024.4.16"
 sphinx-mermaid = "^0.0.8"
-poethepoet = "^0.24.4"
+poethepoet = "^0.36.0"
+pytest-sugar = "^1.0.0"
+pip-audit = "^2.9.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -86,8 +88,6 @@ lint.select = [
     "RUF", # Ruff-specific rules
 ]
 lint.ignore = [
-    "ANN101", # no type for self
-    "ANN102", # no type for cls
     "RET505", # allow else after return
     "SIM108", # allow if-else in place of ternary
     "E111",   # indentation is not a multiple of four
@@ -113,7 +113,7 @@ suppress-none-returning = true
 [tool.mypy]
 files = ["src", "examples"]
 exclude = ["dist", "tests"]
-python_version = "3.10"
+python_version = "3.12"
 warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
@@ -154,12 +154,26 @@ prerelease_token = "beta"
 prerelease = true
 
 [tool.semantic_release.commit_parser_options]
-allowed_tags = ["build", "chore", "ci", "docs", "feat", "fix", "perf", "style", "refactor", "test"]
+allowed_tags = [
+    "build",
+    "chore",
+    "ci",
+    "docs",
+    "feat",
+    "fix",
+    "perf",
+    "style",
+    "refactor",
+    "test",
+]
 minor_tags = ["feat"]
 patch_tags = ["fix", "perf", "docs"]
 
 [tool.semantic_release.publish]
-dist_glob_patterns = ["dist/*", "stubs/dist/*"] # order here is important to ensure compiler wheel is published first
+dist_glob_patterns = [
+    "dist/*",
+    "stubs/dist/*",
+] # order here is important to ensure compiler wheel is published first
 upload_to_vcs_release = true
 
 [tool.semantic_release.remote.token]

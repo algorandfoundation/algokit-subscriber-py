@@ -1,7 +1,7 @@
-from algokit_subscriber.types.arc28 import Arc28Event
-from algokit_utils.beta.algorand_client import AlgorandClient
-from algokit_utils.beta.composer import PayParams
+from algokit_utils import AlgoAmount, AlgorandClient, PaymentParams
 from algosdk.atomic_transaction_composer import TransactionWithSigner
+
+from algokit_subscriber.types.arc28 import Arc28Event
 
 from .contracts.testing_app_client import TestingAppClient
 from .filter_fixture import filter_fixture  # noqa: F401
@@ -279,9 +279,11 @@ def test_arc28_event_subscription(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(
-        PayParams(
-            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+    pay_txn = localnet.create_transaction.payment(
+        PaymentParams(
+            amount=AlgoAmount(micro_algo=1_000_000),
+            sender=test_account.address,
+            receiver=test_account.address,
         )
     )
     pay_txn_w_signer = TransactionWithSigner(
@@ -291,7 +293,7 @@ def test_arc28_event_subscription(filter_fixture: dict) -> None:
     app1 = app(localnet, test_account.address, create=True)["app"]
     atc = app1.compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
-    txns = localnet.new_group().add_atc(atc).execute()
+    txns = localnet.new_group().add_atc(atc).send()
     filter_fixture["subscribe_and_verify_filter"](
         {
             "sender": test_account.address,
@@ -311,9 +313,11 @@ def test_arc28_event_subscription_app_id_include(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(
-        PayParams(
-            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+    pay_txn = localnet.create_transaction.payment(
+        PaymentParams(
+            amount=AlgoAmount(micro_algo=1_000_000),
+            sender=test_account.address,
+            receiver=test_account.address,
         )
     )
     pay_txn_w_signer = TransactionWithSigner(
@@ -323,7 +327,7 @@ def test_arc28_event_subscription_app_id_include(filter_fixture: dict) -> None:
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
-    txns = localnet.new_group().add_atc(atc).execute()
+    txns = localnet.new_group().add_atc(atc).send()
 
     filter_fixture["subscribe_and_verify_filter"](
         {
@@ -345,9 +349,11 @@ def test_arc28_event_subscription_app_id_exclude(filter_fixture: dict) -> None:
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(
-        PayParams(
-            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+    pay_txn = localnet.create_transaction.payment(
+        PaymentParams(
+            amount=AlgoAmount(micro_algo=1_000_000),
+            sender=test_account.address,
+            receiver=test_account.address,
         )
     )
     pay_txn_w_signer = TransactionWithSigner(
@@ -357,14 +363,14 @@ def test_arc28_event_subscription_app_id_exclude(filter_fixture: dict) -> None:
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
-    txns = localnet.new_group().add_atc(atc).execute()
+    txns = localnet.new_group().add_atc(atc).send()
 
     subscription = filter_fixture["subscribe_algod"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
         },
-        txns.confirmed_round,
+        txns.confirmations[0]["confirmed-round"],
         [
             {
                 "group_name": "group1",
@@ -400,9 +406,11 @@ def test_arc28_event_subscription_predicate_include(filter_fixture: dict) -> Non
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(
-        PayParams(
-            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+    pay_txn = localnet.create_transaction.payment(
+        PaymentParams(
+            amount=AlgoAmount(micro_algo=1_000_000),
+            sender=test_account.address,
+            receiver=test_account.address,
         )
     )
     pay_txn_w_signer = TransactionWithSigner(
@@ -412,7 +420,7 @@ def test_arc28_event_subscription_predicate_include(filter_fixture: dict) -> Non
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
-    txns = localnet.new_group().add_atc(atc).execute()
+    txns = localnet.new_group().add_atc(atc).send()
 
     filter_fixture["subscribe_and_verify_filter"](
         {
@@ -435,9 +443,11 @@ def test_arc28_event_subscription_predicate_exclude(filter_fixture: dict) -> Non
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(
-        PayParams(
-            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+    pay_txn = localnet.create_transaction.payment(
+        PaymentParams(
+            amount=AlgoAmount(micro_algo=1_000_000),
+            sender=test_account.address,
+            receiver=test_account.address,
         )
     )
     pay_txn_w_signer = TransactionWithSigner(
@@ -447,14 +457,14 @@ def test_arc28_event_subscription_predicate_exclude(filter_fixture: dict) -> Non
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
-    txns = localnet.new_group().add_atc(atc).execute()
+    txns = localnet.new_group().add_atc(atc).send()
 
     subscription = filter_fixture["subscribe_algod"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group1"}],
         },
-        txns.confirmed_round,
+        txns.confirmations[0]["confirmed-round"],
         [
             {
                 "group_name": "group1",
@@ -492,9 +502,11 @@ def test_arc28_event_subscription_group_validation(filter_fixture: dict) -> None
     localnet: AlgorandClient = filter_fixture["localnet"]
     test_account = localnet.account.localnet_dispenser()
 
-    pay_txn = localnet.transactions.payment(
-        PayParams(
-            amount=1_000_000, sender=test_account.address, receiver=test_account.address
+    pay_txn = localnet.create_transaction.payment(
+        PaymentParams(
+            amount=AlgoAmount(micro_algo=1_000_000),
+            sender=test_account.address,
+            receiver=test_account.address,
         )
     )
     pay_txn_w_signer = TransactionWithSigner(
@@ -504,14 +516,14 @@ def test_arc28_event_subscription_group_validation(filter_fixture: dict) -> None
     app1 = app(localnet, test_account.address, create=True)
     atc = app1["app"].compose().call_abi(value="1").emit_swapped(a=1, b=2).atc
     atc.add_transaction(pay_txn_w_signer)
-    txns = localnet.new_group().add_atc(atc).execute()
+    txns = localnet.new_group().add_atc(atc).send()
 
     subscription = filter_fixture["subscribe_algod"](
         {
             "sender": test_account.address,
             "arc28_events": [{"event_name": "Swapped", "group_name": "group2"}],
         },
-        txns.confirmed_round,
+        txns.confirmations[0]["confirmed-round"],
         [
             {
                 "group_name": "group1",

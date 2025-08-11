@@ -1,169 +1,125 @@
 # CHANGELOG
 
-## v1.0.0 (2024-10-15)
 
-### Ci
+## v1.0.0-beta.6 (2025-03-25)
 
-* ci: add missing shell key ([`1b0bff7`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1b0bff71fb268d8c3b2516e843977b2386aabbc3))
+### Chores
 
-* ci: ensure rc is set to 0 by default ([`961c25a`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/961c25a8750afe53b3dec80acccce913c05f4848))
+- Bump to prod
+  ([`7e70bf1`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/7e70bf148179c4760cf211e800d4736ddfa2e9c4))
 
-* ci: remove pipefail from check_version ([`6af76bc`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/6af76bc419cc8b303012846127dbe873531d4067))
+- Utils-v3 migration ([#18](https://github.com/algorandfoundation/algokit-subscriber-py/pull/18),
+  [`09a58fd`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/09a58fd4519a82749931c2e055e75a91044b617c))
 
-* ci: add shell to composite action, github_token input ([`c9dbbd8`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c9dbbd8b14bcaca95f0b3d29db94411da22123c7))
+## Proposed Changes
 
-* ci: check version increment before release ([`9bfc365`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/9bfc36509f4f3d3f4b7c8be71592c74f4ee45d93))
+- Updating tests to rely on utils-v3
 
-* ci: skip ci for changelog commit ([`78dd62a`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/78dd62aae8849b340276ec23ef49079f791d728e))
+## TODO
 
-### Unknown
+- Update to production release after prod utils v3 is available on pypi - @lempira no major bumps in
+  semantic version needed, as it doesn't affect production code, only the testing stack itself.
+  However note, that I also removed semantic releases dependency as well as dependency on
+  algokit_utils from the prod dependencies list -> i assume they were added there by accident.
+  Algokit utils isn't utilized within the src codebase, only the testing stack.
 
-* Merge pull request #12 from algorandfoundation/main
+### Documentation
 
-1.0 release (fixed CD) ([`22e5193`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/22e5193dbcd8a874e5c15846fa8f751dec682448))
+- Ak-194: Updated dev portal links
+  ([#22](https://github.com/algorandfoundation/algokit-subscriber-py/pull/22),
+  [`9c4ae12`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/9c4ae1228463a65bd0a861c1c0629718facd0f36))
 
-* Merge pull request #11 from algorandfoundation/ci/specify_shell
+## Proposed Changes
 
-ci: add missing shell key ([`7b005b7`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/7b005b754b92f22b091f6f9b4704ad984bf745ae))
+- - -
 
-* Merge pull request #6 from algorandfoundation/main
 
-1.0 release ([`7e82b58`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/7e82b58cfff3bf1ce6e43ab9d05bda012b869a1a))
+## v1.0.0-beta.5 (2025-02-15)
 
-* Merge pull request #10 from algorandfoundation/ci/fix_check_version
+### Chores
 
-ci: ensure rc is set to 0 by default ([`a3afd2c`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/a3afd2ca68500e81ee97c7c8410a94e50d2d226f))
+- Bump to latest beta
+  ([`c405386`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c405386502b0c963fc6dbe59c57fae26975e5653))
 
-* Merge pull request #9 from algorandfoundation/ci/rm_pipefail_check_version
+- Update python semantic release
+  ([#20](https://github.com/algorandfoundation/algokit-subscriber-py/pull/20),
+  [`57039ab`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/57039ab79907f1693a60a9638b3c285cbd59685b))
 
-ci: remove pipefail from check_version ([`53c3cc3`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/53c3cc3bd7c38af45593e7e4e22063bc85ef8370))
+Noting that there are CI failures, but they are fixed in #19. I want to merge this first to avoid
+  noise in the changelog once #19 is merged
 
-* rename workflow ([`dd24b8d`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/dd24b8d500cb84b43e4e014087f497d7792032b2))
+- Utils-v3 migration
+  ([`a099d68`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/a099d684b902bd37888f95821bdd8d956cdcba81))
 
-* Merge pull request #8 from algorandfoundation/ci/check_version_increment
+### Features
 
-ci: check version increment before release ([`17caf58`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/17caf58d8564e3170b2ce88155c928884850f9c5))
+- Support heartbeat transactions and proposer payouts
+  ([#19](https://github.com/algorandfoundation/algokit-subscriber-py/pull/19),
+  [`189e693`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/189e693a8015858592f6ba29f671f48996254a9b))
 
-* Merge pull request #7 from algorandfoundation/ci/changelog_skip_ci
+## Proposed Changes
 
-ci: skip ci for changelog commit ([`91507eb`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/91507eb7e90e0844706cc0af904c7c60b8539d68))
+- Adds support for heartbeat transactions - Adds test for proposer payouts - Adds synthetic
+  transaction for proposer payout when using algod
+
+
+## v1.0.0-beta.4 (2025-02-01)
+
+### Documentation
+
+- Fix README ([#17](https://github.com/algorandfoundation/algokit-subscriber-py/pull/17),
+  [`048a1e2`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/048a1e23a2d43d70b1958b9f83fea094bd4bf5ae))
+
+* replace npm command with pip
+
+* fix doc link in README
+
+
+## v1.0.0-beta.3 (2024-11-13)
+
+### Bug Fixes
+
+- Note prefix string support
+  ([`1651a7f`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1651a7f937c2d7638e5a267601f995a4667ad8ae))
+
+- Properly handle no filters matched
+  ([`030d265`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/030d2653a87de53d3c3f1c75aed6cefe33e20075))
+
+### Continuous Integration
+
+- Add missing shell key
+  ([`1b0bff7`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1b0bff71fb268d8c3b2516e843977b2386aabbc3))
+
+- Add shell to composite action, github_token input
+  ([`c9dbbd8`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c9dbbd8b14bcaca95f0b3d29db94411da22123c7))
+
+- Check version increment before release
+  ([`9bfc365`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/9bfc36509f4f3d3f4b7c8be71592c74f4ee45d93))
+
+- Ensure rc is set to 0 by default
+  ([`961c25a`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/961c25a8750afe53b3dec80acccce913c05f4848))
+
+- Remove pipefail from check_version
+  ([`6af76bc`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/6af76bc419cc8b303012846127dbe873531d4067))
+
+- Skip ci for changelog commit
+  ([`78dd62a`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/78dd62aae8849b340276ec23ef49079f791d728e))
+
 
 ## v1.0.0-beta.2 (2024-10-04)
 
 ### Documentation
 
-* docs: update README ([`d2aab1b`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/d2aab1bc25eefbf4ff6d3a2d4c19c0f1f695c5cd))
+- Update README
+  ([`d2aab1b`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/d2aab1bc25eefbf4ff6d3a2d4c19c0f1f695c5cd))
 
-### Unknown
-
-* 1.0.0-beta.2
-
-Automatically generated by python-semantic-release ([`1793b05`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1793b055900fe07b9d1b3a5977ff31e6570ae223))
-
-* Merge pull request #5 from algorandfoundation/docs/readme
-
-docs: update README ([`ecdb6b1`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/ecdb6b1b3ff3a917a9dca4abc673d4454d57894f))
 
 ## v1.0.0-beta.1 (2024-10-03)
 
 ### Documentation
 
-* docs: aligning logo header assets in readme ([`1d5fd35`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1d5fd35be0dc0c25cf8be57608119e123066505e))
+- Aligning logo header assets in readme
+  ([`1d5fd35`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1d5fd35be0dc0c25cf8be57608119e123066505e))
 
-* docs: setting up sphinx, autodoc2, doctests ([`45ca22c`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/45ca22c574662dcef49f815ebc56a24625450d1f))
-
-### Unknown
-
-* 1.0.0-beta.1
-
-Automatically generated by python-semantic-release ([`c9febb8`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c9febb8c2dc451db7f578413d712deca13067f08))
-
-* Merge pull request #4 from algorandfoundation/first_pr
-
-First PR into main ([`3541db6`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/3541db6fac4532a5e598288614846bf489c8f0f5))
-
-* algokit_subscriber_py -&gt; algokit_subscriber ([`5bf87fe`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/5bf87fef4d8ff5a71e8918ac2f5a68897bb35b8c))
-
-* rename directory ([`1934627`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1934627b2526d4b22aecf02918c0bbb280be1d0a))
-
-* algokit-subscriber-py -&gt; algokit-subscriber ([`3cb576b`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/3cb576b5d77d07ed89d4028280dc150d8fe118c5))
-
-* tool.semantic_release.allow_zero_version = false ([`044faea`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/044faea559ecd6d0d31ba07cc1093f93c80864fe))
-
-* cd on push ([`8f96d58`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/8f96d5816bb35fdb1748ec68e9fc1556f9832005))
-
-* update cd to align with compass ([`8b2d9b8`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/8b2d9b88d4c56227fb65ec2a48b4738a0ddd8290))
-
-* add semantic release ([`83611d2`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/83611d20131a44b19229b07a6e99cad44de409a2))
-
-* modify __all__ and update docs ([`a121dea`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/a121deae1de2b89df8246e182a57c221b77bbe5d))
-
-* Merge pull request #2 from algorandfoundation/docs
-
-docs: sphinx, autodoc2, doctests setup ([`eaaad5f`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/eaaad5f93dda12b65b956d8cc03e4e2c94dee35a))
-
-* add pytest-cov ([`f75ad38`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/f75ad38c0fabbc8c072417f96a01cffd7d04cae9))
-
-* install algokit in workflows ([`931a655`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/931a6558b21893acd20b3a4089125b7330d2ef63))
-
-* comment docs workflow (for now) ([`1ed45c4`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1ed45c405f5f1961096372abc687580157e0f710))
-
-* mypy examples/ ([`a31a80a`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/a31a80a65ac735dde1b07dd070e603dbbfe3478c))
-
-* remove commented out typescript ([`c19d1e3`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c19d1e3d273349f9abfc8b8247d8728282eebebb))
-
-* run black ([`51da047`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/51da047a2f02d897115a800b724648c1e1c2bd94))
-
-* add black as dev dep ([`ff1bf2d`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/ff1bf2d36b842a91caf836b99437cebaabce317f))
-
-* add pre-commit to dev deps ([`75e6675`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/75e6675eedf0d5e6ef13eff340987a690e3995e2))
-
-* remove groups from poetry ([`d5b4fbd`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/d5b4fbd0e1f321972e481c90ef60e48d4c142513))
-
-* sync_behaviour docstring ([`55c5dd3`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/55c5dd3566620198cc9d273a218cd5165eaa6c32))
-
-* reST docstrings ([`1652fd4`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/1652fd419b3c52d5ea39614552963346ba86fdc1))
-
-* add workflows (except docs) ([`46e37f4`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/46e37f418a3000270edfcb0bdfb04c80e6da4f58))
-
-* mypy ([`de26a0e`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/de26a0effc65d869c99c6656bca6dc96ba8e1ed5))
-
-* ruff and black ([`c3e1567`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c3e15672aa20be177243cfde51c0b783eeda0baf))
-
-* preserve order of filters ([`5a87ecc`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/5a87ecc1cbb1d338b81d9071874cc5e62ad21c2e))
-
-* add additional comments to examples ([`46b994d`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/46b994d14428e62fc84a8cf8866896f3ab155a0b))
-
-* add markdown docs + some docstrings ([`c6f7b9f`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c6f7b9fa1386fb74cb20dadefba587e176c14919))
-
-* logging.basicConfig(level=logging.INFO) ([`65456c9`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/65456c92037a5920cd6904201f0aec2aa7a36d8d))
-
-* test_on_error ([`3bbcd40`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/3bbcd40267c324a804f57580bf460b1f1019eea2))
-
-* remove print ([`e2f8cd7`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/e2f8cd709dc6bcc3b487ea1c6319244665654b38))
-
-* stprf and keyreg snapshot tests ([`bb11cf9`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/bb11cf9d08ba4c7acb2e567c40750688b8ff1beb))
-
-* remove TODO ([`3a6d01f`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/3a6d01fabe52eab8e5173e2c4c9abb9857da0c27))
-
-* complex txns snapshots ([`75ea933`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/75ea9335b5d75dbf9d350382bd9fd8decc4343dd))
-
-* subscribe_indexer in test_events ([`18ba66a`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/18ba66a28a99429db91b7df564a9c88eba06464c))
-
-* remove old TODO ([`c7df3d6`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c7df3d6df7ff164235cf6d8a189590a17ebb986e))
-
-* balance changes fixes and tests ([`fcc3631`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/fcc3631c5f370cd40e8b9dbe7afe98aca3697acf))
-
-* remove debugging prints ([`5f50f44`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/5f50f44c19083c726293700e8b3ba854a9ceac5a))
-
-* fix indexer balance change consolidation ([`02d8852`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/02d88520dc763a9eb26b64872f1f1af2abd51dc6))
-
-* fix indexer filters and log encoding/matching ([`c9655cf`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/c9655cf634e91d89f0f90a651367feb4e4729ae2))
-
-* wait for indexer to catchup ([`41ecec3`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/41ecec36e5234a64658dd6ad3fa64bd0be627c32))
-
-* more progress ([`f97c93a`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/f97c93a10fda6b6173be440355c5990bedfc2d7c))
-
-* initial commit ([`15f632a`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/15f632ab9f3aa9c200a5dfa3d2429a113f60979d))
-
-* add README ([`cc81b4c`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/cc81b4c5bfffae344c1cc050326addbc5d6a2431))
+- Setting up sphinx, autodoc2, doctests
+  ([`45ca22c`](https://github.com/algorandfoundation/algokit-subscriber-py/commit/45ca22c574662dcef49f815ebc56a24625450d1f))
