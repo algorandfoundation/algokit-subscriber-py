@@ -1,10 +1,20 @@
 name: Continuous Delivery of Python package
 
+run-name: ${{ inputs.production_release && 'Production Release' || 'Beta Release' }}
+
 on:
   push:
     branches:
       - main
-      - release/*
+    paths-ignore:
+      - "docs/**"
+  workflow_dispatch:
+    inputs:
+      production_release:
+        description: "Production release?"
+        type: boolean
+        required: true
+        default: true
 
 concurrency: release
 
@@ -17,7 +27,7 @@ jobs:
     name: Semantic Release
     runs-on: ubuntu-latest
     permissions:
-      # IMPORTANT: this permission is mandatory for trusted publishing
+      # IMPORTANT: mandatory for trusted publishing and GitHub releases
       id-token: write
       contents: write
       packages: read
@@ -37,56 +47,43 @@ jobs:
       - name: Setup Python and algokit
         uses: ./.github/actions/setup-algokit-python
 
-      - name: Check if version is already released
-        id: check_version
-        run: |
-          rc=0
-          poetry run semantic-release --strict --noop version || rc=$?
-          echo "return_code=$rc" >> $GITHUB_OUTPUT
-          if [ $rc -ne 2 ]; then
-             exit $rc
-          fi
-
-      - name: pre-commit and pytest
-        if: steps.check_version.outputs.return_code == '0'
+      - name: Run tests and quality checks (dummy for testing)
         run: |
           set -o pipefail
           poetry run pre-commit run --all-files && git diff --exit-code
           poetry run pytest
 
-      - name: Set Git user as GitHub actions
-        if: steps.check_version.outputs.return_code == '0'
-        run: git config --global user.email "actions@github.com" && git config --global user.name "github-actions"
+      - name: Get branch name
+        shell: bash
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+        id: get_branch
 
-      - name: Update release
-        if: steps.check_version.outputs.return_code == '0'
-        run: poetry run semantic-release --strict version
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-
-      - name: Create Wheel
-        if: steps.check_version.outputs.return_code == '0'
-        run: poetry build --format wheel
-
-      - uses: actions/upload-artifact@v4 # upload artifacts so they are retained on the job
-        if: steps.check_version.outputs.return_code == '0'
+      - name: Python Semantic Release - Beta (non-prod)
+        id: release-beta
+        if: steps.get_branch.outputs.branch == 'main' && !inputs.production_release
+        uses: python-semantic-release/python-semantic-release@v10.3.1
         with:
-          path: dist
+          github_token: ${{ steps.app-token.outputs.token }}
+          prerelease: true
 
-      - name: Publish to GitHub
-        if: steps.check_version.outputs.return_code == '0'
-        run: poetry run semantic-release publish
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Python Semantic Release - Production
+        id: release-prod
+        if: steps.get_branch.outputs.branch == 'main' && inputs.production_release
+        uses: python-semantic-release/python-semantic-release@v10.3.1
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
 
       - name: Publish to PyPI
-        if: steps.check_version.outputs.return_code == '0'
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+
 
   publish-docs:
     name: Publish Docs
-    # Don't publish canary docs
-    if: github.ref != 'refs/heads/main'
+    needs: release
+    # Don't publish docs for beta releases from main
+    if: inputs.production_release
     uses: ./.github/workflows/gh-pages.yaml
     permissions:
       contents: read
