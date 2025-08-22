@@ -47,7 +47,7 @@ jobs:
       - name: Setup Python and algokit
         uses: ./.github/actions/setup-algokit-python
 
-      - name: Run tests and quality checks (dummy for testing)
+      - name: Run tests and quality checks
         run: |
           set -o pipefail
           poetry run pre-commit run --all-files && git diff --exit-code
