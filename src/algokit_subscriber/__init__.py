@@ -1,28 +1,56 @@
-from .subscriber import AlgorandSubscriber
-from .subscription import get_subscribed_transactions
-from .types.arc28 import Arc28EventGroup
-from .types.event_emitter import EventListener
-from .types.subscription import (
+from algokit_subscriber._subscriber import AlgorandSubscriber
+from algokit_subscriber._subscription import compile_filters, get_subscribed_transactions
+from algokit_subscriber._watermark import in_memory_watermark
+from algokit_subscriber.types.arc28 import (
+    Arc28Event,
+    Arc28EventArg,
+    Arc28EventFilter,
+    Arc28EventGroup,
+    EmittedArc28Event,
+)
+from algokit_subscriber.types.subscription import (
     AlgorandSubscriberConfig,
     BalanceChange,
+    BalanceChangeFilter,
     BalanceChangeRole,
-    NamedTransactionFilter,
+    BeforePollMetadata,
+    BlockMetadata,
+    BlockRewards,
+    BlockUpgradeState,
+    CoreTransactionSubscriptionParams,
     SubscribedTransaction,
+    SubscriberConfigFilter,
+    SyncBehaviour,
+    TransactionFilter,
     TransactionSubscriptionParams,
     TransactionSubscriptionResult,
+    WatermarkPersistence,
 )
 
 __all__ = [
     "AlgorandSubscriber",
     "AlgorandSubscriberConfig",
+    "Arc28Event",
+    "Arc28EventArg",
+    "Arc28EventFilter",
     "Arc28EventGroup",
     "BalanceChange",
+    "BalanceChangeFilter",
     "BalanceChangeRole",
-    "EventListener",
-    "NamedTransactionFilter",
+    "BeforePollMetadata",
+    "BlockMetadata",
+    "BlockRewards",
+    "BlockUpgradeState",
+    "CoreTransactionSubscriptionParams",
+    "EmittedArc28Event",
     "SubscribedTransaction",
+    "SubscriberConfigFilter",
+    "SyncBehaviour",
     "TransactionFilter",
     "TransactionSubscriptionParams",
     "TransactionSubscriptionResult",
+    "WatermarkPersistence",
+    "compile_filters",
     "get_subscribed_transactions",
+    "in_memory_watermark",
 ]

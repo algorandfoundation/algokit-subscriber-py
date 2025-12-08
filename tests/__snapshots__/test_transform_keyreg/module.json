@@ -1,0 +1,45 @@
+{
+  "arc28_events": [],
+  "balance_changes": [
+    {
+      "address": "HQQRVWPYAHABKCXNMZRG242Z5GWFTJMRO63HDCLF23ZWCT3IPQXIGQ2KGY",
+      "amount": -1000,
+      "asset_id": 0,
+      "roles": [
+        "Sender"
+      ]
+    }
+  ],
+  "close_rewards": 0,
+  "closing_amount": 0,
+  "confirmed_round": 34418662,
+  "fee": 1000,
+  "filters_matched": [
+    "default"
+  ],
+  "first_valid": 34418595,
+  "genesis_hash": "wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=",
+  "genesis_id": "mainnet-v1.0",
+  "id_": "LSTIW7IBLO4SFPLFAI45WAV3NPXYPX6RWPTZ5KYDL3NX2LTJFXNA",
+  "inner_txns": [],
+  "intra_round_offset": 54,
+  "keyreg_transaction": {
+    "non_participation": false,
+    "selection_participation_key": "Fsp1QLE/fXpmq5fsk/bWP8P1+H8n30bMD3X7hPdk/GU=",
+    "state_proof_key": "Qld9eu3U/OhHohBMF4atWbKbDQB5NGO2vPl5sZ9q9yHssmrbnQIOlhujP3vaSdFXqstnzD77Z85yrlfxJFfu+g==",
+    "vote_first_valid": 34300000,
+    "vote_key_dilution": 2450,
+    "vote_last_valid": 40300000,
+    "vote_participation_key": "yUR+nfHtSb2twOaprEXrnYjkhbFMBtmXW9D8x+/ROBg="
+  },
+  "last_valid": 34419595,
+  "parent_intra_round_offset": 54,
+  "receiver_rewards": 0,
+  "round_time": 1702579204,
+  "sender": "HQQRVWPYAHABKCXNMZRG242Z5GWFTJMRO63HDCLF23ZWCT3IPQXIGQ2KGY",
+  "sender_rewards": 0,
+  "signature": {
+    "sig": "zs+8H5J4hXmmKk36uEupgupE5Filw/xMae0ox5c7yuHM4jYVPLPBYHLOdPapguScPzuz0Lney/+V9MFrKLj9Dw=="
+  },
+  "tx_type": "keyreg"
+}
