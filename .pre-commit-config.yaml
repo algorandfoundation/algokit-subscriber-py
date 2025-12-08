@@ -1,10 +1,9 @@
 repos:
   - repo: local
     hooks:
-      - id: black
-        name: black
-        description: "Black: The uncompromising Python code formatter"
-        entry: poetry run black .
+      - id: ruff_format
+        name: ruff format
+        entry: poetry run ruff format
         pass_filenames: false
         require_serial: true
         language: system
@@ -28,4 +27,3 @@ repos:
         require_serial: true
         additional_dependencies: []
         minimum_pre_commit_version: "2.9.2"
-        exclude: "tests/"

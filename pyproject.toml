@@ -7,15 +7,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-py-algorand-sdk = "^2.9.1"
+algokit-utils = ">=5.0.0a5"
 
 [tool.poetry.group.dev.dependencies]
-algokit-utils = "^4.1.0"
-mypy = "^1.17.1"
+mypy = "^1.19.1"
 ruff = "^0.12.9"
 pytest = "^8.4.1"
 pre-commit = "^4.2.0"
-black = "^25.1.0"
 pytest-cov = "^6.2.1"
 sphinx = "^8.2.3"
 furo = "^2024.1.29"
@@ -27,14 +25,14 @@ sphinx-mermaid = "^0.0.8"
 poethepoet = "^0.36.0"
 pytest-sugar = "^1.0.0"
 pip-audit = "^2.9.0"
+syrupy = "^5.0.0"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
-# TODO: eventually bring this down to 120
-line-length = 280
+line-length = 99
 lint.select = [
     # all possible codes as of this ruff version are listed here,
     # ones we don't want/need are commented out to make it clear
@@ -110,8 +108,8 @@ allow-star-arg-any = true
 suppress-none-returning = true
 
 [tool.mypy]
-files = ["src", "examples"]
-exclude = ["dist", "tests"]
+files = ["src", "examples", "test"]
+exclude = ["dist"]
 python_version = "3.12"
 warn_unused_ignores = true
 warn_redundant_casts = true
