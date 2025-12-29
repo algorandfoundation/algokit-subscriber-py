@@ -655,6 +655,10 @@ def _get_txn_asset_id(txn: Transaction) -> int | None:
         return txn.created_asset_id
     elif txn.asset_transfer_transaction:
         return txn.asset_transfer_transaction.asset_id
+    elif txn.asset_config_transaction:
+        return txn.asset_config_transaction.asset_id
+    elif txn.asset_freeze_transaction:
+        return txn.asset_freeze_transaction.asset_id
     else:
         return None
 
