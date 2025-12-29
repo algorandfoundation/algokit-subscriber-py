@@ -45,19 +45,28 @@ logger = logging.getLogger(__package__)
 _Filter = Callable[[Transaction], bool]
 
 
+def _arc28_events_to_dict(
+    arc28_events: Sequence[Arc28EventGroup] | None,
+) -> dict[str, Arc28EventGroup]:
+    """Convert arc28_events sequence to a dictionary keyed by group_name."""
+    if not arc28_events:
+        return {}
+    return {group.group_name: group for group in arc28_events}
+
+
 def compile_filters(
     filters: Sequence[TransactionFilter],
-    arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+    arc28_events: Sequence[Arc28EventGroup] | None = None,
 ) -> list[CompiledFilter]:
     """
     Pre-compile transaction filters for efficient reuse across multiple subscription polls.
     Can be optionally provided to get_subscribed_transactions.
 
     :param filters: The transaction filters to compile
-    :param arc28_events: Optional ARC-28 event group definitions (keys are group names)
+    :param arc28_events: Optional ARC-28 event group definitions
     :return: A list of compiled filters
     """
-    arc28_groups = arc28_events or {}
+    arc28_groups = _arc28_events_to_dict(arc28_events)
     compiled = []
     for txn_filter in filters:
         pre_filter = _create_indexer_pre_filter(txn_filter)
@@ -173,8 +182,8 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     start = time.time()
     skip_algod_sync = False
 
-    arc28_groups = subscription.arc28_events or {}
-    filters = compiled_filters or compile_filters(subscription.filters, arc28_groups)
+    arc28_groups = _arc28_events_to_dict(subscription.arc28_events)
+    filters = compiled_filters or compile_filters(subscription.filters, subscription.arc28_events)
 
     # If we are less than `max_rounds_to_sync` from the tip of the chain then
     # we consult the `sync_behaviour` to determine what to do
@@ -408,8 +417,11 @@ def _extract_arc28_event(
             args_by_name[arg.name] = arg_value
 
     return EmittedArc28Event(
-        group=group_name,
-        event=event,
+        group_name=group_name,
+        event_name=event.name,
+        event_signature=event.signature,
+        event_prefix=event.prefix,
+        event_definition=event,
         args=args,
         args_by_name=args_by_name,
     )

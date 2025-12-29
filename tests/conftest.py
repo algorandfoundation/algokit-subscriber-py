@@ -4,7 +4,7 @@ import enum
 import json
 import time
 import typing
-from collections.abc import Mapping
+from collections.abc import Sequence
 from pathlib import Path
 
 import algokit_utils
@@ -88,7 +88,7 @@ class FilterFixture:
         self,
         txn_filter: TransactionFilter,
         confirmed_round: int,
-        arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+        arc28_events: Sequence[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
         return get_subscribed_transactions_for_test(
             TransactionSubscriptionParams(
@@ -106,7 +106,7 @@ class FilterFixture:
         self,
         txn_filter: TransactionFilter,
         confirmed_round: int,
-        arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+        arc28_events: Sequence[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
         send_x_transactions(3, self.dispenser.addr, self.localnet)
         wait_for_round(self.localnet.client.indexer, confirmed_round)
@@ -133,7 +133,7 @@ class FilterFixture:
         self,
         txn_filter: TransactionFilter,
         tx_id: str,
-        arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+        arc28_events: Sequence[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
         confirmed_round = self._confirmed_round(tx_id)
 
@@ -146,7 +146,7 @@ class FilterFixture:
         self,
         txn_filter: TransactionFilter,
         tx_ids: list[str] | str,
-        arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+        arc28_events: Sequence[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
         __tracebackhide__ = True
         if isinstance(tx_ids, str):

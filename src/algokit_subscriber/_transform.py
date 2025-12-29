@@ -666,8 +666,17 @@ def block_data_to_block_metadata(block_data: algod.BlockResponse) -> BlockMetada
             next_protocol_vote_before=upgrade_state.next_protocol_vote_before,
         ),
         txn_counter=header.txn_counter or 0,
-        transactions_root=txn_commitments.native_sha512_256_commitment,
-        transactions_root_sha256=txn_commitments.sha256_commitment,
+        transactions_root=(
+            base64.b64encode(txn_commitments.native_sha512_256_commitment).decode("utf-8")
+            if txn_commitments.native_sha512_256_commitment
+            else ""
+        ),
+        transactions_root_sha256=(
+            base64.b64encode(txn_commitments.sha256_commitment).decode("utf-8")
+            if txn_commitments.sha256_commitment
+            else ""
+        ),
+        proposer=header.proposer,
     )
 
 

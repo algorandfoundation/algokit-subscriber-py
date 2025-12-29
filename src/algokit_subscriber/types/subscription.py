@@ -1,4 +1,4 @@
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Literal
@@ -74,6 +74,54 @@ class BlockUpgradeState:
 
 
 @dataclass(kw_only=True, slots=True)
+class BlockStateProofTracking:
+    """Tracks the status of state proofs."""
+
+    next_round: int | None = None
+    """Next round for which we will accept a state proof transaction."""
+
+    online_total_weight: int | None = None
+    """
+    The total number of microalgos held by the online accounts during the
+    StateProof round.
+    """
+
+    type: int | None = None
+    """State Proof Type. Note the raw object uses map with this as key."""
+
+    voters_commitment: str | None = None
+    """Root of a vector commitment containing online accounts that will help sign the proof."""
+
+
+@dataclass(kw_only=True, slots=True)
+class BlockUpgradeVote:
+    """Fields relating to voting for a protocol upgrade."""
+
+    upgrade_approve: bool | None = None
+    """Indicates a yes vote for the current proposal."""
+
+    upgrade_delay: int | None = None
+    """Indicates the time between acceptance and execution."""
+
+    upgrade_propose: str | None = None
+    """Indicates a proposed upgrade."""
+
+
+@dataclass(kw_only=True, slots=True)
+class ParticipationUpdates:
+    """Participation account data that needs to be checked/acted on by the network."""
+
+    absent_participation_accounts: list[str] | None = None
+    """A list of online accounts that need to be suspended."""
+
+    expired_participation_accounts: list[str] | None = None
+    """
+    A list of online accounts that needs to be converted to offline
+    since their participation key expired.
+    """
+
+
+@dataclass(kw_only=True, slots=True)
 class BlockMetadata:
     """Metadata about a block that was retrieved from algod."""
 
@@ -114,23 +162,35 @@ class BlockMetadata:
     started being supported).
     """
 
-    transactions_root: bytes
+    transactions_root: str
     """
-    Root of transaction merkle tree using SHA512_256 hash function.
+    Root of transaction merkle tree using SHA512_256 hash function (base64 encoded).
     This commitment is computed based on the PaysetCommit type specified in
     the block's consensus protocol.
     """
 
-    transactions_root_sha256: bytes | None
+    transactions_root_sha256: str
     """
     TransactionsRootSHA256 is an auxiliary TransactionRoot, built using a
     vector commitment instead of a merkle tree, and SHA256 hash function
-    instead of the default SHA512_256. This commitment can be used on
+    instead of the default SHA512_256 (base64 encoded). This commitment can be used on
     environments where only the SHA256 function exists.
     """
 
     upgrade_state: BlockUpgradeState | None = None
     """Fields relating to a protocol upgrade."""
+
+    state_proof_tracking: list[BlockStateProofTracking] | None = None
+    """Tracks the status of state proofs."""
+
+    upgrade_vote: BlockUpgradeVote | None = None
+    """Fields relating to voting for a protocol upgrade."""
+
+    participation_updates: ParticipationUpdates | None = None
+    """Participation account data that needs to be checked/acted on by the network."""
+
+    proposer: str | None = None
+    """Address of the proposer of this block."""
 
 
 @dataclass(kw_only=True, slots=True)
@@ -369,11 +429,8 @@ class CoreTransactionSubscriptionParams:
     A filter name can be used multiple times to create an OR filter.
     """
 
-    arc28_events: Mapping[str, Arc28EventGroup] | None = None
-    """
-    ARC-28 event definitions to process from app call logs.
-    Keys are group names, values are the group definitions.
-    """
+    arc28_events: Sequence[Arc28EventGroup] | None = None
+    """Any ARC-28 event definitions to process from app call logs."""
 
     max_rounds_to_sync: int = 500
     """
