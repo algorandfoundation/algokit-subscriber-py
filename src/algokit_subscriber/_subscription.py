@@ -326,7 +326,6 @@ def _deduplicate_subscribed_transactions(
     result_dict = dict[str, SubscribedTransaction]()
 
     for txn in txns:
-        assert txn.id_ is not None
         try:
             existing_txn = result_dict[txn.id_]
         except KeyError:
