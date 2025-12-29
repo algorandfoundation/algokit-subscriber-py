@@ -118,8 +118,8 @@ class EmittedArc28Event:
     event_signature: str
     """The signature of the event e.g. `EventName(type1,type2)`"""
 
-    event_prefix: bytes
-    """The 4-byte prefix for the event"""
+    event_prefix: str
+    """The 4-byte hex prefix for the event"""
 
     event_definition: Arc28Event
     """The ARC-28 definition of the event"""

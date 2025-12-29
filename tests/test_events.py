@@ -160,7 +160,7 @@ def test_simple_event(app: _TypedApp, filter_fixture: FilterFixture) -> None:
     assert arc28_event.group_name == "group1"
     assert arc28_event.event_name == "Swapped"
     assert arc28_event.event_definition.name == "Swapped"
-    assert arc28_event.event_prefix == bytes.fromhex("1ccbd925")
+    assert arc28_event.event_prefix == "1ccbd925"
     assert arc28_event.event_signature == "Swapped(uint64,uint64)"
 
 
@@ -284,7 +284,7 @@ def test_multiple_events_in_group(app: _TypedApp, filter_fixture: FilterFixture)
     assert swapped.args_by_name == {"a": 1, "b": 2}
     assert swapped.group_name == "group1"
     assert swapped.event_name == "Swapped"
-    assert swapped.event_prefix == bytes.fromhex("1ccbd925")
+    assert swapped.event_prefix == "1ccbd925"
     assert swapped.event_signature == "Swapped(uint64,uint64)"
 
     complex_ = subscription.arc28_events[1]
@@ -292,7 +292,7 @@ def test_multiple_events_in_group(app: _TypedApp, filter_fixture: FilterFixture)
     assert complex_.args_by_name == {"array": [1, 2, 3], "int": 2}
     assert complex_.group_name == "group1"
     assert complex_.event_name == "Complex"
-    assert complex_.event_prefix == bytes.fromhex("18da5ea7")
+    assert complex_.event_prefix == "18da5ea7"
     assert complex_.event_signature == "Complex(uint32[],uint64)"
 
 

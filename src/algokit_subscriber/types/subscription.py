@@ -429,7 +429,7 @@ class CoreTransactionSubscriptionParams:
     A filter name can be used multiple times to create an OR filter.
     """
 
-    arc28_events: Sequence[Arc28EventGroup] | None = None
+    arc28_events: list[Arc28EventGroup] | None = None
     """Any ARC-28 event definitions to process from app call logs."""
 
     max_rounds_to_sync: int = 500

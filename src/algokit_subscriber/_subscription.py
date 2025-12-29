@@ -46,9 +46,9 @@ _Filter = Callable[[Transaction], bool]
 
 
 def _arc28_events_to_dict(
-    arc28_events: Sequence[Arc28EventGroup] | None,
+    arc28_events: list[Arc28EventGroup] | None,
 ) -> dict[str, Arc28EventGroup]:
-    """Convert arc28_events sequence to a dictionary keyed by group_name."""
+    """Convert arc28_events list to a dictionary keyed by group_name."""
     if not arc28_events:
         return {}
     return {group.group_name: group for group in arc28_events}
@@ -56,7 +56,7 @@ def _arc28_events_to_dict(
 
 def compile_filters(
     filters: Sequence[TransactionFilter],
-    arc28_events: Sequence[Arc28EventGroup] | None = None,
+    arc28_events: list[Arc28EventGroup] | None = None,
 ) -> list[CompiledFilter]:
     """
     Pre-compile transaction filters for efficient reuse across multiple subscription polls.
@@ -420,7 +420,7 @@ def _extract_arc28_event(
         group_name=group_name,
         event_name=event.name,
         event_signature=event.signature,
-        event_prefix=event.prefix,
+        event_prefix=event.prefix.hex(),
         event_definition=event,
         args=args,
         args_by_name=args_by_name,
