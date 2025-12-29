@@ -14,14 +14,14 @@ files = [
 
 [[package]]
 name = "algokit-utils"
-version = "5.0.0a5"
+version = "5.0.0a11"
 description = "Utilities for Algorand development for use by AlgoKit"
 optional = false
 python-versions = "<4,>=3.10"
 groups = ["main"]
 files = [
-    {file = "algokit_utils-5.0.0a5-py3-none-any.whl", hash = "sha256:4202354e7f3020972d91bb399df6408ead6e09394991c5cb6ca9aea2748897c0"},
-    {file = "algokit_utils-5.0.0a5.tar.gz", hash = "sha256:a76c3391bf62bfbb8d8f87f95c1dd78b5af6f24d0df0df2f34c46c08d38c57a1"},
+    {file = "algokit_utils-5.0.0a11-py3-none-any.whl", hash = "sha256:8f3008bb6fc2d8853f9f9a46d01726b7882ff522210f7bb4272baac3649c92d6"},
+    {file = "algokit_utils-5.0.0a11.tar.gz", hash = "sha256:f833f3eab7a4b264421818d64babda16d46ecde3a86b70f1bf46b06954307382"},
 ]
 
 [package.dependencies]
@@ -2273,4 +2273,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "2925a44bd3e78246784837699a8f6a367b50ae230b80a3e76d4a70444ee5c726"
+content-hash = "fc360e7e7758a643e722171105fd38005381262eb000daa0dbf010f681ad06c1"

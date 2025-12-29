@@ -9,7 +9,7 @@ from algokit_algod_client import models as algod
 from algokit_indexer_client import models as indexer
 from algokit_transact import (
     AssetConfigTransactionFields,
-    LogicSignature,
+    LogicSigSignature,
     MultisigSignature,
     MultisigSubsignature,
     OnApplicationComplete,
@@ -166,7 +166,7 @@ def _convert_signature(
     )
 
 
-def _convert_lsig(lsig: LogicSignature) -> indexer.TransactionSignatureLogicsig:
+def _convert_lsig(lsig: LogicSigSignature) -> indexer.TransactionSignatureLogicsig:
     return indexer.TransactionSignatureLogicsig(
         logic=lsig.logic,
         args=lsig.args,
