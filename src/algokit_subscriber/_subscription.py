@@ -45,15 +45,6 @@ logger = logging.getLogger(__package__)
 _Filter = Callable[[Transaction], bool]
 
 
-def _arc28_events_to_dict(
-    arc28_events: list[Arc28EventGroup] | None,
-) -> dict[str, Arc28EventGroup]:
-    """Convert arc28_events list to a dictionary keyed by group_name."""
-    if not arc28_events:
-        return {}
-    return {group.group_name: group for group in arc28_events}
-
-
 def compile_filters(
     filters: Sequence[TransactionFilter],
     arc28_events: list[Arc28EventGroup] | None = None,
@@ -66,7 +57,7 @@ def compile_filters(
     :param arc28_events: Optional ARC-28 event group definitions
     :return: A list of compiled filters
     """
-    arc28_groups = _arc28_events_to_dict(arc28_events)
+    arc28_groups = arc28_events or []
     compiled = []
     for txn_filter in filters:
         pre_filter = _create_indexer_pre_filter(txn_filter)
@@ -182,7 +173,7 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     start = time.time()
     skip_algod_sync = False
 
-    arc28_groups = _arc28_events_to_dict(subscription.arc28_events)
+    arc28_groups = subscription.arc28_events or []
     filters = compiled_filters or compile_filters(subscription.filters, subscription.arc28_events)
 
     # If we are less than `max_rounds_to_sync` from the tip of the chain then
@@ -699,13 +690,13 @@ def _make_set[T](maybe_seq: T | list[T]) -> set[T]:
 
 def _create_transaction_filter(  # noqa: C901, PLR0912, PLR0915
     transaction_filter: TransactionFilter,
-    arc28_groups: Mapping[str, Arc28EventGroup],
+    arc28_groups: list[Arc28EventGroup],
 ) -> Callable[[Transaction], bool]:
     """
     Create a filter function for transactions based on the subscription parameters.
 
     :param transaction_filter: The transaction filter parameters
-    :param arc28_groups: The ARC-28 group definitions (keys are group names)
+    :param arc28_groups: The ARC-28 group definitions
     :return: A function that applies the filter to a transaction in a block
     """
     filters = list[_Filter]()
@@ -788,16 +779,17 @@ def _create_transaction_filter(  # noqa: C901, PLR0912, PLR0915
 
 
 def _create_arc28_filter(
-    groups: Mapping[str, Arc28EventGroup], event_filters: list[Arc28EventFilter]
+    groups: list[Arc28EventGroup], event_filters: list[Arc28EventFilter]
 ) -> _Filter:
     filtered_groups_events = defaultdict[str, list[Arc28Event]](list)
     group_event_filter = {(f.group_name, f.event_name) for f in event_filters}
-    for group_name, group in groups.items():
+    groups_by_name = {g.group_name: g for g in groups}
+    for group in groups:
         for event in group.events:
-            if (group_name, event.name) in group_event_filter:
-                filtered_groups_events[group_name].append(event)
+            if (group.group_name, event.name) in group_event_filter:
+                filtered_groups_events[group.group_name].append(event)
     group_filters = [
-        _create_arc28_group_event_filter(groups[group_name], events)
+        _create_arc28_group_event_filter(groups_by_name[group_name], events)
         for group_name, events in filtered_groups_events.items()
     ]
     return lambda t: any(group_filter(t) for group_filter in group_filters)
