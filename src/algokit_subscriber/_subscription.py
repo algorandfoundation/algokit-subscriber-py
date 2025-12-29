@@ -5,7 +5,7 @@ import logging
 import time
 import typing
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from typing import Any
 
 from algokit_algod_client import AlgodClient
@@ -330,13 +330,13 @@ def _deduplicate_subscribed_transactions(
 
 def _process_extra_fields(
     transaction: SubscribedTransaction,
-    arc28_groups: Mapping[str, Arc28EventGroup],
+    arc28_groups: list[Arc28EventGroup],
 ) -> SubscribedTransaction:
     """
     Process extra fields for a transaction, including ARC-28 events and balance changes.
 
     :param transaction: The transaction to process
-    :param arc28_groups: The ARC-28 event groups (keys are group names)
+    :param arc28_groups: The ARC-28 event groups
     :return: The processed transaction with extra fields
     """
     arc28_events = _extract_arc28_events(transaction, arc28_groups)
@@ -352,7 +352,7 @@ def _process_extra_fields(
 
 
 def _extract_arc28_events(
-    transaction: SubscribedTransaction, groups: Mapping[str, Arc28EventGroup]
+    transaction: SubscribedTransaction, groups: list[Arc28EventGroup]
 ) -> list[EmittedArc28Event]:
     arc28_events = list[EmittedArc28Event]()
     logs = transaction.logs or []
@@ -360,20 +360,19 @@ def _extract_arc28_events(
         return arc28_events
 
     potential_groups = []
-    for group_name, group in groups.items():
+    for group in groups:
         group_filter = _create_arc28_group_filter(group)
         if all(f(transaction) for f in group_filter):
-            potential_groups.append(group_name)
+            potential_groups.append(group)
 
     for log in logs:
-        for group_name in potential_groups:
-            group = groups[group_name]
+        for group in potential_groups:
             for event in group.events:
                 if not log.startswith(event.prefix):
                     continue
                 event_bytes = log[4:]
                 arc28_event = _extract_arc28_event(
-                    transaction.id_, event_bytes, group_name, group, event
+                    transaction.id_, event_bytes, group.group_name, group, event
                 )
                 if arc28_event is not None:
                     arc28_events.append(arc28_event)
