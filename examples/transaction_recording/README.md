@@ -21,5 +21,5 @@ poetry install
 ### Run the script
 
 ```bash
-poetry run python governance.py
+poetry run python transaction_recording.py
 ```
