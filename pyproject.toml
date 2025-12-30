@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-algokit-utils = ">=5.0.0a11"
+algokit-utils = ">=5.0.0a14"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.19.1"
