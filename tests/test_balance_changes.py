@@ -14,6 +14,7 @@ from algokit_subscriber.types.subscription import (
     AlgorandSubscriberConfig,
     BalanceChangeFilter,
     BalanceChangeRole,
+    NamedTransactionFilter,
     SubscriberConfigFilter,
     TransactionFilter,
     WatermarkPersistence,
@@ -39,13 +40,11 @@ def test_asset_create_txns(localnet: AlgorandClient, filter_fixture: FilterFixtu
     asset = confirmations[0].asset_id
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    role=[BalanceChangeRole.AssetCreator],
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(role=[BalanceChangeRole.AssetCreator])]
+            ),
         ),
         txns.tx_ids[0],
     )
@@ -95,9 +94,11 @@ def test_asset_destroy_txns(localnet: AlgorandClient, filter_fixture: FilterFixt
     )
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[BalanceChangeFilter(role=[BalanceChangeRole.AssetDestroyer])],
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(role=[BalanceChangeRole.AssetDestroyer])]
+            ),
         ),
         txns.tx_ids[0],
     )
@@ -143,19 +144,21 @@ def test_balance_change_filter_on_fee(
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=test_account,
-                    role=[BalanceChangeRole.Sender],
-                    min_amount=-4000,
-                    max_amount=-2000,
-                    min_absolute_amount=2000,
-                    max_absolute_amount=4000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=test_account,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-4000,
+                        max_amount=-2000,
+                        min_absolute_amount=2000,
+                        max_absolute_amount=4000,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[2]],
     )
@@ -259,202 +262,197 @@ def test_various_filters_on_payments(
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account,
-                    role=[BalanceChangeRole.Sender],
-                    min_absolute_amount=2001,
-                    max_absolute_amount=3000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account,
+                        role=[BalanceChangeRole.Sender],
+                        min_absolute_amount=2001,
+                        max_absolute_amount=3000,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[2]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account,
-                    role=[BalanceChangeRole.Sender],
-                    min_amount=-3000,
-                    max_amount=-2001,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-3000,
+                        max_amount=-2001,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[2]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account,
-                    min_amount=-2000,
-                    max_amount=-2000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0], address=account, min_amount=-2000, max_amount=-2000
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[0]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account,
-                    min_amount=1000,
-                    max_amount=1000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0], address=account, min_amount=1000, max_amount=1000
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[1]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account2,
-                    role=[BalanceChangeRole.Sender],
-                    min_amount=-3000,
-                    max_amount=-2001,
-                    min_absolute_amount=2001,
-                    max_absolute_amount=3000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account2,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-3000,
+                        max_amount=-2001,
+                        min_absolute_amount=2001,
+                        max_absolute_amount=3000,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[3]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account,
-                    min_absolute_amount=1,
-                    max_absolute_amount=1000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account,
+                        min_absolute_amount=1,
+                        max_absolute_amount=1000,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[1]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account2,
-                    max_absolute_amount=1000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(asset_id=[0], address=account2, max_absolute_amount=1000)
+                ]
+            ),
         ),
         [txns.tx_ids[0]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account3,
-                    role=BalanceChangeRole.CloseTo,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0], address=account3, role=BalanceChangeRole.CloseTo
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[6]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[0],
-                    address=account3,
-                    role=[BalanceChangeRole.CloseTo, BalanceChangeRole.Sender],
-                    min_amount=0,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account3,
+                        role=[BalanceChangeRole.CloseTo, BalanceChangeRole.Sender],
+                        min_amount=0,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[6]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    min_amount=196_000,
-                )
-            ],
+            filter=TransactionFilter(balance_changes=[BalanceChangeFilter(min_amount=196_000)]),
         ),
         [txns.tx_ids[7]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    address=[account2, account3],
-                    min_absolute_amount=296_000,
-                    max_absolute_amount=296_000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        address=[account2, account3],
+                        min_absolute_amount=296_000,
+                        max_absolute_amount=296_000,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[8]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    min_absolute_amount=297_000,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(min_absolute_amount=297_000)]
+            ),
         ),
         [txns.tx_ids[7]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    max_amount=-297_000,
-                )
-            ],
+            filter=TransactionFilter(balance_changes=[BalanceChangeFilter(max_amount=-297_000)]),
         ),
         [txns.tx_ids[7]],
     )
 
     subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    min_amount=0,
-                    max_amount=0,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(min_amount=0, max_amount=0)]
+            ),
         ),
         [txns.tx_ids[9]],
     )
@@ -470,7 +468,10 @@ def test_various_filters_on_payments(
     ).confirmed_round
     assert confirmed_round is not None
     result = filter_fixture.subscribe_algod(
-        TransactionFilter(name="default", balance_changes=[BalanceChangeFilter(min_amount=0)]),
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(balance_changes=[BalanceChangeFilter(min_amount=0)]),
+        ),
         confirmed_round,
     )
 
@@ -640,194 +641,196 @@ def test_various_filters_on_axfers(
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account,
-                    role=[BalanceChangeRole.Sender],
-                    min_absolute_amount=1.1,
-                    max_absolute_amount=2,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1],
+                        address=account,
+                        role=[BalanceChangeRole.Sender],
+                        min_absolute_amount=1.1,
+                        max_absolute_amount=2,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[2]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account,
-                    role=[BalanceChangeRole.Sender],
-                    min_amount=-2,
-                    max_amount=-1.1,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1],
+                        address=account,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-2,
+                        max_amount=-1.1,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[2]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account,
-                    min_amount=-1,
-                    max_amount=-1,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account, min_amount=-1, max_amount=-1
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[0]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account,
-                    min_amount=1,
-                    max_amount=1,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account, min_amount=1, max_amount=1
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[1]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account2,
-                    role=[BalanceChangeRole.Sender],
-                    min_amount=-2,
-                    max_amount=-1.1,
-                    min_absolute_amount=1.1,
-                    max_absolute_amount=2,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1],
+                        address=account2,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-2,
+                        max_amount=-1.1,
+                        min_absolute_amount=1.1,
+                        max_absolute_amount=2,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[3]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account,
-                    min_amount=0.1,
-                    max_absolute_amount=1,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account, min_amount=0.1, max_absolute_amount=1
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[1]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account2,
-                    min_amount=0.1,
-                    max_absolute_amount=1,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account2, min_amount=0.1, max_absolute_amount=1
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[0]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account3,
-                    role=BalanceChangeRole.CloseTo,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account3, role=BalanceChangeRole.CloseTo
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[6]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    address=account3,
-                    role=[BalanceChangeRole.CloseTo, BalanceChangeRole.Sender],
-                    min_amount=0,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1],
+                        address=account3,
+                        role=[BalanceChangeRole.CloseTo, BalanceChangeRole.Sender],
+                        min_amount=0,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[6]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    min_amount=18,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(asset_id=[asset1], min_amount=18)]
+            ),
         ),
         [txns.tx_ids[10]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    address=[account2, account3],
-                    min_absolute_amount=17,
-                    max_absolute_amount=17,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        address=[account2, account3],
+                        min_absolute_amount=17,
+                        max_absolute_amount=17,
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[8]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    asset_id=[asset1],
-                    min_absolute_amount=23,
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(asset_id=[asset1], min_absolute_amount=23)]
+            ),
         ),
         [txns.tx_ids[10]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            balance_changes=[
-                BalanceChangeFilter(
-                    address=account2,
-                    max_amount=-23,
-                    max_absolute_amount=23,  # Stop algo balance changes triggering it
-                )
-            ],
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        address=account2,
+                        max_amount=-23,
+                        max_absolute_amount=23,  # Stop algo balance changes triggering it
+                    )
+                ]
+            ),
         ),
         [txns.tx_ids[12]],
     )
@@ -844,7 +847,10 @@ def test_various_filters_on_axfers(
     ).confirmed_round
     assert confirmed_round is not None
     result = filter_fixture.subscribe_algod(
-        TransactionFilter(name="default", balance_changes=[BalanceChangeFilter(min_amount=0)]),
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(balance_changes=[BalanceChangeFilter(min_amount=0)]),
+        ),
         confirmed_round,
     )
 
@@ -939,7 +945,9 @@ def test_block_payouts(mainnet: AlgorandClient) -> None:
 
     config = AlgorandSubscriberConfig(
         filters=[
-            SubscriberConfigFilter(name="payout", custom_filter=synthetic_filter),
+            SubscriberConfigFilter(
+                name="payout", filter=TransactionFilter(custom_filter=synthetic_filter)
+            ),
         ],
         max_rounds_to_sync=1,
         max_indexer_rounds_to_sync=1,
@@ -961,7 +969,9 @@ def test_block_payouts(mainnet: AlgorandClient) -> None:
     watermark = payout_round - 1
     config_indexer = AlgorandSubscriberConfig(
         filters=[
-            SubscriberConfigFilter(name="payout", custom_filter=synthetic_filter),
+            SubscriberConfigFilter(
+                name="payout", filter=TransactionFilter(custom_filter=synthetic_filter)
+            ),
         ],
         max_rounds_to_sync=1,
         max_indexer_rounds_to_sync=1,

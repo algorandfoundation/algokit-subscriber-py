@@ -12,6 +12,7 @@ from algokit_utils import (
 
 from algokit_subscriber import get_subscribed_transactions
 from algokit_subscriber.types.subscription import (
+    NamedTransactionFilter,
     SyncBehaviour,
     TransactionFilter,
     TransactionSubscriptionParams,
@@ -94,7 +95,9 @@ def get_subscribe_transactions_from_sender(  # noqa: PLR0913
     max_indexer_rounds_to_sync: int | None = None,
 ) -> TransactionSubscriptionResult:
     accounts = account if isinstance(account, list) else [account]
-    filters = [TransactionFilter(name=a, sender=a) for a in accounts]
+    filters = [
+        NamedTransactionFilter(name=a, filter=TransactionFilter(sender=a)) for a in accounts
+    ]
     return get_subscribed_transactions(
         subscription=TransactionSubscriptionParams(
             filters=filters,

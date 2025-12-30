@@ -16,8 +16,10 @@ subscriber = sub.AlgorandSubscriber(
         filters=[
             sub.SubscriberConfigFilter(
                 name="filter1",
-                type="pay",
-                sender="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ",
+                filter=sub.TransactionFilter(
+                    type="pay",
+                    sender="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ",
+                ),
             ),
         ],
         watermark_persistence=sub.in_memory_watermark(),

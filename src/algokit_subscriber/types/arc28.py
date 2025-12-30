@@ -68,6 +68,12 @@ class Arc28EventGroup:
     when to attempt to process the events.
     """
 
+    group_name: str
+    """The name to designate for this group of events."""
+
+    events: list[Arc28Event] = field(default_factory=list)
+    """The list of ARC-28 event definitions."""
+
     process_for_app_ids: list[int] | None = None
     """Optional list of app IDs that this group should apply to."""
 
@@ -82,9 +88,6 @@ class Arc28EventGroup:
     Whether or not to silently (with warning log) continue if an error is
     encountered processing the ARC-28 event data; default = False.
     """
-
-    events: list[Arc28Event] = field(default_factory=list)
-    """The list of ARC-28 event definitions."""
 
 
 @dataclass(kw_only=True, slots=True)
@@ -106,11 +109,21 @@ class EmittedArc28Event:
     Represents an ARC-28 event that was emitted.
     """
 
-    group: str
-    """The name of the event group the event belongs to"""
+    group_name: str
+    """The name of the ARC-28 event group the event belongs to"""
 
-    event: Arc28Event
+    event_name: str
+    """The name of the ARC-28 event that was triggered"""
+
+    event_signature: str
+    """The signature of the event e.g. `EventName(type1,type2)`"""
+
+    event_prefix: str
+    """The 4-byte hex prefix for the event"""
+
+    event_definition: Arc28Event
     """The ARC-28 definition of the event"""
+
     args: list[Any]
     """The ordered arguments extracted from the event that was emitted"""
 

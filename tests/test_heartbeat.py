@@ -5,6 +5,7 @@ from algokit_subscriber import AlgorandSubscriber
 from algokit_subscriber.types.subscription import (
     AlgorandSubscriberConfig,
     SubscriberConfigFilter,
+    TransactionFilter,
     WatermarkPersistence,
 )
 
@@ -23,7 +24,9 @@ def poll_heartbeat_round(*, use_indexer: bool) -> None:
 
     config = AlgorandSubscriberConfig(
         filters=[
-            SubscriberConfigFilter(name="heartbeat", type=TransactionType.Heartbeat.value),
+            SubscriberConfigFilter(
+                name="heartbeat", filter=TransactionFilter(type=TransactionType.Heartbeat.value)
+            ),
         ],
         max_rounds_to_sync=1,
         max_indexer_rounds_to_sync=1,

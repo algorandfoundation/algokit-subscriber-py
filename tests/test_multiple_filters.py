@@ -31,7 +31,9 @@ def test_multiple_filters_with_indexer() -> None:
     subscribed = get_subscribed_transactions_for_test(
         sub.TransactionSubscriptionParams(
             filters=[
-                sub.TransactionFilter(name="default", sender=senders),
+                sub.NamedTransactionFilter(
+                    name="default", filter=sub.TransactionFilter(sender=senders)
+                ),
             ],
             max_rounds_to_sync=last_txn_round - post_indexer_round,
             sync_behaviour="catchup-with-indexer",

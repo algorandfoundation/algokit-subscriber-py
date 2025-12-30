@@ -16,7 +16,7 @@ from algokit_subscriber.types.arc28 import (
     Arc28EventFilter,
     Arc28EventGroup,
 )
-from algokit_subscriber.types.subscription import TransactionFilter
+from algokit_subscriber.types.subscription import NamedTransactionFilter, TransactionFilter
 
 from .conftest import FilterFixture
 
@@ -138,17 +138,17 @@ def test_simple_event(app: _TypedApp, filter_fixture: FilterFixture) -> None:
     tx_id = app.send(txn)
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            app_id=app.id_,
+            filter=TransactionFilter(sender=app.creator.addr, app_id=app.id_),
         ),
         tx_id,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
             ),
-        },
+        ],
     ).subscribed_transactions[0]
 
     assert len(subscription.arc28_events) == 1
@@ -156,10 +156,11 @@ def test_simple_event(app: _TypedApp, filter_fixture: FilterFixture) -> None:
 
     assert arc28_event.args == [1, 2]
     assert arc28_event.args_by_name == {"a": 1, "b": 2}
-    assert arc28_event.group == "group1"
-    assert arc28_event.event.name == "Swapped"
-    assert arc28_event.event.prefix == bytes.fromhex("1ccbd925")
-    assert arc28_event.event.signature == "Swapped(uint64,uint64)"
+    assert arc28_event.group_name == "group1"
+    assert arc28_event.event_name == "Swapped"
+    assert arc28_event.event_definition.name == "Swapped"
+    assert arc28_event.event_prefix == "1ccbd925"
+    assert arc28_event.event_signature == "Swapped(uint64,uint64)"
 
 
 def test_multiple_events(app: _TypedApp, filter_fixture: FilterFixture) -> None:
@@ -167,23 +168,23 @@ def test_multiple_events(app: _TypedApp, filter_fixture: FilterFixture) -> None:
     tx_id = app.send(txn)
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            app_id=app.id_,
+            filter=TransactionFilter(sender=app.creator.addr, app_id=app.id_),
         ),
         tx_id,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
             ),
-        },
+        ],
     ).subscribed_transactions[0]
 
     assert len(subscription.arc28_events) == 2
     second_event = subscription.arc28_events[1]
     assert second_event.args_by_name == {"b": 1, "a": 2}
-    assert second_event.group == "group1"
+    assert second_event.group_name == "group1"
 
 
 def test_app_id_filter_exclusion(app: _TypedApp, filter_fixture: FilterFixture) -> None:
@@ -191,18 +192,18 @@ def test_app_id_filter_exclusion(app: _TypedApp, filter_fixture: FilterFixture) 
     tx_id = app.send(txn)
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            app_id=app.id_,
+            filter=TransactionFilter(sender=app.creator.addr, app_id=app.id_),
         ),
         tx_id,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_for_app_ids=[app.id_ + 1],
             ),
-        },
+        ],
     ).subscribed_transactions[0]
 
     assert not subscription.arc28_events
@@ -213,18 +214,18 @@ def test_app_predicate_filter_inclusion(app: _TypedApp, filter_fixture: FilterFi
     tx_id = app.send(txn)
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            app_id=app.id_,
+            filter=TransactionFilter(sender=app.creator.addr, app_id=app.id_),
         ),
         tx_id,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_transaction=lambda transaction: transaction.id_ == tx_id,
             ),
-        },
+        ],
     ).subscribed_transactions[0]
 
     assert len(subscription.arc28_events) == 1
@@ -235,18 +236,18 @@ def test_app_predicate_filter_exclusion(app: _TypedApp, filter_fixture: FilterFi
     tx_id = app.send(txn)
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            app_id=app.id_,
+            filter=TransactionFilter(sender=app.creator.addr, app_id=app.id_),
         ),
         tx_id,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_transaction=lambda _: False,
             ),
-        },
+        ],
     ).subscribed_transactions[0]
 
     assert not subscription.arc28_events
@@ -257,17 +258,17 @@ def test_multiple_events_in_group(app: _TypedApp, filter_fixture: FilterFixture)
     tx_id = app.send(txn)
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            app_id=app.id_,
+            filter=TransactionFilter(sender=app.creator.addr, app_id=app.id_),
         ),
         tx_id,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event, complex_event],
             ),
-        },
+        ],
     ).subscribed_transactions[0]
 
     assert len(subscription.arc28_events) == 2
@@ -275,18 +276,18 @@ def test_multiple_events_in_group(app: _TypedApp, filter_fixture: FilterFixture)
     swapped = subscription.arc28_events[0]
     assert swapped.args == [1, 2]
     assert swapped.args_by_name == {"a": 1, "b": 2}
-    assert swapped.group == "group1"
-    assert swapped.event.name == "Swapped"
-    assert swapped.event.prefix == bytes.fromhex("1ccbd925")
-    assert swapped.event.signature == "Swapped(uint64,uint64)"
+    assert swapped.group_name == "group1"
+    assert swapped.event_name == "Swapped"
+    assert swapped.event_prefix == "1ccbd925"
+    assert swapped.event_signature == "Swapped(uint64,uint64)"
 
     complex_ = subscription.arc28_events[1]
     assert complex_.args == [[1, 2, 3], 2]
     assert complex_.args_by_name == {"array": [1, 2, 3], "int": 2}
-    assert complex_.group == "group1"
-    assert complex_.event.name == "Complex"
-    assert complex_.event.prefix == bytes.fromhex("18da5ea7")
-    assert complex_.event.signature == "Complex(uint32[],uint64)"
+    assert complex_.group_name == "group1"
+    assert complex_.event_name == "Complex"
+    assert complex_.event_prefix == "18da5ea7"
+    assert complex_.event_signature == "Complex(uint32[],uint64)"
 
 
 def test_multiple_groups(app: _TypedApp, filter_fixture: FilterFixture) -> None:
@@ -294,31 +295,32 @@ def test_multiple_groups(app: _TypedApp, filter_fixture: FilterFixture) -> None:
     tx_id = app.send(txn)
 
     subscription = filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            app_id=app.id_,
+            filter=TransactionFilter(sender=app.creator.addr, app_id=app.id_),
         ),
         tx_id,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[complex_event],
             ),
-            "group2": Arc28EventGroup(
+            Arc28EventGroup(
+                group_name="group2",
                 events=[swapped_event],
             ),
-        },
+        ],
     ).subscribed_transactions[0]
 
     assert len(subscription.arc28_events) == 2
 
     swapped = subscription.arc28_events[0]
-    assert swapped.event.signature == "Swapped(uint64,uint64)"
-    assert swapped.group == "group2"
+    assert swapped.event_signature == "Swapped(uint64,uint64)"
+    assert swapped.group_name == "group2"
 
     complex_ = subscription.arc28_events[1]
-    assert complex_.event.signature == "Complex(uint32[],uint64)"
-    assert complex_.group == "group1"
+    assert complex_.event_signature == "Complex(uint32[],uint64)"
+    assert complex_.group_name == "group1"
 
 
 def test_arc28_event_subscription(
@@ -328,17 +330,20 @@ def test_arc28_event_subscription(
 ) -> None:
     tx_id = call_emit_pay_txn_group.tx_ids[1]
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            ),
         ),
         [tx_id],
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
             ),
-        },
+        ],
     )
 
 
@@ -350,18 +355,21 @@ def test_arc28_event_subscription_app_id_include(
     tx_id = call_emit_pay_txn_group.tx_ids[1]
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            ),
         ),
         [tx_id],
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_for_app_ids=[app.id_],
             ),
-        },
+        ],
     )
 
 
@@ -374,35 +382,41 @@ def test_arc28_event_subscription_app_id_exclude(
     assert confirmed_round is not None, "expected confirmation"
 
     subscription = filter_fixture.subscribe_algod(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            ),
         ),
         confirmed_round,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_for_app_ids=[app.id_ + 1],
             ),
-        },
+        ],
     )
 
     assert len(subscription.subscribed_transactions) == 0
 
     subscription2 = filter_fixture.subscribe_indexer(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            ),
         ),
         confirmed_round,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_for_app_ids=[app.id_ + 1],
             ),
-        },
+        ],
     )
 
     assert len(subscription2.subscribed_transactions) == 0
@@ -415,18 +429,21 @@ def test_arc28_event_subscription_predicate_include(
 ) -> None:
     tx_id = call_emit_pay_txn_group.tx_ids[1]
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            ),
         ),
         [tx_id],
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_transaction=lambda transaction: transaction.id_ == tx_id,
             ),
-        },
+        ],
     )
 
 
@@ -440,35 +457,41 @@ def test_arc28_event_subscription_predicate_exclude(
     assert confirmed_round is not None, "expected confirmation"
 
     subscription = filter_fixture.subscribe_algod(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            ),
         ),
         confirmed_round,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_transaction=lambda transaction: transaction.id_ != tx_id,
             ),
-        },
+        ],
     )
 
     assert len(subscription.subscribed_transactions) == 0
 
     subscription2 = filter_fixture.subscribe_indexer(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group1")],
+            ),
         ),
         confirmed_round,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_transaction=lambda transaction: transaction.id_ != tx_id,
             ),
-        },
+        ],
     )
 
     assert len(subscription2.subscribed_transactions) == 0
@@ -484,35 +507,41 @@ def test_arc28_event_subscription_group_validation(
     assert confirmed_round is not None, "expected confirmation"
 
     subscription = filter_fixture.subscribe_algod(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group2")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group2")],
+            ),
         ),
         confirmed_round,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_transaction=lambda transaction: transaction.id_ != tx_id,
             ),
-        },
+        ],
     )
 
     assert len(subscription.subscribed_transactions) == 0
 
     subscription2 = filter_fixture.subscribe_indexer(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=app.creator.addr,
-            arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group2")],
+            filter=TransactionFilter(
+                sender=app.creator.addr,
+                arc28_events=[Arc28EventFilter(event_name="Swapped", group_name="group2")],
+            ),
         ),
         confirmed_round,
-        {
-            "group1": Arc28EventGroup(
+        [
+            Arc28EventGroup(
+                group_name="group1",
                 events=[swapped_event],
                 process_transaction=lambda transaction: transaction.id_ != tx_id,
             ),
-        },
+        ],
     )
 
     assert len(subscription2.subscribed_transactions) == 0

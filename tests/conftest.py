@@ -4,7 +4,6 @@ import enum
 import json
 import time
 import typing
-from collections.abc import Mapping
 from pathlib import Path
 
 import algokit_utils
@@ -20,8 +19,8 @@ from syrupy.location import PyTestLocation
 
 from algokit_subscriber.types.arc28 import Arc28EventGroup
 from algokit_subscriber.types.subscription import (
+    NamedTransactionFilter,
     SubscribedTransaction,
-    TransactionFilter,
     TransactionSubscriptionParams,
     TransactionSubscriptionResult,
 )
@@ -86,9 +85,9 @@ class FilterFixture:
 
     def subscribe_algod(
         self,
-        txn_filter: TransactionFilter,
+        txn_filter: NamedTransactionFilter,
         confirmed_round: int,
-        arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+        arc28_events: list[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
         return get_subscribed_transactions_for_test(
             TransactionSubscriptionParams(
@@ -104,9 +103,9 @@ class FilterFixture:
 
     def subscribe_indexer(
         self,
-        txn_filter: TransactionFilter,
+        txn_filter: NamedTransactionFilter,
         confirmed_round: int,
-        arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+        arc28_events: list[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
         send_x_transactions(3, self.dispenser.addr, self.localnet)
         wait_for_round(self.localnet.client.indexer, confirmed_round)
@@ -131,9 +130,9 @@ class FilterFixture:
 
     def subscribe_and_verify(
         self,
-        txn_filter: TransactionFilter,
+        txn_filter: NamedTransactionFilter,
         tx_id: str,
-        arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+        arc28_events: list[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
         confirmed_round = self._confirmed_round(tx_id)
 
@@ -144,9 +143,9 @@ class FilterFixture:
 
     def subscribe_and_verify_filter(
         self,
-        txn_filter: TransactionFilter,
+        txn_filter: NamedTransactionFilter,
         tx_ids: list[str] | str,
-        arc28_events: Mapping[str, Arc28EventGroup] | None = None,
+        arc28_events: list[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
         __tracebackhide__ = True
         if isinstance(tx_ids, str):

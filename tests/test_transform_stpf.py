@@ -12,7 +12,11 @@ STPF_TXN_ID = "G2U5DWQRQV7EGQDAHH62EDY22VYPP4VWM3V2S5BLDNXNWFNKRXMQ"
 def test_stpf_from_indexer(mainnet: AlgorandClient, module_snapshot: SnapshotAssertion) -> None:
     txns = get_subscribed_transactions_for_test(
         sub.TransactionSubscriptionParams(
-            filters=[sub.TransactionFilter(name="default", type="stpf")],
+            filters=[
+                sub.NamedTransactionFilter(
+                    name="default", filter=sub.TransactionFilter(type="stpf")
+                )
+            ],
             max_rounds_to_sync=1,
             current_round=STPF_ROUND + 1,
             sync_behaviour="catchup-with-indexer",
@@ -31,7 +35,11 @@ def test_stpf_from_indexer(mainnet: AlgorandClient, module_snapshot: SnapshotAss
 def test_stpf_from_algod(mainnet: AlgorandClient, module_snapshot: SnapshotAssertion) -> None:
     txns = get_subscribed_transactions_for_test(
         sub.TransactionSubscriptionParams(
-            filters=[sub.TransactionFilter(name="default", type="stpf")],
+            filters=[
+                sub.NamedTransactionFilter(
+                    name="default", filter=sub.TransactionFilter(type="stpf")
+                )
+            ],
             max_rounds_to_sync=1,
             current_round=STPF_ROUND + 1,
             sync_behaviour="sync-oldest",
