@@ -13,10 +13,12 @@ def test_keyreg_from_indexer(mainnet: AlgorandClient, module_snapshot: SnapshotA
     txns = get_subscribed_transactions_for_test(
         sub.TransactionSubscriptionParams(
             filters=[
-                sub.TransactionFilter(
+                sub.NamedTransactionFilter(
                     name="default",
-                    type="keyreg",
-                    sender="HQQRVWPYAHABKCXNMZRG242Z5GWFTJMRO63HDCLF23ZWCT3IPQXIGQ2KGY",
+                    filter=sub.TransactionFilter(
+                        type="keyreg",
+                        sender="HQQRVWPYAHABKCXNMZRG242Z5GWFTJMRO63HDCLF23ZWCT3IPQXIGQ2KGY",
+                    ),
                 )
             ],
             max_rounds_to_sync=1,
@@ -39,10 +41,12 @@ def test_keyreg_from_algod(mainnet: AlgorandClient, module_snapshot: SnapshotAss
     txns = get_subscribed_transactions_for_test(
         sub.TransactionSubscriptionParams(
             filters=[
-                sub.TransactionFilter(
+                sub.NamedTransactionFilter(
                     name="default",
-                    type="keyreg",
-                    sender="HQQRVWPYAHABKCXNMZRG242Z5GWFTJMRO63HDCLF23ZWCT3IPQXIGQ2KGY",
+                    filter=sub.TransactionFilter(
+                        type="keyreg",
+                        sender="HQQRVWPYAHABKCXNMZRG242Z5GWFTJMRO63HDCLF23ZWCT3IPQXIGQ2KGY",
+                    ),
                 )
             ],
             max_rounds_to_sync=1,

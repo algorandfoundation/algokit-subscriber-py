@@ -21,9 +21,11 @@ subscriber = sub.AlgorandSubscriber(
             # Only match asset transfers of USDC that are more than 1 USDC
             sub.SubscriberConfigFilter(
                 name="usdc",
-                type="axfer",
-                asset_id=31566704,  # mainnet usdc
-                min_amount=1_000_000,
+                filter=sub.TransactionFilter(
+                    type="axfer",
+                    asset_id=31566704,  # mainnet usdc
+                    min_amount=1_000_000,
+                ),
             ),
         ],
         # Once we are caught up, always wait until the next block is available

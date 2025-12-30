@@ -69,11 +69,13 @@ subscriber = sub.AlgorandSubscriber(
             # Only match transactions with balance changes for the tracked address
             sub.SubscriberConfigFilter(
                 name="Tracked Address",
-                balance_changes=[
-                    sub.BalanceChangeFilter(
-                        address=track_address,
-                    ),
-                ],
+                filter=sub.TransactionFilter(
+                    balance_changes=[
+                        sub.BalanceChangeFilter(
+                            address=track_address,
+                        ),
+                    ],
+                ),
             ),
         ],
         # Once we are caught up, always wait until the next block is available

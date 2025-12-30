@@ -19,8 +19,8 @@ from syrupy.location import PyTestLocation
 
 from algokit_subscriber.types.arc28 import Arc28EventGroup
 from algokit_subscriber.types.subscription import (
+    NamedTransactionFilter,
     SubscribedTransaction,
-    TransactionFilter,
     TransactionSubscriptionParams,
     TransactionSubscriptionResult,
 )
@@ -85,7 +85,7 @@ class FilterFixture:
 
     def subscribe_algod(
         self,
-        txn_filter: TransactionFilter,
+        txn_filter: NamedTransactionFilter,
         confirmed_round: int,
         arc28_events: list[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
@@ -103,7 +103,7 @@ class FilterFixture:
 
     def subscribe_indexer(
         self,
-        txn_filter: TransactionFilter,
+        txn_filter: NamedTransactionFilter,
         confirmed_round: int,
         arc28_events: list[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
@@ -130,7 +130,7 @@ class FilterFixture:
 
     def subscribe_and_verify(
         self,
-        txn_filter: TransactionFilter,
+        txn_filter: NamedTransactionFilter,
         tx_id: str,
         arc28_events: list[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:
@@ -143,7 +143,7 @@ class FilterFixture:
 
     def subscribe_and_verify_filter(
         self,
-        txn_filter: TransactionFilter,
+        txn_filter: NamedTransactionFilter,
         tx_ids: list[str] | str,
         arc28_events: list[Arc28EventGroup] | None = None,
     ) -> TransactionSubscriptionResult:

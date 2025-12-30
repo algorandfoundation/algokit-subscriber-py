@@ -31,6 +31,7 @@ from algokit_subscriber.types.subscription import (
     BalanceChangeFilter,
     BalanceChangeRole,
     BlockMetadata,
+    NamedTransactionFilter,
     SubscribedTransaction,
     TransactionFilter,
     TransactionSubscriptionParams,
@@ -46,7 +47,7 @@ _Filter = Callable[[Transaction], bool]
 
 
 def compile_filters(
-    filters: Sequence[TransactionFilter],
+    filters: Sequence[NamedTransactionFilter],
     arc28_events: list[Arc28EventGroup] | None = None,
 ) -> list[CompiledFilter]:
     """
@@ -59,11 +60,11 @@ def compile_filters(
     """
     arc28_groups = arc28_events or []
     compiled = []
-    for txn_filter in filters:
-        pre_filter = _create_indexer_pre_filter(txn_filter)
-        post_filter = _create_transaction_filter(txn_filter, arc28_groups)
+    for named_filter in filters:
+        pre_filter = _create_indexer_pre_filter(named_filter.filter)
+        post_filter = _create_transaction_filter(named_filter.filter, arc28_groups)
         compiled.append(
-            CompiledFilter(name=txn_filter.name, pre_filter=pre_filter, post_filter=post_filter)
+            CompiledFilter(name=named_filter.name, pre_filter=pre_filter, post_filter=post_filter)
         )
     return compiled
 

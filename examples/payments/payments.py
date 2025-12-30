@@ -21,10 +21,12 @@ subscriber = sub.AlgorandSubscriber(
         filters=[
             sub.SubscriberConfigFilter(
                 name="pay txns",
-                # Match payment transactions
-                type="pay",
-                # We only want transactions that transferred at least 1 ALGO
-                min_amount=int(1e6),
+                filter=sub.TransactionFilter(
+                    # Match payment transactions
+                    type="pay",
+                    # We only want transactions that transferred at least 1 ALGO
+                    min_amount=int(1e6),
+                ),
             ),
         ],
         # Once we are caught up, always wait until the next block is available

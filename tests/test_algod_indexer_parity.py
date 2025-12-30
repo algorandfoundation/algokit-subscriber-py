@@ -26,7 +26,7 @@ from tests.conftest import dataclass_to_json
 )
 def test_algo_indexer_parity(mainnet: AlgorandClient, start_round: int) -> None:
     subscription = sub.TransactionSubscriptionParams(
-        filters=[sub.TransactionFilter(name="all")],
+        filters=[sub.NamedTransactionFilter(name="all", filter=sub.TransactionFilter())],
         watermark=max(start_round - 1, 0),
         max_rounds_to_sync=1,
         max_indexer_rounds_to_sync=1,

@@ -14,7 +14,7 @@ from algokit_utils import (
     SendTransactionComposerResults,
 )
 
-from algokit_subscriber.types.subscription import TransactionFilter
+from algokit_subscriber.types.subscription import NamedTransactionFilter, TransactionFilter
 
 from .accounts import generate_account
 from .conftest import FilterFixture
@@ -175,9 +175,8 @@ def test_single_receiver(
     filter_fixture: FilterFixture, algo_transfers_fixture: _AlgoTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
-            name="default",
-            receiver=algo_transfers_fixture.account2,
+        NamedTransactionFilter(
+            name="default", filter=TransactionFilter(receiver=algo_transfers_fixture.account2)
         ),
         algo_transfers_fixture.txns.tx_ids[0],
     )
@@ -187,9 +186,8 @@ def test_single_sender(
     filter_fixture: FilterFixture, algo_transfers_fixture: _AlgoTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
-            name="default",
-            sender=algo_transfers_fixture.account2,
+        NamedTransactionFilter(
+            name="default", filter=TransactionFilter(sender=algo_transfers_fixture.account2)
         ),
         algo_transfers_fixture.txns.tx_ids[2],
     )
@@ -199,12 +197,14 @@ def test_multiple_receivers(
     filter_fixture: FilterFixture, algo_transfers_fixture: _AlgoTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            receiver=[
-                algo_transfers_fixture.account2,
-                algo_transfers_fixture.account3.addr,
-            ],
+            filter=TransactionFilter(
+                receiver=[
+                    algo_transfers_fixture.account2,
+                    algo_transfers_fixture.account3.addr,
+                ]
+            ),
         ),
         algo_transfers_fixture.txns.tx_ids[:2],
     )
@@ -214,12 +214,14 @@ def test_multiple_senders(
     filter_fixture: FilterFixture, algo_transfers_fixture: _AlgoTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=[
-                algo_transfers_fixture.test_account,
-                algo_transfers_fixture.account2,
-            ],
+            filter=TransactionFilter(
+                sender=[
+                    algo_transfers_fixture.test_account,
+                    algo_transfers_fixture.account2,
+                ]
+            ),
         ),
         algo_transfers_fixture.txns.tx_ids,
     )
@@ -229,10 +231,12 @@ def test_min_amount_of_algos(
     filter_fixture: FilterFixture, algo_transfers_fixture: _AlgoTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=algo_transfers_fixture.test_account,
-            min_amount=1_000_001,  # 1 Algo + 1 microAlgo
+            filter=TransactionFilter(
+                sender=algo_transfers_fixture.test_account,
+                min_amount=1_000_001,  # 1 Algo + 1 microAlgo
+            ),
         ),
         algo_transfers_fixture.txns.tx_ids[1],
     )
@@ -242,10 +246,12 @@ def test_max_amount_of_algos(
     filter_fixture: FilterFixture, algo_transfers_fixture: _AlgoTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=algo_transfers_fixture.test_account,
-            max_amount=1_000_001,  # 1 Algo + 1 microAlgo
+            filter=TransactionFilter(
+                sender=algo_transfers_fixture.test_account,
+                max_amount=1_000_001,  # 1 Algo + 1 microAlgo
+            ),
         ),
         algo_transfers_fixture.txns.tx_ids[0],
     )
@@ -255,19 +261,17 @@ def test_note_prefix(
     filter_fixture: FilterFixture, algo_transfers_fixture: _AlgoTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=algo_transfers_fixture.test_account,
-            note_prefix="a",
+            filter=TransactionFilter(sender=algo_transfers_fixture.test_account, note_prefix="a"),
         ),
         algo_transfers_fixture.txns.tx_ids[0],
     )
 
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=algo_transfers_fixture.test_account,
-            note_prefix="b",
+            filter=TransactionFilter(sender=algo_transfers_fixture.test_account, note_prefix="b"),
         ),
         algo_transfers_fixture.txns.tx_ids[1],
     )
@@ -279,10 +283,12 @@ def test_asset_txns(
     tx_ids = asset_transfers_fixture.txns.tx_ids
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=asset_transfers_fixture.test_account,
-            asset_id=asset_transfers_fixture.asset1,
+            filter=TransactionFilter(
+                sender=asset_transfers_fixture.test_account,
+                asset_id=asset_transfers_fixture.asset1,
+            ),
         ),
         [tx_ids[0], tx_ids[3], tx_ids[4]],
     )
@@ -292,10 +298,12 @@ def test_multiple_asset_ids(
     filter_fixture: FilterFixture, asset_transfers_fixture: _AssetTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=asset_transfers_fixture.test_account,
-            asset_id=[asset_transfers_fixture.asset1, asset_transfers_fixture.asset2],
+            filter=TransactionFilter(
+                sender=asset_transfers_fixture.test_account,
+                asset_id=[asset_transfers_fixture.asset1, asset_transfers_fixture.asset2],
+            ),
         ),
         [
             asset_transfers_fixture.txns.tx_ids[0],
@@ -310,10 +318,11 @@ def test_asset_create(
     filter_fixture: FilterFixture, asset_transfers_fixture: _AssetTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=asset_transfers_fixture.test_account,
-            asset_create=True,
+            filter=TransactionFilter(
+                sender=asset_transfers_fixture.test_account, asset_create=True
+            ),
         ),
         asset_transfers_fixture.txns.tx_ids[2],
     )
@@ -325,28 +334,27 @@ def test_transaction_types(
     tx_ids = asset_transfers_fixture.txns.tx_ids
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=asset_transfers_fixture.test_account,
-            type="axfer",
+            filter=TransactionFilter(sender=asset_transfers_fixture.test_account, type="axfer"),
         ),
         [tx_ids[0], tx_ids[1], tx_ids[3], tx_ids[4]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=asset_transfers_fixture.test_account,
-            type="acfg",
+            filter=TransactionFilter(sender=asset_transfers_fixture.test_account, type="acfg"),
         ),
         [tx_ids[2]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=asset_transfers_fixture.test_account,
-            type=["acfg", "axfer"],
+            filter=TransactionFilter(
+                sender=asset_transfers_fixture.test_account, type=["acfg", "axfer"]
+            ),
         ),
         tx_ids,
     )
@@ -356,11 +364,11 @@ def test_min_amount_of_asset(
     filter_fixture: FilterFixture, asset_transfers_fixture: _AssetTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            type="axfer",
-            sender=asset_transfers_fixture.test_account,
-            min_amount=2,
+            filter=TransactionFilter(
+                type="axfer", sender=asset_transfers_fixture.test_account, min_amount=2
+            ),
         ),
         asset_transfers_fixture.txns.tx_ids[4],
     )
@@ -372,11 +380,11 @@ def test_max_amount_of_asset(
     tx_ids = asset_transfers_fixture.txns.tx_ids
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            type="axfer",
-            sender=asset_transfers_fixture.test_account,
-            max_amount=1,
+            filter=TransactionFilter(
+                type="axfer", sender=asset_transfers_fixture.test_account, max_amount=1
+            ),
         ),
         [tx_ids[0], tx_ids[1], tx_ids[3]],
     )
@@ -388,12 +396,14 @@ def test_max_amount_of_asset_with_asset_id(
     tx_ids = asset_transfers_fixture.txns.tx_ids
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            type="axfer",
-            sender=asset_transfers_fixture.test_account,
-            max_amount=1,
-            asset_id=asset_transfers_fixture.asset1,
+            filter=TransactionFilter(
+                type="axfer",
+                sender=asset_transfers_fixture.test_account,
+                max_amount=1,
+                asset_id=asset_transfers_fixture.asset1,
+            ),
         ),
         [tx_ids[0], tx_ids[3]],
     )
@@ -403,13 +413,15 @@ def test_min_and_max_amount_of_asset_with_asset_id(
     filter_fixture: FilterFixture, asset_transfers_fixture: _AssetTransfersFixture
 ) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            type="axfer",
-            sender=asset_transfers_fixture.test_account,
-            min_amount=1,
-            max_amount=1,
-            asset_id=asset_transfers_fixture.asset1,
+            filter=TransactionFilter(
+                type="axfer",
+                sender=asset_transfers_fixture.test_account,
+                min_amount=1,
+                max_amount=1,
+                asset_id=asset_transfers_fixture.asset1,
+            ),
         ),
         asset_transfers_fixture.txns.tx_ids[3],
     )
@@ -417,10 +429,9 @@ def test_min_and_max_amount_of_asset_with_asset_id(
 
 def test_app_create(filter_fixture: FilterFixture, apps_fixture: _AppsFixture) -> None:
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            app_create=True,
+            filter=TransactionFilter(sender=apps_fixture.test_account, app_create=True),
         ),
         apps_fixture.txns.tx_ids[2],
     )
@@ -430,19 +441,19 @@ def test_app_ids(filter_fixture: FilterFixture, apps_fixture: _AppsFixture) -> N
     tx_ids = apps_fixture.txns.tx_ids
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            app_id=apps_fixture.app1,
+            filter=TransactionFilter(sender=apps_fixture.test_account, app_id=apps_fixture.app1),
         ),
         [tx_ids[0], tx_ids[3]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            app_id=[apps_fixture.app1, apps_fixture.app2],
+            filter=TransactionFilter(
+                sender=apps_fixture.test_account, app_id=[apps_fixture.app1, apps_fixture.app2]
+            ),
         ),
         [tx_ids[0], tx_ids[1], tx_ids[3]],
     )
@@ -452,19 +463,19 @@ def test_on_complete(filter_fixture: FilterFixture, apps_fixture: _AppsFixture) 
     tx_ids = apps_fixture.txns.tx_ids
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            app_on_complete="optin",
+            filter=TransactionFilter(sender=apps_fixture.test_account, app_on_complete="optin"),
         ),
         [tx_ids[3]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            app_on_complete=["optin", "noop"],
+            filter=TransactionFilter(
+                sender=apps_fixture.test_account, app_on_complete=["optin", "noop"]
+            ),
         ),
         tx_ids,
     )
@@ -474,28 +485,33 @@ def test_method_signatures(filter_fixture: FilterFixture, apps_fixture: _AppsFix
     tx_ids = apps_fixture.txns.tx_ids
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            method_signature="opt_in()void",
+            filter=TransactionFilter(
+                sender=apps_fixture.test_account, method_signature="opt_in()void"
+            ),
         ),
         [tx_ids[3]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            method_signature=["opt_in()void", "madeUpMethod()void"],
+            filter=TransactionFilter(
+                sender=apps_fixture.test_account,
+                method_signature=["opt_in()void", "madeUpMethod()void"],
+            ),
         ),
         [tx_ids[3]],
     )
 
     filter_fixture.subscribe_and_verify_filter(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            method_signature=["opt_in()void", "call_abi(string)string"],
+            filter=TransactionFilter(
+                sender=apps_fixture.test_account,
+                method_signature=["opt_in()void", "call_abi(string)string"],
+            ),
         ),
         [tx_ids[0], tx_ids[1], tx_ids[3]],
     )
@@ -506,10 +522,11 @@ def test_app_args(filter_fixture: FilterFixture, apps_fixture: _AppsFixture) -> 
         return bool(args and len(args) > 1 and args[1][2:].decode("utf-8") == "test1")
 
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=apps_fixture.test_account,
-            app_call_arguments_match=app_call_arguments_match,
+            filter=TransactionFilter(
+                sender=apps_fixture.test_account, app_call_arguments_match=app_call_arguments_match
+            ),
         ),
         apps_fixture.txns.tx_ids[0],
     )
@@ -522,10 +539,11 @@ def test_custom_filter(
         return t.id_ == algo_transfers_fixture.txns.tx_ids[1]
 
     filter_fixture.subscribe_and_verify(
-        TransactionFilter(
+        NamedTransactionFilter(
             name="default",
-            sender=algo_transfers_fixture.test_account,
-            custom_filter=custom_filter,
+            filter=TransactionFilter(
+                sender=algo_transfers_fixture.test_account, custom_filter=custom_filter
+            ),
         ),
         algo_transfers_fixture.txns.tx_ids[1],
     )

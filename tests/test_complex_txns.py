@@ -18,10 +18,12 @@ def test_nested_inners_from_indexer(
     txns = get_subscribed_transactions_for_test(
         sub.TransactionSubscriptionParams(
             filters=[
-                sub.TransactionFilter(
+                sub.NamedTransactionFilter(
                     name="default",
-                    app_id=NESTED_INNER_APP,
-                    sender="AACCDJTFPQR5UQJZ337NFR56CC44T776EWBGVJG5NY2QFTQWBWTALTEN4A",
+                    filter=sub.TransactionFilter(
+                        app_id=NESTED_INNER_APP,
+                        sender="AACCDJTFPQR5UQJZ337NFR56CC44T776EWBGVJG5NY2QFTQWBWTALTEN4A",
+                    ),
                 )
             ],
             max_rounds_to_sync=1,
@@ -45,10 +47,12 @@ def test_nested_inners_from_algod(
     txns = get_subscribed_transactions_for_test(
         sub.TransactionSubscriptionParams(
             filters=[
-                sub.TransactionFilter(
+                sub.NamedTransactionFilter(
                     name="default",
-                    app_id=NESTED_INNER_APP,
-                    sender="AACCDJTFPQR5UQJZ337NFR56CC44T776EWBGVJG5NY2QFTQWBWTALTEN4A",
+                    filter=sub.TransactionFilter(
+                        app_id=NESTED_INNER_APP,
+                        sender="AACCDJTFPQR5UQJZ337NFR56CC44T776EWBGVJG5NY2QFTQWBWTALTEN4A",
+                    ),
                 )
             ],
             max_rounds_to_sync=1,

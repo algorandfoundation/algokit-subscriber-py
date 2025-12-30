@@ -53,8 +53,10 @@ subscriber = sub.AlgorandSubscriber(
         filters=[
             sub.SubscriberConfigFilter(
                 name="Governance",
-                type="pay",
-                note_prefix="af/gov1:j",
+                filter=sub.TransactionFilter(
+                    type="pay",
+                    note_prefix="af/gov1:j",
+                ),
             ),
         ],
         # Instead of always waiting for the next block, just poll for new blocks every 10 seconds

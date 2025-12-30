@@ -40,7 +40,9 @@ def get_subscription(  # noqa: PLR0913
     subscribed_txns = list[str]()
 
     all_filters: list[sub.SubscriberConfigFilter] = [
-        sub.SubscriberConfigFilter(name="test-txn", sender=test_account),
+        sub.SubscriberConfigFilter(
+            name="test-txn", filter=sub.TransactionFilter(sender=test_account)
+        ),
         *(filters or []),
     ]
 
@@ -130,12 +132,12 @@ def test_subscribes_correctly_with_multiple_filters(localnet: AlgorandClient) ->
         filters=[
             sub.SubscriberConfigFilter(
                 name="sender1",
-                sender=senders[0],
+                filter=sub.TransactionFilter(sender=senders[0]),
                 mapper=lambda txns: [t.id_ for t in txns],
             ),
             sub.SubscriberConfigFilter(
                 name="sender2",
-                sender=senders[1],
+                filter=sub.TransactionFilter(sender=senders[1]),
                 mapper=lambda txns: [t.confirmed_round for t in txns],
             ),
         ],
@@ -336,8 +338,12 @@ def test_correctly_fires_various_on_methods(localnet: AlgorandClient) -> None:
         sync_behaviour="sync-oldest",
         frequency_in_seconds=1000,
         filters=[
-            sub.SubscriberConfigFilter(name="account1", sender=test_account),
-            sub.SubscriberConfigFilter(name="account2", sender=random_account),
+            sub.SubscriberConfigFilter(
+                name="account1", filter=sub.TransactionFilter(sender=test_account)
+            ),
+            sub.SubscriberConfigFilter(
+                name="account2", filter=sub.TransactionFilter(sender=random_account)
+            ),
         ],
         initial_watermark=initial_watermark,
     )
@@ -395,7 +401,9 @@ def test_on_error(localnet: AlgorandClient) -> None:
         indexer_client=localnet.client.indexer,
         config=sub.AlgorandSubscriberConfig(
             filters=[
-                sub.SubscriberConfigFilter(name="pay txns", type="pay", min_amount=0),
+                sub.SubscriberConfigFilter(
+                    name="pay txns", filter=sub.TransactionFilter(type="pay", min_amount=0)
+                ),
             ],
             watermark_persistence=in_memory_watermark(),
             wait_for_block_when_at_tip=True,

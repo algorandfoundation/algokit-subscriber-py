@@ -337,19 +337,7 @@ TransactionType = Literal["pay", "axfer", "afrz", "acfg", "keyreg", "appl", "stp
 
 @dataclass(kw_only=True, slots=True)
 class TransactionFilter:
-    """
-    A named transaction filter for subscription configuration.
-
-    Each filter you provide applies an AND logic between the specified fields.
-    A filter name can be used multiple times to create an OR filter.
-    """
-
-    name: str
-    """
-    The name of the filter. This is used to identify the filter when a transaction
-    is matched and can be used for OR logic by providing multiple filters with the
-    same name.
-    """
+    """Specify a filter to apply to find transactions of interest."""
 
     type: TransactionType | list[TransactionType] | None = None
     """Filter based on the given transaction type(s)."""
@@ -422,12 +410,20 @@ SyncBehaviour = Literal[
 
 
 @dataclass(kw_only=True, slots=True)
+class NamedTransactionFilter:
+    """Specify a named filter to apply to find transactions of interest."""
+
+    name: str
+    """The name to give the filter."""
+
+    filter: TransactionFilter
+    """The filter itself."""
+
+
+@dataclass(kw_only=True, slots=True)
 class CoreTransactionSubscriptionParams:
-    filters: Sequence[TransactionFilter]
-    """
-    The filter(s) to apply to find transactions of interest.
-    A filter name can be used multiple times to create an OR filter.
-    """
+    filters: Sequence[NamedTransactionFilter]
+    """The filter(s) to apply to find transactions of interest."""
 
     arc28_events: list[Arc28EventGroup] | None = None
     """Any ARC-28 event definitions to process from app call logs."""
@@ -486,13 +482,8 @@ class WatermarkPersistence:
 
 
 @dataclass(kw_only=True, slots=True)
-class SubscriberConfigFilter(TransactionFilter):
-    """
-    A named transaction filter for AlgorandSubscriber with optional data mapper.
-
-    Each filter you provide applies an AND logic between the specified fields.
-    A filter name can be used multiple times to create an OR filter.
-    """
+class SubscriberConfigFilter(NamedTransactionFilter):
+    """A single event to subscribe to / emit."""
 
     mapper: Callable[[list[SubscribedTransaction]], list[Any]] | None = None
     """
@@ -508,10 +499,7 @@ class AlgorandSubscriberConfig(CoreTransactionSubscriptionParams):
     """
 
     filters: Sequence[SubscriberConfigFilter]
-    """
-    The set of filters to subscribe to / emit events for, along with optional data mappers.
-    A filter name can be used multiple times to create an OR filter.
-    """
+    """The set of filters to subscribe to / emit events for, along with optional data mappers."""
 
     watermark_persistence: WatermarkPersistence
     """

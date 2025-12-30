@@ -19,15 +19,19 @@ subscriber = sub.AlgorandSubscriber(
             # Only match non-zero USDC transfers
             sub.SubscriberConfigFilter(
                 name="USDC",
-                type="axfer",
-                asset_id=31566704,  # mainnet usdc
-                min_amount=1,
+                filter=sub.TransactionFilter(
+                    type="axfer",
+                    asset_id=31566704,  # mainnet usdc
+                    min_amount=1,
+                ),
             ),
             # Only match non-zero ALGO transfers
             sub.SubscriberConfigFilter(
                 name="ALGO",
-                type="pay",
-                min_amount=1,
+                filter=sub.TransactionFilter(
+                    type="pay",
+                    min_amount=1,
+                ),
             ),
         ],
         # Once we are caught up, always wait until the next block is available
