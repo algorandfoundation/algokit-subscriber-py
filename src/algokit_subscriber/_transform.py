@@ -380,6 +380,7 @@ def _convert_application_transaction(
         local_state_schema=_convert_schema(app.local_state_schema),
         box_references=[_convert_box_ref(app_id, ref) for ref in app.box_references or []] or None,
         access=[_convert_access_ref(app_id, ref) for ref in app.access_references or []] or None,
+        reject_version=app.reject_version,
     )
 
 
