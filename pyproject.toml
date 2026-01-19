@@ -26,6 +26,7 @@ poethepoet = "^0.36.0"
 pytest-sugar = "^1.0.0"
 pip-audit = "^2.9.0"
 syrupy = "^5.0.0"
+python-semantic-release = "^10.5.3"
 
 [build-system]
 requires = ["poetry-core"]
@@ -137,17 +138,17 @@ docs-dev = { shell = "poetry run poe docs-build && sphinx-autobuild docs docs/_b
 
 [tool.poe.tasks.release-preview]
 sequence = [
-  { cmd = "poetry run semantic-release print-version --current" },
-  { cmd = "poetry run semantic-release print-version --prerelease" },
+  { cmd = "poetry run semantic-release version --print-last-released-tag" },
+  { cmd = "poetry run semantic-release version --print-tag --as-prerelease" },
 ]
 help = "Preview current and next prerelease version"
 
 [tool.poe.tasks.release-dry-run-alpha]
-shell = "poetry run semantic-release -v DEBUG --noop --prerelease --define=prerelease_tag=alpha publish"
+shell = "poetry run semantic-release --noop -vv version --as-prerelease --prerelease-token alpha --print-tag"
 help = "Dry-run alpha release (no changes made)"
 
 [tool.poe.tasks.release-dry-run-beta]
-shell = "poetry run semantic-release -v DEBUG --noop --prerelease --define=prerelease_tag=beta publish"
+shell = "poetry run semantic-release --noop -vv version --as-prerelease --prerelease-token beta --print-tag"
 help = "Dry-run beta release (no changes made)"
 
 [tool.semantic_release]

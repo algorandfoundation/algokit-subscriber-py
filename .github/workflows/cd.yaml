@@ -61,7 +61,7 @@ jobs:
 
       - name: Python Semantic Release - Alpha
         id: release-alpha
-        if: steps.get_branch.outputs.branch == 'alpha'
+        if: steps.get_branch.outputs.branch == 'alpha' && !inputs.production_release
         uses: python-semantic-release/python-semantic-release@v10.3.1
         with:
           github_token: ${{ steps.app-token.outputs.token }}
@@ -88,7 +88,6 @@ jobs:
         with:
           verbose: true
 
-
   publish-docs:
     name: Publish Docs
     needs: release
@@ -99,3 +98,4 @@ jobs:
       contents: read
       pages: write
       id-token: write
+
