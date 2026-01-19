@@ -1,11 +1,12 @@
 name: Continuous Delivery of Python package
 
-run-name: ${{ inputs.production_release && 'Production Release' || 'Beta Release' }}
+run-name: ${{ github.ref == 'refs/heads/alpha' && 'Alpha Release' || (inputs.production_release && 'Production Release' || 'Beta Release') }}
 
 on:
   push:
     branches:
       - main
+      - alpha
     paths-ignore:
       - "docs/**"
   workflow_dispatch:
@@ -58,6 +59,14 @@ jobs:
         run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
         id: get_branch
 
+      - name: Python Semantic Release - Alpha
+        id: release-alpha
+        if: steps.get_branch.outputs.branch == 'alpha'
+        uses: python-semantic-release/python-semantic-release@v10.3.1
+        with:
+          github_token: ${{ steps.app-token.outputs.token }}
+          prerelease: true
+
       - name: Python Semantic Release - Beta (non-prod)
         id: release-beta
         if: steps.get_branch.outputs.branch == 'main' && !inputs.production_release
@@ -74,7 +83,7 @@ jobs:
           github_token: ${{ steps.app-token.outputs.token }}
 
       - name: Publish to PyPI
-        if: (steps.release-beta.outputs.released == 'true') || (steps.release-prod.outputs.released == 'true')
+        if: (steps.release-alpha.outputs.released == 'true') || (steps.release-beta.outputs.released == 'true') || (steps.release-prod.outputs.released == 'true')
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
@@ -83,8 +92,8 @@ jobs:
   publish-docs:
     name: Publish Docs
     needs: release
-    # Don't publish docs for beta releases from main
-    if: inputs.production_release
+    # Don't publish docs for beta or alpha releases from main
+    if: inputs.production_release && github.ref != 'refs/heads/alpha'
     uses: ./.github/workflows/gh-pages.yaml
     permissions:
       contents: read

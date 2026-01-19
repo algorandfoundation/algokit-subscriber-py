@@ -135,6 +135,21 @@ docs-clear = { shell = "rm -rf docs/_build" }
 docs-build = { shell = "poetry run poe docs-clear && sphinx-build docs docs/_build -W --keep-going -n -E" }
 docs-dev = { shell = "poetry run poe docs-build && sphinx-autobuild docs docs/_build" }
 
+[tool.poe.tasks.release-preview]
+sequence = [
+  { cmd = "poetry run semantic-release print-version --current" },
+  { cmd = "poetry run semantic-release print-version --prerelease" },
+]
+help = "Preview current and next prerelease version"
+
+[tool.poe.tasks.release-dry-run-alpha]
+shell = "poetry run semantic-release -v DEBUG --noop --prerelease --define=prerelease_tag=alpha publish"
+help = "Dry-run alpha release (no changes made)"
+
+[tool.poe.tasks.release-dry-run-beta]
+shell = "poetry run semantic-release -v DEBUG --noop --prerelease --define=prerelease_tag=beta publish"
+help = "Dry-run beta release (no changes made)"
+
 [tool.semantic_release]
 version_toml = ["pyproject.toml:tool.poetry.version"]
 build_command = "pip install build && python -m build"
@@ -146,6 +161,11 @@ allow_zero_version = false
 match = "main"
 prerelease_token = "beta"
 prerelease = false
+
+[tool.semantic_release.branches.alpha]
+match = "alpha"
+prerelease_token = "alpha"
+prerelease = true
 
 [tool.semantic_release.commit_parser_options]
 allowed_tags = [
