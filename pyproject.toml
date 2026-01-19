@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "algokit-subscriber"
-version = "1.0.1"
+version = "2.0.0-alpha.1"
 description = ""
 authors = ["Algorand Foundation"]
 readme = "README.md"
