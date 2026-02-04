@@ -16,17 +16,17 @@ jobs:
       - name: Check pre-commits
         run: |
           set -o pipefail
-          poetry run pre-commit run --all-files && git diff --exit-code
+          uv run pre-commit run --all-files && git diff --exit-code
 
       - name: Check documentation
         run: |
           set -o pipefail
-          poetry run poe docs-test
+          uv run poe docs-test
 
       - name: Check wheels can be built
         run: |
           set -o pipefail
-          poetry build --format wheel
+          uv build --wheel
 
   tests:
     runs-on: "ubuntu-latest"
@@ -43,7 +43,7 @@ jobs:
           COVERAGE_CORE: sysmon
         run: |
           set -o pipefail
-          poetry run pytest --junitxml=pytest-junit.xml --cov | tee pytest-coverage.txt
+          uv run pytest --junitxml=pytest-junit.xml --cov | tee pytest-coverage.txt
 
       - name: pytest coverage comment
         continue-on-error: true # forks fail to add a comment, so continue any way

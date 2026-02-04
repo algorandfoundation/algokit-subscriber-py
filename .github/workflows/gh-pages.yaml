@@ -15,23 +15,22 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: "poetry"
 
       - name: Install dependencies
-        run: poetry install --no-interaction
+        run: uv sync --group dev
 
       - name: Test doctests
-        run: poetry run poe docs-test
+        run: uv run poe docs-test
 
       - name: Build docs
-        run: poetry run poe docs-build
+        run: uv run poe docs-build
 
       - name: Upload to GitHub pages
         uses: actions/upload-pages-artifact@v3

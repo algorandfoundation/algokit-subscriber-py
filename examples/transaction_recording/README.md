@@ -15,11 +15,11 @@ To run the example, execute the following commands:
 ### Install dependencies
 
 ```bash
-poetry install
+uv sync
 ```
 
 ### Run the script
 
 ```bash
-poetry run python transaction_recording.py
+uv run python transaction_recording.py
 ```
