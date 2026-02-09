@@ -51,8 +51,8 @@ jobs:
       - name: Run tests and quality checks
         run: |
           set -o pipefail
-          poetry run pre-commit run --all-files && git diff --exit-code
-          poetry run pytest
+          uv run pre-commit run --all-files && git diff --exit-code
+          uv run pytest
 
       - name: Get branch name
         shell: bash
