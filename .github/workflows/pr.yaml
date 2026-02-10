@@ -5,4 +5,4 @@ on:
 
 jobs:
   python-ci:
-    uses: algorandfoundation/shared-config/.github/workflows/python-ci.yaml@main
+    uses: algorandfoundation/algokit-shared-config/.github/workflows/python-ci.yaml@main
