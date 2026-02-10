@@ -46,7 +46,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Setup Python and algokit
-        uses: algorandfoundation/shared-config/.github/actions/setup-algokit-python@main
+        uses: algorandfoundation/algokit-shared-config/.github/actions/setup-algokit-python@main
 
       - name: Run tests and quality checks
         run: |
