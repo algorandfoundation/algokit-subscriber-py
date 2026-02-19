@@ -25,7 +25,7 @@ wheels = [
 
 [[package]]
 name = "algokit-subscriber"
-version = "2.0.0a1"
+version = "2.0.0a2"
 source = { editable = "." }
 dependencies = [
     { name = "algokit-utils" },
@@ -53,7 +53,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0a14" }]
+requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0a15" }]
 
 [package.metadata.requires-dev]
 dev = [

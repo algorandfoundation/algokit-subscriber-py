@@ -6,7 +6,7 @@ authors = [{ name = "Algorand Foundation" }]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "algokit-utils>=5.0.0a14",
+    "algokit-utils>=5.0.0a15",
 ]
 
 [dependency-groups]
@@ -133,7 +133,7 @@ pythonpath = ["src", "tests"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E501", "T201", "PLR2004", "F811"]
-"examples/*" = ["T201"]
+"examples/*" = ["T201", "N999", "PLR2004"]
 
 [tool.poe.tasks]
 docs-test = { shell = "sphinx-build -b doctest docs docs/_build -W --keep-going -n -E" }
