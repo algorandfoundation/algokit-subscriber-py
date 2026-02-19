@@ -121,44 +121,36 @@ def poll_and_display(
 def print_delivery_box() -> None:
     """Print the at-least-once delivery semantics explanation."""
     print()
-    w = 61
-    top = f"  \u250c{'\u2500' * w}\u2510"
-    mid = f"  \u251c{'\u2500' * w}\u2524"
-    bot = f"  \u2514{'\u2500' * w}\u2518"
-
-    def row(text: str = "") -> str:
-        return f"  \u2502  {text:<{w - 2}}\u2502"
-
-    print(top)
-    print(row("Watermark Persistence & Delivery Semantics"))
-    print(mid)
-    print(row())
-    print(row("The watermark is updated AFTER processing completes:"))
-    print(row())
-    print(row("  1. get() -> read current watermark"))
-    print(row("  2. Fetch transactions from watermark to tip"))
-    print(row("  3. Fire on/on_batch handlers"))
-    print(row("  4. set(newWatermark) -> persist new watermark"))
-    print(row())
-    print(row("If the process crashes between steps 3 and 4, the"))
-    print(row("watermark is NOT updated. On restart, the same"))
-    print(row("transactions will be re-fetched and re-processed."))
-    print(row())
-    print(row("This gives AT-LEAST-ONCE delivery:"))
-    print(row("  - Every transaction is guaranteed to be processed"))
-    print(row("  - Some transactions MAY be processed more than once"))
-    print(row("  - Handlers should be idempotent (safe to re-run)"))
-    print(row())
-    print(row("To achieve exactly-once semantics, persist the watermark"))
-    print(row("in the same atomic transaction as your business logic"))
-    print(row("(e.g., in a database transaction)."))
-    print(row())
-    print(bot)
+    print("  ┌─────────────────────────────────────────────────────────────┐")
+    print("  │  Watermark Persistence & Delivery Semantics                 │")
+    print("  ├─────────────────────────────────────────────────────────────┤")
+    print("  │                                                             │")
+    print("  │  The watermark is updated AFTER processing completes:       │")
+    print("  │                                                             │")
+    print("  │    1. get() -> read current watermark                       │")
+    print("  │    2. Fetch transactions from watermark to tip              │")
+    print("  │    3. Fire on/on_batch handlers                             │")
+    print("  │    4. set(newWatermark) -> persist new watermark            │")
+    print("  │                                                             │")
+    print("  │  If the process crashes between steps 3 and 4, the          │")
+    print("  │  watermark is NOT updated. On restart, the same             │")
+    print("  │  transactions will be re-fetched and re-processed.          │")
+    print("  │                                                             │")
+    print("  │  This gives AT-LEAST-ONCE delivery:                         │")
+    print("  │    - Every transaction is guaranteed to be processed        │")
+    print("  │    - Some transactions MAY be processed more than once      │")
+    print("  │    - Handlers should be idempotent (safe to re-run)         │")
+    print("  │                                                             │")
+    print("  │  To achieve exactly-once semantics, persist the watermark   │")
+    print("  │  in the same atomic transaction as your business logic      │")
+    print("  │  (e.g., in a database transaction).                         │")
+    print("  │                                                             │")
+    print("  └─────────────────────────────────────────────────────────────┘")
     print()
 
 
 def main() -> None:
-    print_header("11 \u2014 Watermark Persistence")
+    print_header("11 — Watermark Persistence")
 
     # Step 1: Connect to LocalNet
     print_step(1, "Connect to LocalNet")
@@ -233,7 +225,7 @@ def _run_example(
     print_success("Watermark positioned before first batch")
 
     # Step 6: First poll — expect 2 transactions from batch 1
-    print_step(6, "First poll \u2014 expect 2 transactions from batch 1")
+    print_step(6, "First poll — expect 2 transactions from batch 1")
     poll1 = poll_and_display(algorand, sender, receiver, persistence)
     assert len(poll1) == 2, f"Expected 2 transactions in first poll, got {len(poll1)}"
     print_success("First poll caught exactly 2 transactions")
@@ -262,7 +254,7 @@ def _run_example(
     print_success("Second batch of 2 payments sent")
 
     # Step 9: Second poll — expect only 2 NEW transactions from batch 2
-    print_step(9, "Second poll \u2014 expect only 2 NEW transactions from batch 2")
+    print_step(9, "Second poll — expect only 2 NEW transactions from batch 2")
     poll2 = poll_and_display(algorand, sender, receiver, persistence)
     assert len(poll2) == 2, f"Expected 2 transactions in second poll, got {len(poll2)}"
     poll2_notes = [t["note"] for t in poll2]

@@ -84,28 +84,22 @@ def show_mapped_data(
 def print_summary_table(batch_size: int, on_count: int) -> None:
     """Step 10: Print comparison table for on_batch vs on."""
     print()
-    w = 57
-    h = "\u2500" * w
-    print(f"  \u250c{h}\u2510")
-    print(f"  \u2502  on_batch(filter_name, handler){' ' * 26}\u2502")
-    print(f"  \u2502    - Fires: once per poll{' ' * 31}\u2502")
-    print(
-        f"  \u2502    - Receives: list[T]"
-        f" (array of {batch_size} PaymentSummary items)"
-        f"{' ' * 4}\u2502"
-    )
-    print(f"  \u2502    - Use for: bulk inserts, batch processing{' ' * 11}\u2502")
-    print(f"  \u251c{h}\u2524")
-    print(f"  \u2502  on(filter_name, handler){' ' * 31}\u2502")
-    print(f"  \u2502    - Fires: once per transaction ({on_count} times){' ' * 13}\u2502")
-    print(f"  \u2502    - Receives: T (single PaymentSummary item){' ' * 10}\u2502")
-    print(f"  \u2502    - Use for: per-item processing, logging{' ' * 13}\u2502")
-    print(f"  \u251c{h}\u2524")
-    print(f"  \u2502  mapper on filter config{' ' * 31}\u2502")
-    print(f"  \u2502    - Transforms: SubscribedTransaction[] -> T[]{' ' * 8}\u2502")
-    print(f"  \u2502    - Applied BEFORE both on and on_batch handlers{' ' * 5}\u2502")
-    print(f"  \u2502    - Type safety via mapper return type{' ' * 16}\u2502")
-    print(f"  \u2514{h}\u2518")
+    print("  ┌─────────────────────────────────────────────────────────────┐")
+    print("  │  on_batch(filter_name, handler)                             │")
+    print("  │    - Fires: once per poll                                   │")
+    print(f"  │    - Receives: list[T] (array of {batch_size} PaymentSummary items)    │")
+    print("  │    - Use for: bulk inserts, batch processing                │")
+    print("  ├─────────────────────────────────────────────────────────────┤")
+    print("  │  on(filter_name, handler)                                   │")
+    print(f"  │    - Fires: once per transaction ({on_count} times)                  │")
+    print("  │    - Receives: T (single PaymentSummary item)               │")
+    print("  │    - Use for: per-item processing, logging                  │")
+    print("  ├─────────────────────────────────────────────────────────────┤")
+    print("  │  mapper on filter config                                    │")
+    print("  │    - Transforms: SubscribedTransaction[] -> T[]             │")
+    print("  │    - Applied BEFORE both on and on_batch handlers           │")
+    print("  │    - Type safety via mapper return type                     │")
+    print("  └─────────────────────────────────────────────────────────────┘")
     print()
 
 
@@ -206,22 +200,22 @@ def create_and_poll(
 
     def handle_item(item: PaymentSummary, _name: str) -> None:
         individual_results.append(item)
-        print(f"  [on]      Received item: {item.note} \u2014 {item.amount_in_algos} ALGO")
+        print(f"  [on]      Received item: {item.note} — {item.amount_in_algos} ALGO")
 
     subscriber.on_batch("payments", handle_batch)
     subscriber.on("payments", handle_item)
-    print_info("on_batch: registered \u2014 fires once per poll with full array")
-    print_info("on: registered \u2014 fires once per transaction with individual item")
+    print_info("on_batch: registered — fires once per poll with full array")
+    print_info("on: registered — fires once per transaction with individual item")
 
     # Step 6: Poll once to trigger handlers
-    print_step(6, "Poll once \u2014 observe on_batch vs on firing")
+    print_step(6, "Poll once — observe on_batch vs on firing")
     poll_result = subscriber.poll_once()
     print_info(f"Raw matched count: {len(poll_result.subscribed_transactions)}")
     return batch_results, individual_results
 
 
 def main() -> None:
-    print_header("10 \u2014 Batch Handling & Data Mappers")
+    print_header("10 — Batch Handling & Data Mappers")
 
     # Step 1: Connect to LocalNet
     print_step(1, "Connect to LocalNet")

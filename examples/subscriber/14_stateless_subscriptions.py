@@ -110,7 +110,7 @@ def print_contrast() -> None:
     print("    - Caller manages watermark externally (DB, file, env var)")
     print("    - Single function call: params in -> result out")
     print("    - Ideal for serverless functions, cron jobs, Lambda/Cloud Functions")
-    print("    - No polling loop \u2014 caller controls when/how often to call")
+    print("    - No polling loop — caller controls when/how often to call")
     print()
     print("  AlgorandSubscriber (stateful):")
     print("    - Class with start/stop, event emitters (on, onBatch)")
@@ -121,7 +121,7 @@ def print_contrast() -> None:
 
 
 def main() -> None:
-    print_header("14 \u2014 getSubscribedTransactions (Stateless)")
+    print_header("14 — getSubscribedTransactions (Stateless)")
 
     # Step 1: Connect to LocalNet
     print_step(1, "Connect to LocalNet")
@@ -182,7 +182,7 @@ def main() -> None:
     first_ids = set(first_call.transactions)
     overlap = [t for t in second_call.transactions if t in first_ids]
     assert len(overlap) == 0, f"Found {len(overlap)} overlapping transactions"
-    print_success("No overlap \u2014 second call returned only new transactions")
+    print_success("No overlap — second call returned only new transactions")
 
     # Step 8: Contrast with AlgorandSubscriber class
     print_step(8, "Contrast: getSubscribedTransactions vs AlgorandSubscriber")

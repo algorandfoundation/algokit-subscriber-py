@@ -53,7 +53,7 @@ def verify_filters_matched(
 
 
 def main() -> None:
-    print_header("06 \u2014 Multiple Named Filters")
+    print_header("06 — Multiple Named Filters")
 
     # Step 1: Connect to LocalNet
     print_step(1, "Connect to LocalNet")
@@ -136,9 +136,9 @@ def main() -> None:
         ),
         algod_client=algorand.client.algod,
     )
-    print_info("Filter 1: 'from-sender' \u2014 sender = sender account")
-    print_info("Filter 2: 'to-receiver' \u2014 receiver = receiver account")
-    print_info("Filter 3: 'large-txns'  \u2014 minAmount = 3,000,000 microAlgo")
+    print_info("Filter 1: 'from-sender' — sender = sender account")
+    print_info("Filter 2: 'to-receiver' — receiver = receiver account")
+    print_info("Filter 3: 'large-txns'  — minAmount = 3,000,000 microAlgo")
     print_success("Subscriber created with 3 named filters")
 
     # Step 5: Poll once and inspect results
@@ -178,48 +178,19 @@ def print_summary_table(txns: list[SubscribedTransaction]) -> None:
     """Print a summary table of matched transactions."""
     print_step(9, "Summary table")
     print()
-    print(
-        "  \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510"
-    )
-    print(
-        "  \u2502 Note       "
-        "\u2502 Amount                  "
-        "\u2502 Filters Matched                       \u2502"
-    )
-    mid = (
-        "  \u251c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u253c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2524"
-    )
+    print("  ┌────────────┬─────────────────────────┬───────────────────────────────────────┐")
+    print("  │ Note       │ Amount                  │ Filters Matched                       │")
+    mid = "  ├────────────┼─────────────────────────┼───────────────────────────────────────┤"
     print(mid)
     for txn in txns:
         note = txn.note.decode() if txn.note else ""
         amt = txn.payment_transaction.amount if txn.payment_transaction else 0
         filters = ", ".join(txn.filters_matched)
-        print(
-            f"  \u2502 {note:<10} \u2502 {format_micro_algo(amt):<23} \u2502 {filters:<37} \u2502"
-        )
+        print(f"  │ {note:<10} │ {format_micro_algo(amt):<23} │ {filters:<37} │")
     print(mid)
-    excluded = "(no match \u2014 excluded)"
-    print(
-        f"  \u2502 {'multi-05':<10} \u2502 {'500000 microALGO':<23} \u2502 {excluded:<37} \u2502"
-    )
-    print(
-        "  \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"
-        "\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518"
-    )
+    excluded = "(no match — excluded)"
+    print(f"  │ {'multi-05':<10} │ {'500000 microALGO':<23} │ {excluded:<37} │")
+    print("  └────────────┴─────────────────────────┴───────────────────────────────────────┘")
     print()
 
 

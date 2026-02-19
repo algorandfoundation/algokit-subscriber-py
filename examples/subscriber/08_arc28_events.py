@@ -104,8 +104,8 @@ def print_summary(step: int, app_id: int, group: Arc28EventGroup) -> None:
     print_step(step, "Summary")
     print_info(f"App ID: {app_id}")
     print_info(f'Event group: "{group.group_name}" with {len(group.events)} event definitions')
-    print_info(f"process_for_app_ids: [{app_id}] \u2014 only parse events from this app")
-    print_info("continue_on_error: True \u2014 skip unparseable events")
+    print_info(f"process_for_app_ids: [{app_id}] — only parse events from this app")
+    print_info("continue_on_error: True — skip unparseable events")
     print_info("Config-level arc28_events: Defines HOW events are parsed from app call logs")
     print_info(
         "Filter-level arc28_events: Defines WHICH transactions to match (by group + event name)"
@@ -116,7 +116,7 @@ def print_summary(step: int, app_id: int, group: Arc28EventGroup) -> None:
 
 
 def main() -> None:
-    print_header("08 \u2014 ARC-28 Event Subscription")
+    print_header("08 — ARC-28 Event Subscription")
 
     # Step 1: Connect to LocalNet
     print_step(1, "Connect to LocalNet")
@@ -192,7 +192,7 @@ def main() -> None:
     # KEY DISTINCTION:
     #   Config-level arc28_events (Arc28EventGroup[]): HOW to parse events
     #   Filter-level arc28_events: WHICH transactions to match
-    print_step(6, "Subscribe with arc28_events \u2014 event parsing + filtering")
+    print_step(6, "Subscribe with arc28_events — event parsing + filtering")
     arc28_event_group = Arc28EventGroup(
         group_name="testing-app-events",
         events=[swapped_event, complex_event],
@@ -239,7 +239,7 @@ def main() -> None:
     # Step 8: Demonstrate continueOnError behavior
     print_step(8, "Demonstrate continue_on_error: True")
     print_info(
-        "continue_on_error: True \u2014 if an event log cannot be decoded,"
+        "continue_on_error: True — if an event log cannot be decoded,"
         " a warning is logged and the event is skipped"
     )
     print_info(
@@ -248,7 +248,7 @@ def main() -> None:
     )
     print_success(
         "continue_on_error: True is set on the event group"
-        " \u2014 unparseable events are silently skipped"
+        " — unparseable events are silently skipped"
     )
 
     # Step 9: Summary

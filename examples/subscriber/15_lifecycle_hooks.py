@@ -74,9 +74,7 @@ def part_a(algorand: AlgorandClient, sender: str, watermark_a: int) -> int:
         )
     )
 
-    subscriber_a.on(
-        "payments", lambda txn, _: timeline.append(f'on("payments") \u2014 txn {txn.id_}')
-    )
+    subscriber_a.on("payments", lambda txn, _: timeline.append(f'on("payments") — txn {txn.id_}'))
 
     subscriber_a.on_poll(
         lambda result, _: timeline.append(
@@ -151,9 +149,7 @@ def part_b(
         )
     )
 
-    subscriber_b.on(
-        "payments", lambda txn, _: timeline.append(f'on("payments") \u2014 txn {txn.id_}')
-    )
+    subscriber_b.on("payments", lambda txn, _: timeline.append(f'on("payments") — txn {txn.id_}'))
 
     subscriber_b.on_poll(
         lambda result, _: timeline.append(
@@ -254,10 +250,10 @@ def part_c(
         nonlocal successful_polls
         # Simulate an error on the first poll
         if poll_number == 1:
-            error_timeline.append("on_poll \u2014 throwing simulated error!")
+            error_timeline.append("on_poll — throwing simulated error!")
             raise RuntimeError("Simulated processing error")
         successful_polls += 1
-        error_timeline.append(f"on_poll \u2014 success (poll #{poll_number})")
+        error_timeline.append(f"on_poll — success (poll #{poll_number})")
 
     def on_error_c(error: Exception, _ev: str) -> None:
         nonlocal retry_count, errors_caught
@@ -265,15 +261,15 @@ def part_c(
         retry_count += 1
         message = str(error)
         error_timeline.append(
-            f'on_error \u2014 caught: "{message}" (retry {retry_count}/{MAX_RETRIES})'
+            f'on_error — caught: "{message}" (retry {retry_count}/{MAX_RETRIES})'
         )
         if retry_count > MAX_RETRIES:
-            error_timeline.append("on_error \u2014 max retries exceeded, stopping")
+            error_timeline.append("on_error — max retries exceeded, stopping")
             subscriber_c.stop("max retries exceeded")
             return
         # In Python start() blocks and the loop retries automatically,
         # unlike TS where start() is non-blocking and must be re-called.
-        error_timeline.append("on_error \u2014 retrying (loop continues)")
+        error_timeline.append("on_error — retrying (loop continues)")
 
     subscriber_c.on_before_poll(before_poll_c)
     subscriber_c.on_poll(on_poll_c)
@@ -306,7 +302,7 @@ def part_c(
 
 
 def main() -> None:
-    print_header("15 \u2014 Lifecycle Hooks & Error Handling")
+    print_header("15 — Lifecycle Hooks & Error Handling")
 
     # Step 1: Connect to LocalNet
     print_step(1, "Connect to LocalNet")
@@ -332,7 +328,7 @@ def main() -> None:
     print_info(f"Sender: {shorten_address(sender)}")
 
     # Part A: Hook execution order with poll_once()
-    print_step(3, "Part A \u2014 Hook execution order (poll_once)")
+    print_step(3, "Part A — Hook execution order (poll_once)")
 
     # Send a transaction so we have something to match
     txn1 = algorand.send.payment(
@@ -351,7 +347,7 @@ def main() -> None:
     watermark_a = part_a(algorand, sender, watermark_a)
 
     # Part B: start(inspect) callback
-    print_step(4, "Part B \u2014 start(inspect) callback")
+    print_step(4, "Part B — start(inspect) callback")
 
     # Send 2 more transactions
     for i in range(2, 4):
@@ -368,7 +364,7 @@ def main() -> None:
     watermark_b = part_b(algorand, sender, watermark_a)
 
     # Part C: Error recovery with on_error
-    print_step(5, "Part C \u2014 Error recovery with on_error")
+    print_step(5, "Part C — Error recovery with on_error")
 
     # Send a transaction so there's something to process
     algorand.send.payment(
@@ -397,17 +393,14 @@ def main() -> None:
 
     print_success("Lifecycle hook execution order:")
     print_info(
-        "  1: on_before_poll(metadata)  \u2014 before each poll,"
-        " receives { watermark, current_round }"
+        "  1: on_before_poll(metadata)  — before each poll, receives { watermark, current_round }"
     )
-    print_info("  2: [transaction processing] \u2014 filter matching, mapper, on(), on_batch()")
+    print_info("  2: [transaction processing] — filter matching, mapper, on(), on_batch()")
     print_info(
-        "  3: on_poll(result)          \u2014 after processing,"
-        " receives TransactionSubscriptionResult"
+        "  3: on_poll(result)          — after processing, receives TransactionSubscriptionResult"
     )
     print_info(
-        "  4: inspect(result)         \u2014 in start() loop only,"
-        " after on_poll, same result object"
+        "  4: inspect(result)         — in start() loop only, after on_poll, same result object"
     )
 
     print_success("Error handling:")

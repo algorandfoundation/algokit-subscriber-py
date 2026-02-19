@@ -372,7 +372,7 @@ def _print_summary_box() -> None:
         "    Best for real-time notifications only.",
         "",
         "  sync-oldest-start-now:",
-        "    Hybrid \u2014 skips history on first start (wm=0), then catches",
+        "    Hybrid — skips history on first start (wm=0), then catches",
         "    up incrementally like sync-oldest afterward.",
         "",
         "  fail:",

@@ -138,28 +138,18 @@ def print_summary() -> None:
     """Step 10: Print summary table."""
     print_step(10, "Summary")
     print()
-    h = "\u2500" * 18
-    d = "\u2500" * 50
-    print(f"  \u250c{h}\u252c{d}\u2510")
-    print(
-        "  \u2502 Filter           \u2502 Description                                      \u2502"
-    )
-    print(f"  \u251c{h}\u253c{d}\u2524")
-    print(
-        "  \u2502 algo-sender      \u2502 assetId=0, role=Sender, minAbsoluteAmount=2M     \u2502"
-    )
-    print(
-        "  \u2502 asa-receiver     \u2502 assetId=ASA, role=Receiver                        \u2502"
-    )
-    print(
-        "  \u2502 address          \u2502 address=Sender (any role, any asset)              \u2502"
-    )
-    print(f"  \u2514{h}\u2534{d}\u2518")
+    print("  ┌──────────────────┬──────────────────────────────────────────────────┐")
+    print("  │ Filter           │ Description                                      │")
+    print("  ├──────────────────┼──────────────────────────────────────────────────┤")
+    print("  │ algo-sender      │ assetId=0, role=Sender, minAbsoluteAmount=2M     │")
+    print("  │ asa-receiver     │ assetId=ASA, role=Receiver                       │")
+    print("  │ address          │ address=Sender (any role, any asset)             │")
+    print("  └──────────────────┴──────────────────────────────────────────────────┘")
     print()
 
 
 def main() -> None:
-    print_header("07 \u2014 Balance Change Tracking")
+    print_header("07 — Balance Change Tracking")
 
     # Step 1: Connect to LocalNet
     print_step(1, "Connect to LocalNet")

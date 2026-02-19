@@ -127,7 +127,7 @@ def print_pass_fail(
 
 
 def main() -> None:
-    print_header("13 \u2014 Custom Filters")
+    print_header("13 — Custom Filters")
 
     algorand, sender, allowlist, payments, watermark_before = setup_and_send()
     test_filter = create_filter_tester(algorand.client.algod, watermark_before)

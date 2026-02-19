@@ -96,7 +96,7 @@ def deploy_and_call(algorand: AlgorandClient, caller: str) -> tuple[int, str, st
     print_info(f"App call txn: {app_call_txn_id}")
     print_info(f"Confirmed round: {app_call_round}")
     print_info(f"Transfer amount: {format_algo(transfer_amount)}")
-    print_success("issue_transfer_to_sender called \u2014 inner payment created")
+    print_success("issue_transfer_to_sender called — inner payment created")
 
     return app_id, app_addr, app_call_txn_id, app_call_round, transfer_amount
 
@@ -104,7 +104,7 @@ def deploy_and_call(algorand: AlgorandClient, caller: str) -> tuple[int, str, st
 def verify_inner(inner_txn: SubscribedTransaction) -> None:
     """Steps 7-8: Verify parentTransactionId and inner txn ID format."""
     # Step 7: Inspect inner transaction — parentTransactionId
-    print_step(7, "Inspect inner transaction \u2014 parentTransactionId")
+    print_step(7, "Inspect inner transaction — parentTransactionId")
     print_info(f"Inner txn ID: {inner_txn.id_}")
     print_info(f"parentTransactionId: {inner_txn.parent_transaction_id or 'None'}")
     assert inner_txn.parent_transaction_id, (
@@ -209,7 +209,7 @@ def print_parent_child(
     print_info(f"    Sender: {shorten_address(caller)}")
     print_info(f"    innerTxns count: {len(parent_txn.inner_txns)}")
     print()
-    print("  \u2514\u2500\u2500 Inner (payment):")
+    print("  └── Inner (payment):")
     print_info(f"      ID: {inner_txn.id_}")
     print_info("      Type: pay (payment)")
     print_info(f"      Sender: {shorten_address(app_addr)}")
@@ -222,7 +222,7 @@ def print_parent_child(
 
 
 def main() -> None:
-    print_header("09 \u2014 Inner Transaction Subscription")
+    print_header("09 — Inner Transaction Subscription")
 
     # Step 1: Connect to LocalNet
     print_step(1, "Connect to LocalNet")
@@ -286,9 +286,9 @@ def main() -> None:
     print_step(11, "Summary")
     print_info(f"App ID: {app_id}")
     print_info(f"App address: {shorten_address(app_addr)}")
-    print_info("Method called: issue_transfer_to_sender(1_000_000) \u2014 1 ALGO inner payment")
+    print_info("Method called: issue_transfer_to_sender(1_000_000) — 1 ALGO inner payment")
     print_info("Inner txn matched: by payment filter (sender: app, receiver: caller)")
-    print_info("parentTransactionId: set on inner txn \u2014 links to parent app call")
+    print_info("parentTransactionId: set on inner txn — links to parent app call")
     print_info("Inner txn ID format: <rootTxId>/inner/<N>")
     print_info("Parent innerTxns: contains the inner transaction")
 
