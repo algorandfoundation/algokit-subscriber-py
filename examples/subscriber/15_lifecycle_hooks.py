@@ -344,6 +344,7 @@ def main() -> None:
         )
     )
     first_round = txn1.confirmation.confirmed_round
+    assert first_round is not None
     print_info(f"Sent txn: {txn1.tx_id}")
 
     watermark_a = first_round - 1

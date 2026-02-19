@@ -12,7 +12,6 @@ Prerequisites:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 
 from algokit_utils import AlgoAmount, AlgorandClient, PaymentParams
 from shared import (
@@ -29,13 +28,11 @@ from shared import (
 from algokit_subscriber import (
     AlgorandSubscriber,
     AlgorandSubscriberConfig,
+    SubscribedTransaction,
     SubscriberConfigFilter,
     TransactionFilter,
     WatermarkPersistence,
 )
-
-if TYPE_CHECKING:
-    from algokit_subscriber import SubscribedTransaction
 
 
 @dataclass

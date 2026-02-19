@@ -226,6 +226,7 @@ def _run_example(
 
     # Step 5: Set initial watermark to isolate test transactions
     print_step(5, "Set initial watermark to isolate test transactions")
+    assert first_round is not None
     start_watermark = first_round - 1
     persistence.set(start_watermark)
     print_info(f"Watermark set to: {start_watermark}")
@@ -243,6 +244,7 @@ def _run_example(
     file_content = json.loads(watermark_path.read_text())["watermark"]
     print_info(f"File content: {file_content}")
     print_info(f"Watermark value: {saved_watermark}")
+    assert saved_watermark is not None
     assert saved_watermark > start_watermark, (
         f"Watermark should have advanced past {start_watermark}, but is {saved_watermark}"
     )
@@ -273,6 +275,7 @@ def _run_example(
     print_step(10, "Verify final watermark")
     final_watermark = persistence.get()
     print_info(f"Final watermark: {final_watermark}")
+    assert final_watermark is not None
     assert final_watermark > saved_watermark, (
         f"Final watermark should have advanced past {saved_watermark}, but is {final_watermark}"
     )

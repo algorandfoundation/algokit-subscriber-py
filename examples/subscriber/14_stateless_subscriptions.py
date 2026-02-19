@@ -33,7 +33,7 @@ from algokit_subscriber import (
 )
 
 if TYPE_CHECKING:
-    from algosdk.v2client.algod import AlgodClient
+    from algokit_algod_client import AlgodClient
 
 
 @dataclass
@@ -87,7 +87,10 @@ def send_payment(
     print_info(f"{label} ID: {result.tx_id}")
     rnd = result.confirmation.confirmed_round
     print_info(f"{label} round: {rnd}")
-    return result.tx_id, rnd
+    tx_id = result.tx_id
+    assert tx_id is not None
+    assert rnd is not None
+    return tx_id, rnd
 
 
 def print_poll_result(poll: PollResult) -> None:

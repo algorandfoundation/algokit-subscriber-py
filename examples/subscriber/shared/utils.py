@@ -13,7 +13,7 @@ from algokit_subscriber import (
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from algosdk.v2client.algod import AlgodClient
+    from algokit_algod_client import AlgodClient
 
     from algokit_subscriber import SubscribedTransaction
 

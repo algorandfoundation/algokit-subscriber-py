@@ -103,8 +103,9 @@ def setup_and_send(
     print_info("Txn 3: Sender -> Receiver, 500 BTT (ASA)")
     print_success("All transactions sent")
 
-    watermark_before = pay1.confirmation.confirmed_round - 1
-    assert watermark_before is not None
+    confirmed_round = pay1.confirmation.confirmed_round
+    assert confirmed_round is not None
+    watermark_before = confirmed_round - 1
     return sender, receiver, asset_id, watermark_before
 
 

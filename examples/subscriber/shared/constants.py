@@ -1,4 +1,3 @@
-from algokit_utils import AlgorandClient
 from algokit_utils.models.network import AlgoClientNetworkConfig
 
 # Individual LocalNet constants

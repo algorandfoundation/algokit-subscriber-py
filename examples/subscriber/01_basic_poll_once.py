@@ -78,7 +78,9 @@ def main() -> None:
 
     # Step 4: Create subscriber with in-memory watermark
     print_step(4, "Create AlgorandSubscriber")
-    watermark_before = txn1.confirmation.confirmed_round - 1
+    confirmed_round = txn1.confirmation.confirmed_round
+    assert confirmed_round is not None
+    watermark_before = confirmed_round - 1
 
     subscriber = AlgorandSubscriber(
         config=AlgorandSubscriberConfig(
