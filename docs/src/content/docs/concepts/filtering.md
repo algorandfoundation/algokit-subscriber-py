@@ -3,8 +3,6 @@ title: Subscription Filtering
 description: Fine-grained transaction filtering by type, sender, receiver, app, asset, ARC-28 events, and more.
 ---
 
-# Subscription Filtering
-
 This library has extensive filtering options available to you so you can have fine-grained control over which transactions you are interested in.
 
 There is a core type [`TransactionFilter`](../../guide/subscriptions/#transactionfilter) used to specify the filters:

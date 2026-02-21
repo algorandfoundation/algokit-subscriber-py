@@ -28,6 +28,19 @@ _PLAIN_QUALIFIED_RE = re.compile(
 )
 _INDEX_MD_RE = re.compile(r"/index\.md")
 
+# Matches *class* headings with constructor signatures: "### *class* Foo(\*args, \*\*kwds)"
+_CLASS_ARGS_RE = re.compile(
+    r"^(#{3,4} \*class\* \w+)\(.*\)\s*$",
+    re.MULTILINE,
+)
+# Extracts H3 heading text for anchor map building
+_H3_TEXT_RE = re.compile(r"^### (.+)$", re.MULTILINE)
+# Matches qualified Sphinx anchors inside markdown link URLs: (#algokit_subscriber.path.Symbol)
+_QUALIFIED_ANCHOR_RE = re.compile(
+    r"\(([^()\s\"']*?)#(?:algokit_subscriber|typing_extensions|collections\.abc)"
+    r"(?:\.\w+)*\.(\w+)\)"
+)
+
 
 def _clean_api_output() -> None:
     """Remove previous API output and create a fresh directory."""
@@ -116,6 +129,8 @@ def _inject_frontmatter() -> None:
         escaped_title = title.replace('"', '\\"')
 
         content = md_file.read_text(encoding="utf-8")
+        # Strip the H1 heading — Starlight renders the title from frontmatter
+        content = re.sub(r"^# [^\n]*\n+", "", content)
         md_file.write_text(
             f'---\ntitle: "{escaped_title}"\n---\n\n<div class="api-ref">\n\n{content}\n\n</div>\n',
             encoding="utf-8",
@@ -132,6 +147,68 @@ def _fix_internal_links() -> None:
     for md_file in sorted(API_OUT.rglob("*.md")):
         content = md_file.read_text(encoding="utf-8")
         updated = _INDEX_MD_RE.sub("/", content)
+        if updated != content:
+            md_file.write_text(updated, encoding="utf-8")
+
+
+def _compute_starlight_anchor(heading_text: str) -> str:
+    """Compute the anchor slug that Starlight/rehype-slug generates from heading text."""
+    text = re.sub(r"\*([^*]+)\*", r"\1", heading_text)  # *em* → em
+    text = re.sub(r"`([^`]+)`", r"\1", text)  # `code` → code
+    text = re.sub(r"\\.", "", text)  # \* → (removed)
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9-]+", " ", text)
+    return "-".join(text.split())
+
+
+def _simplify_class_headings() -> None:
+    """Strip constructor signatures from *class* headings for predictable anchors.
+
+    Converts: ### *class* Foo(\\*args, \\*\\*kwds)
+    To:        ### *class* Foo
+    """
+    print("==> Simplifying class heading signatures...")
+    for md_file in sorted(API_OUT.rglob("*.md")):
+        content = md_file.read_text(encoding="utf-8")
+        updated = _CLASS_ARGS_RE.sub(r"\1", content)
+        if updated != content:
+            md_file.write_text(updated, encoding="utf-8")
+
+
+def _fix_qualified_anchors() -> None:
+    """Rewrite Sphinx-style qualified anchors in links to match Starlight heading IDs.
+
+    Sphinx generates links like [Foo](#algokit_subscriber.module.Foo) but Starlight
+    generates anchors from heading text (e.g. #class-foo). This step builds a per-file
+    map of symbol → anchor and rewrites the links accordingly.
+    """
+    print("==> Fixing qualified name anchors...")
+    # Build per-file maps: symbol_name → Starlight anchor
+    file_maps: dict[str, dict[str, str]] = {}
+    for md_file in sorted(API_OUT.rglob("*.md")):
+        anchor_map: dict[str, str] = {}
+        content = md_file.read_text(encoding="utf-8")
+        for m in _H3_TEXT_RE.finditer(content):
+            heading_text = m.group(1)
+            key_m = re.match(r"(?:\*\w+\*\s+)?(\w+)", heading_text)
+            if key_m:
+                symbol = key_m.group(1)
+                anchor_map[symbol] = _compute_starlight_anchor(heading_text)
+        file_maps[str(md_file)] = anchor_map
+
+    for md_file in sorted(API_OUT.rglob("*.md")):
+        content = md_file.read_text(encoding="utf-8")
+
+        def fix_anchor(m: re.Match, _file: Path = md_file) -> str:
+            path_part, symbol = m.group(1), m.group(2)
+            if path_part:
+                target_md = (_file.parent / path_part).resolve() / "index.md"
+            else:
+                target_md = _file
+            anchor = file_maps.get(str(target_md), {}).get(symbol, symbol.lower())
+            return f"({path_part}#{anchor})"
+
+        updated = _QUALIFIED_ANCHOR_RE.sub(fix_anchor, content)
         if updated != content:
             md_file.write_text(updated, encoding="utf-8")
 
@@ -169,6 +246,8 @@ def main() -> None:
     _inject_frontmatter()
     _fix_internal_links()
     _shorten_qualified_names()
+    _simplify_class_headings()
+    _fix_qualified_anchors()
 
     file_count = sum(1 for _ in API_OUT.rglob("*.md"))
     print(f"==> API docs generated at: {API_OUT}")

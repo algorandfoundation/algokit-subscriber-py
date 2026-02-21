@@ -3,8 +3,6 @@ title: Sync Behaviour
 description: Control how the subscriber handles catching up to and staying at the tip of the chain.
 ---
 
-# Sync Behaviour
-
 This library supports the ability to stay at the tip of the chain and power notification / alerting type scenarios through the use of the `sync_behaviour` parameter in both [`AlgorandSubscriber`](../../guide/subscriber/) and [`get_subscribed_transactions`](../../guide/subscriptions/).
 
 For example to stay at the tip of the chain for notification/alerting scenarios you could do:

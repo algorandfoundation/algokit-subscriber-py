@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 from docutils import nodes
 
 project = "algokit-subscriber-py"
-copyright = "2024, Algorand Foundation"
+copyright = "2026, Algorand Foundation"
 author = "Algorand Foundation"
 release = "2.0"
 
@@ -30,10 +30,15 @@ autoapi_options = [
     "show-module-summary",
 ]
 
-# Exclude private implementation modules (underscore-prefixed files).
-# Keeps: __init__.py (public API) and types/ subpackage (public types).
 autoapi_ignore = [
-    "*algokit_subscriber/_*.py",
+    "*algokit_subscriber/_block.py",
+    "*algokit_subscriber/_indexer_lookup.py",
+    "*algokit_subscriber/_internal_types.py",
+    "*algokit_subscriber/_subscriber.py",
+    "*algokit_subscriber/_subscription.py",
+    "*algokit_subscriber/_transform.py",
+    "*algokit_subscriber/_utils.py",
+    "*algokit_subscriber/_watermark.py",
 ]
 
 

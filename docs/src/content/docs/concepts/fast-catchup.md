@@ -3,8 +3,6 @@ title: Fast Catchup
 description: Use Algorand Indexer to catch up millions of rounds in seconds rather than days.
 ---
 
-# Fast Catchup
-
 When [subscribing to the chain](../sync-behaviour/) for the purposes of building an index you often will want to start at the beginning of the chain or a substantial time in the past when the given solution you are subscribing for started.
 
 This kind of catch up takes days to process since algod only lets you retrieve a single block at a time and retrieving a block takes 0.5-1s. Given there are millions of blocks in MainNet it doesn't take long to do the math to see why it takes so long to catch up.

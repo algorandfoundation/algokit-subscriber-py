@@ -3,8 +3,6 @@ title: Low Latency Processing
 description: Control polling frequency and use algod block waiting for near-instant transaction processing.
 ---
 
-# Low Latency Processing
-
 You can control the polling semantics of the library when using the [`AlgorandSubscriber`](../../guide/subscriber/) by either specifying the `frequency_in_seconds` parameter to control the duration between polls or you can use the `wait_for_block_when_at_tip` parameter to indicate the subscriber should [call algod to ask it to inform the subscriber when a new round is available](https://dev.algorand.co/reference/rest-apis/algod/#waitforblock) so the subscriber can immediately process that round with a much lower-latency.
 
 When `wait_for_block_when_at_tip` is set, the subscriber intelligently uses this option only when it's caught up to the tip of the chain, but otherwise uses `frequency_in_seconds` while catching up.

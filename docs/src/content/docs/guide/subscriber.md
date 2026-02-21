@@ -3,8 +3,6 @@ title: AlgorandSubscriber
 description: Guide to using the AlgorandSubscriber class to continuously poll the Algorand blockchain.
 ---
 
-# `AlgorandSubscriber`
-
 `AlgorandSubscriber` is a class that allows you to easily subscribe to the Algorand Blockchain, define a series of events that you are interested in, and react to those events.
 
 ## Creating a subscriber

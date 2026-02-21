@@ -3,8 +3,6 @@ title: Inner Transaction Support
 description: First-class support for subscribing to and receiving inner transactions.
 ---
 
-# Inner Transaction Support
-
 When you subscribe to transactions any subscriptions that cover an inner transaction will pick up that inner transaction and [return](../../guide/subscriptions/#subscribedtransaction) it to you correctly.
 
 Note: the behaviour Algorand Indexer has is to return the parent transaction, not the inner transaction; this library will always return the actual transaction you subscribed to.

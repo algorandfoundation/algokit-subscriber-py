@@ -3,8 +3,6 @@ title: Watermarking and Resilience
 description: Use round watermarks to create resilient syncing services that recover from outages.
 ---
 
-# Watermarking and Resilience
-
 You can create reliable syncing / indexing services through a simple round watermarking capability that allows you to create resilient syncing services that can recover from an outage.
 
 This works through the use of the `watermark_persistence` parameter in [`AlgorandSubscriber`](../../guide/subscriber/) and `watermark` parameter in [`get_subscribed_transactions`](../../guide/subscriptions/):

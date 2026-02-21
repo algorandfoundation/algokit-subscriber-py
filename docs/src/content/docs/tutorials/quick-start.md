@@ -3,8 +3,6 @@ title: Quick Start
 description: Get up and running with algokit-subscriber in minutes.
 ---
 
-# Quick Start
-
 ## Installation
 
 ```bash

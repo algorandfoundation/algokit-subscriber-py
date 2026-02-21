@@ -3,8 +3,6 @@ title: ARC-28 Events
 description: Subscribe to and receive ARC-28 smart contract events, similar to Ethereum event subscriptions.
 ---
 
-# ARC-28 Events
-
 You can [subscribe to ARC-28 events](../filtering/) for a smart contract, similar to how you can [subscribe to events in Ethereum](https://docs.web3js.org/guides/events_subscriptions/).
 
 Furthermore, you can receive any ARC-28 events that a smart contract call you subscribe to emitted in the [subscribed transaction object](../../guide/subscriptions/#subscribedtransaction).

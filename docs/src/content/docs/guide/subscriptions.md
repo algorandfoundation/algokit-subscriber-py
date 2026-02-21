@@ -3,8 +3,6 @@ title: get_subscribed_transactions
 description: Guide to using get_subscribed_transactions for single-poll blockchain subscription.
 ---
 
-# `get_subscribed_transactions`
-
 `get_subscribed_transactions` is the core building block at the centre of this library. It's a simple, but flexible mechanism that allows you to enact a single subscription "poll" of the Algorand blockchain.
 
 This is a lower level building block, you likely don't want to use it directly, but instead use the [`AlgorandSubscriber` class](../subscriber/).

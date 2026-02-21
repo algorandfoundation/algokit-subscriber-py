@@ -3,8 +3,6 @@ title: Emitting ARC-28 Events
 description: Code examples for emitting ARC-28 events from Algorand smart contracts.
 ---
 
-# Emitting ARC-28 Events
-
 To emit ARC-28 events from your smart contract you can use the following syntax.
 
 ## Algorand Python
