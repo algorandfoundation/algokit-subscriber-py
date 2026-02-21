@@ -18,7 +18,6 @@ jobs:
         uses: algorandfoundation/algokit-shared-config/.github/actions/setup-algokit-python@main
         with:
           python-version: ${{ matrix.python }}
-          install-algokit: "false"
 
       - name: pytest + coverage
         shell: bash
@@ -26,7 +25,9 @@ jobs:
           COVERAGE_CORE: sysmon
         run: |
           set -o pipefail
+          uvx algokit localnet start
           uv run pytest --junitxml=pytest-junit.xml --cov | tee pytest-coverage.txt
+          uvx algokit localnet stop
 
       - name: pytest coverage comment
         if: matrix.python == '3.12' && matrix.os == 'ubuntu-latest'
