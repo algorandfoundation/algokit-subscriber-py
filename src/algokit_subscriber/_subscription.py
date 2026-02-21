@@ -148,6 +148,8 @@ def get_subscribed_transactions(  # noqa: C901, PLR0912, PLR0915
     :param compiled_filters: Pre-compiled filters to use. If not provided, filters will be
         compiled from subscription.filters. For repeated polling, pre-compile once using
         compile_filters() and pass here for better performance.
+    :raises ValueError: If `sync_behaviour` is ``"fail"`` and the watermark is more
+        than `max_rounds_to_sync` behind the current round.
     :return: The transaction subscription result
     """
     watermark = subscription.watermark

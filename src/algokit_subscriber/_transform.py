@@ -610,9 +610,7 @@ def block_data_to_block_metadata(block_data: algod.BlockResponse) -> BlockMetada
     Extract key metadata from a block.
 
     :param block_data: The raw block data
-    :type block_data: algod.GetBlock
     :return: The block metadata
-    :rtype: BlockMetadata
     """
     block = block_data.block
     header = block.header

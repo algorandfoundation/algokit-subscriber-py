@@ -23,6 +23,13 @@ logger = logging.getLogger(__package__)
 class AlgorandSubscriber:
     """
     A subscriber for Algorand transactions.
+
+    :param config: The subscriber configuration
+    :param algod_client: An algod client
+    :param indexer_client: An (optional) indexer client; only needed if
+        `subscription.syncBehaviour` is `catchup-with-indexer`
+    :raises ValueError: If `sync_behaviour` is ``"catchup-with-indexer"`` but no
+        `indexer_client` is provided.
     """
 
     def __init__(
@@ -31,13 +38,6 @@ class AlgorandSubscriber:
         algod_client: AlgodClient,
         indexer_client: IndexerClient | None = None,
     ):
-        """
-        Create a new `AlgorandSubscriber`.
-        :param config: The subscriber configuration
-        :param algod_client: An algod client
-        :param indexer_client: An (optional) indexer client; only needed if
-            `subscription.syncBehaviour` is `catchup-with-indexer`
-        """
         self.algod = algod_client
         self.indexer = indexer_client
         self.config = config
