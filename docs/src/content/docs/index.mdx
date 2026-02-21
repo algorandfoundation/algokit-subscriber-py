@@ -1,0 +1,74 @@
+---
+title: AlgoKit Subscriber Python
+description: Subscribe to the Algorand blockchain with a simple, flexible Python library.
+template: splash
+hero:
+  title: AlgoKit Subscriber Python
+  tagline: Subscribe to the Algorand blockchain with a simple, flexible Python library
+  actions:
+    - text: Get Started
+      link: tutorials/quick-start/
+      icon: right-arrow
+    - text: API Reference
+      link: api/algokit_subscriber/
+      variant: minimal
+---
+
+import { Card, CardGrid, Tabs, TabItem } from "@astrojs/starlight/components";
+
+## Installation
+
+<Tabs>
+  <TabItem label="pip">```bash pip install algokit-subscriber ```</TabItem>
+  <TabItem label="uv">```bash uv add algokit-subscriber ```</TabItem>
+</Tabs>
+
+## Quick Example
+
+```python
+import algokit_subscriber as sub
+from algokit_utils import AlgorandClient
+
+testnet = AlgorandClient.testnet()
+
+subscriber = sub.AlgorandSubscriber(
+    config=sub.AlgorandSubscriberConfig(
+        filters=[
+            sub.SubscriberConfigFilter(
+                name="filter1",
+                filter=sub.TransactionFilter(
+                    type="pay",
+                    sender="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ",
+                ),
+            ),
+        ],
+        watermark_persistence=sub.in_memory_watermark(),
+        sync_behaviour="skip-sync-newest",
+        max_rounds_to_sync=100,
+    ),
+    algod_client=testnet.client.algod,
+)
+
+subscriber.on("filter1", lambda transaction, _: print(f"Received: {transaction.id_}"))
+subscriber.on_error(lambda error, _: print(f"Error: {error}"))
+
+result = subscriber.poll_once()
+print(f"Polled {len(result.subscribed_transactions)} transactions")
+```
+
+## Features
+
+<CardGrid>
+  <Card title="Real-time Subscriptions" icon="rocket">
+    Stay at the tip of the chain for notifications and alerting, with low-latency block waiting.
+  </Card>
+  <Card title="Indexing and Catchup" icon="seti:db">
+    Index from the beginning of the chain or a specific round, with fast catchup via Algorand Indexer.
+  </Card>
+  <Card title="ARC-28 Events" icon="puzzle">
+    Subscribe to and decode ARC-28 smart contract events, similar to Ethereum event subscriptions.
+  </Card>
+  <Card title="Resilient Watermarking" icon="approve-check">
+    Persist round watermarks to any store and recover from outages with at-least-once delivery.
+  </Card>
+</CardGrid>
