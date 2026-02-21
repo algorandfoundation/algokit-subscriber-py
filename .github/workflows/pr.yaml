@@ -6,3 +6,6 @@ on:
 jobs:
   python-ci:
     uses: algorandfoundation/algokit-shared-config/.github/workflows/python-ci.yaml@main
+
+  check-docs:
+    uses: ./.github/workflows/check-docs.yaml
