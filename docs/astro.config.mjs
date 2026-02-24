@@ -60,6 +60,10 @@ export default defineConfig({
           ],
         },
         {
+          label: "Examples",
+          items: [{ label: "Overview", link: "/examples/" }],
+        },
+        {
           label: "API Reference",
           collapsed: true,
           items: [
