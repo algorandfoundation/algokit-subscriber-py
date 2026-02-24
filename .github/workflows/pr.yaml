@@ -4,15 +4,9 @@ on:
   pull_request:
 
 jobs:
-  pr-check:
-    name: Check Python
-    uses: ./.github/workflows/check-python.yaml
+  python-ci:
+    uses: algorandfoundation/algokit-shared-config/.github/workflows/python-ci.yaml@main
 
-  pr-check-docs:
-    name: Check Documentation
-    uses: ./.github/workflows/check-docs.yaml
-
-  pr-build:
-    name: Build and Test Python
-    needs: [pr-check, pr-check-docs]
-    uses: ./.github/workflows/build-python.yaml
+  pr-verify-examples:
+    name: Verify Examples
+    uses: ./.github/workflows/verify-examples.yaml

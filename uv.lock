@@ -40,7 +40,7 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0a14" }]
+requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0a15" }]
 
 [package.metadata.requires-dev]
 dev = [
