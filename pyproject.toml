@@ -140,7 +140,6 @@ docs-dev         = { shell = "python docs/api_build.py && npm run --prefix docs 
 docs-build       = { shell = "python docs/api_build.py && npm run --prefix docs build" }
 docs-preview     = "npm run --prefix docs preview"
 docstrings-check = "pydoclint src --style sphinx --arg-type-hints-in-docstring false --check-return-types false"
-docs-test        = { sequence = ["docstrings-check", "docs-build"], help = "Validate documentation (CI)" }
 
 [tool.poe.tasks.release-preview]
 sequence = [
