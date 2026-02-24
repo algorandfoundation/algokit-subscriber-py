@@ -6,3 +6,7 @@ on:
 jobs:
   python-ci:
     uses: algorandfoundation/algokit-shared-config/.github/workflows/python-ci.yaml@main
+
+  pr-verify-examples:
+    name: Verify Examples
+    uses: ./.github/workflows/verify-examples.yaml

@@ -1,0 +1,15 @@
+[project]
+name = "algokit-subscriber-examples"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = ["algokit-subscriber"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["shared"]
+
+[tool.uv.sources]
+algokit-subscriber = { path = "../..", editable = true }
