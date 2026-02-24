@@ -1,0 +1,24 @@
+name: Check Python Code
+
+on:
+  workflow_call:
+
+jobs:
+  check-python:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Python environment
+        uses: algorandfoundation/algokit-shared-config/.github/actions/setup-algokit-python@main
+        with:
+          install-algokit: "false"
+
+      - name: Check pre-commits
+        run: |
+          set -o pipefail
+          uv run pre-commit run --all-files && git diff --exit-code
+
+      - name: Check wheels can be built
+        run: uv build --wheel

@@ -1,0 +1,25 @@
+name: Check Documentation
+
+on:
+  workflow_call:
+
+jobs:
+  check-docs:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Setup Python environment
+        uses: algorandfoundation/algokit-shared-config/.github/actions/setup-algokit-python@main
+        with:
+          install-algokit: "false"
+
+      - name: Install Python docs dependencies
+        run: uv sync --group docs
+
+      - name: Check docstrings
+        run: uv run poe docstrings-check
+
+      - name: Build documentation
+        uses: ./.github/actions/publish-docs

@@ -9,6 +9,7 @@ repos:
         language: system
         minimum_pre_commit_version: 2.9.2
         types_or: [python, pyi]
+        exclude: ^docs/
       - id: ruff
         name: ruff
         description: "Run 'ruff' for extremely fast Python linting"
@@ -18,6 +19,7 @@ repos:
         args: [--fix, --no-cache]
         additional_dependencies: []
         minimum_pre_commit_version: "0"
+        exclude: ^docs/
       - id: mypy
         name: mypy
         description: "`mypy` will check Python types for correctness"
@@ -27,3 +29,4 @@ repos:
         require_serial: true
         additional_dependencies: []
         minimum_pre_commit_version: "2.9.2"
+        exclude: ^docs/

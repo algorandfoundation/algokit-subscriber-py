@@ -16,18 +16,17 @@ dev = [
     "pytest>=8.4.1",
     "pre-commit>=4.2.0",
     "pytest-cov>=6.2.1",
-    "sphinx>=8.2.3",
-    "furo>=2024.1.29",
-    "myst-parser>=4.0.0",
-    "sphinx-autodoc2>=0.5.0",
-    "sphinx-copybutton>=0.5.2",
-    "sphinx-autobuild>=2024.4.16",
-    "sphinx-mermaid>=0.0.8",
     "poethepoet>=0.36.0",
     "pytest-sugar>=1.0.0",
     "pip-audit>=2.9.0",
     "syrupy>=5.0.0",
     "python-semantic-release>=10.5.3",
+]
+docs = [
+    "sphinx>=8.0.0,<9",
+    "sphinx-autoapi>=3.4.0,<4",
+    "sphinx-markdown-builder>=0.6.8,<0.7",
+    "pydoclint>=0.6.0,<0.7",
 ]
 
 [build-system]
@@ -136,10 +135,11 @@ pythonpath = ["src", "tests"]
 "examples/*" = ["T201", "N999", "PLR2004"]
 
 [tool.poe.tasks]
-docs-test = { shell = "sphinx-build -b doctest docs docs/_build -W --keep-going -n -E" }
-docs-clear = { shell = "rm -rf docs/_build" }
-docs-build = { shell = "uv run poe docs-clear && sphinx-build docs docs/_build -W --keep-going -n -E" }
-docs-dev = { shell = "uv run poe docs-build && sphinx-autobuild docs docs/_build" }
+docs-api         = "python docs/api_build.py"
+docs-dev         = { shell = "python docs/api_build.py && npm run --prefix docs dev" }
+docs-build       = { shell = "python docs/api_build.py && npm run --prefix docs build" }
+docs-preview     = "npm run --prefix docs preview"
+docstrings-check = "pydoclint src --style sphinx --arg-type-hints-in-docstring false --check-return-types false"
 
 [tool.poe.tasks.release-preview]
 sequence = [

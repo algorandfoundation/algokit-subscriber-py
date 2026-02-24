@@ -1,41 +1,31 @@
-name: "Sphinx: Render + publish docs"
+name: "Starlight: Render + publish docs"
 
 on:
   workflow_call:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
       id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
+      - name: Build documentation
+        uses: ./.github/actions/publish-docs
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Test doctests
-        run: uv run poe docs-test
-
-      - name: Build docs
-        run: uv run poe docs-build
-
-      - name: Upload to GitHub pages
+      - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@v4
         with:
-          path: docs/_build
+          path: docs/dist
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
