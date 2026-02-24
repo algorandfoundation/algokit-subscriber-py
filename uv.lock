@@ -13,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "algokit-subscriber"
-version = "2.0.0a2"
+version = "2.0.0a3"
 source = { editable = "." }
 dependencies = [
     { name = "algokit-utils" },

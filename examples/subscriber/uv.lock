@@ -4,7 +4,7 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "algokit-subscriber"
-version = "2.0.0a2"
+version = "2.0.0a3"
 source = { editable = "../../" }
 dependencies = [
     { name = "algokit-utils" },
@@ -15,9 +15,7 @@ requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0a15" }]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "furo", specifier = ">=2024.1.29" },
     { name = "mypy", specifier = ">=1.19.1" },
-    { name = "myst-parser", specifier = ">=4.0.0" },
     { name = "pip-audit", specifier = ">=2.9.0" },
     { name = "poethepoet", specifier = ">=0.36.0" },
     { name = "pre-commit", specifier = ">=4.2.0" },
@@ -26,12 +24,13 @@ dev = [
     { name = "pytest-sugar", specifier = ">=1.0.0" },
     { name = "python-semantic-release", specifier = ">=10.5.3" },
     { name = "ruff", specifier = ">=0.12.9" },
-    { name = "sphinx", specifier = ">=8.2.3" },
-    { name = "sphinx-autobuild", specifier = ">=2024.4.16" },
-    { name = "sphinx-autodoc2", specifier = ">=0.5.0" },
-    { name = "sphinx-copybutton", specifier = ">=0.5.2" },
-    { name = "sphinx-mermaid", specifier = ">=0.0.8" },
     { name = "syrupy", specifier = ">=5.0.0" },
+]
+docs = [
+    { name = "pydoclint", specifier = ">=0.6.0,<0.7" },
+    { name = "sphinx", specifier = ">=8.0.0,<9" },
+    { name = "sphinx-autoapi", specifier = ">=3.4.0,<4" },
+    { name = "sphinx-markdown-builder", specifier = ">=0.6.8,<0.7" },
 ]
 
 [[package]]
