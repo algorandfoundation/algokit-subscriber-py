@@ -1,54 +1,45 @@
 ---
 title: Subscription Filtering
-description: Fine-grained transaction filtering by type, sender, receiver, app, asset, ARC-28 events, and more.
+description: Fine-grained control over which transactions you are interested in.
 ---
 
 This library has extensive filtering options available to you so you can have fine-grained control over which transactions you are interested in.
 
-There is a core type [`TransactionFilter`](../../guide/subscriptions/#transactionfilter) used to specify the filters:
+There is a core type that is used to specify the filters [`TransactionFilter`](../../guide/subscriptions/#transactionfilter):
 
 ```python
 import algokit_subscriber as sub
 
 subscriber = sub.AlgorandSubscriber(
     config=sub.AlgorandSubscriberConfig(
-        filters=[
-            sub.SubscriberConfigFilter(
-                name="filterName",
-                # Filter properties...
-            ),
-        ],
-        sync_behaviour=...,
-        watermark_persistence=...,
+        filters=[sub.SubscriberConfigFilter(name="filterName", filter=sub.TransactionFilter(...))],
+        ...
     ),
+    ...
 )
 # or:
 sub.get_subscribed_transactions(
     subscription=sub.TransactionSubscriptionParams(
-        filters=[
-            sub.TransactionFilter(
-                name="filterName",
-                # Filter properties...
-            ),
-        ],
+        filters=[sub.NamedTransactionFilter(name="filterName", filter=sub.TransactionFilter(...))],
+        ...
     ),
+    ...
 )
 ```
 
 Currently this allows you to filter based on any combination (AND logic) of:
 
-- **Transaction type** e.g. `sub.TransactionFilter(name="filter", type="axfer")` or `sub.TransactionFilter(name="filter", type=["axfer", "pay"])`
-- **Account** (sender and receiver) e.g. `sub.TransactionFilter(name="filter", sender="ABCDE..F")` or `sub.TransactionFilter(name="filter", sender=["ABCDE..F", "ZYXWV..A"])` and `sub.TransactionFilter(name="filter", receiver="12345..6")`
-- **Note prefix** e.g. `sub.TransactionFilter(name="filter", note_prefix="xyz")`
-- **Apps**
-  - ID e.g. `sub.TransactionFilter(name="filter", app_id=54321)` or `sub.TransactionFilter(name="filter", app_id=[54321, 12345])`
-  - Creation e.g. `sub.TransactionFilter(name="filter", app_create=True)`
-  - Call on-complete(s) e.g. `sub.TransactionFilter(name="filter", app_on_complete="optin")` or `sub.TransactionFilter(name="filter", app_on_complete=["optin", "noop"])`
-  - ARC4 method signature(s) e.g. `sub.TransactionFilter(name="filter", method_signature="MyMethod(uint64,string)")`
+- Transaction type e.g. `sub.TransactionFilter(type="axfer")` or `sub.TransactionFilter(type=["axfer", "pay"])`
+- Account (sender and receiver) e.g. `sub.TransactionFilter(sender="ABCDE..F")` or `sub.TransactionFilter(sender=["ABCDE..F", "ZYXWV..A"])` and `sub.TransactionFilter(receiver="12345..6")` or `sub.TransactionFilter(receiver=["12345..6", "67890..A"])`
+- Note prefix e.g. `sub.TransactionFilter(note_prefix="xyz")`
+- Apps
+  - ID e.g. `sub.TransactionFilter(app_id=54321)` or `sub.TransactionFilter(app_id=[54321, 12345])`
+  - Creation e.g. `sub.TransactionFilter(app_create=True)`
+  - Call on-complete(s) e.g. `sub.TransactionFilter(app_on_complete="optin")` or `sub.TransactionFilter(app_on_complete=["optin", "noop"])`
+  - ARC4 method signature(s) e.g. `sub.TransactionFilter(method_signature="MyMethod(uint64,string)")` or `sub.TransactionFilter(method_signature=["MyMethod(uint64,string)", "OtherMethod(byte[])"])`
   - Call arguments e.g.
     ```python
     sub.TransactionFilter(
-        name="filter",
         app_call_arguments_match=lambda app_call_arguments:
             app_call_arguments is not None
             and len(app_call_arguments) > 1
@@ -58,21 +49,19 @@ Currently this allows you to filter based on any combination (AND logic) of:
   - Emitted ARC-28 event(s) e.g.
     ```python
     sub.TransactionFilter(
-        name="filter",
         arc28_events=[sub.Arc28EventFilter(group_name="group1", event_name="MyEvent")]
     )
     ```
     Note: For this to work you need to [specify ARC-28 events in the subscription config](../arc28-events/).
 
-- **Assets**
-  - ID e.g. `sub.TransactionFilter(name="filter", asset_id=123456)` or `sub.TransactionFilter(name="filter", asset_id=[123456, 456789])`
-  - Creation e.g. `sub.TransactionFilter(name="filter", asset_create=True)`
-  - Amount transferred (min and/or max) e.g. `sub.TransactionFilter(name="filter", type="axfer", min_amount=1, max_amount=100)`
-  - Balance changes e.g. `sub.TransactionFilter(name="filter", balance_changes=[sub.BalanceChangeFilter(asset_id=[15345, 36234], role=[sub.BalanceChangeRole.Sender], address="ABC...", min_amount=1, max_amount=2)])`
-- **Algo transfers** (pay transactions)
-  - Amount transferred (min and/or max) e.g. `sub.TransactionFilter(name="filter", type="pay", min_amount=1, max_amount=100)`
-  - Balance changes e.g. `sub.TransactionFilter(name="filter", balance_changes=[sub.BalanceChangeFilter(role=[sub.BalanceChangeRole.Sender], address="ABC...", min_amount=1, max_amount=2)])`
+- Assets
+  - ID e.g. `sub.TransactionFilter(asset_id=123456)` or `sub.TransactionFilter(asset_id=[123456, 456789])`
+  - Creation e.g. `sub.TransactionFilter(asset_create=True)`
+  - Amount transferred (min and/or max) e.g. `sub.TransactionFilter(type="axfer", min_amount=1, max_amount=100)`
+  - Balance changes (asset ID, address, role including Sender/Receiver/CloseTo/AssetCreator/AssetDestroyer, min and/or max amount, min and/or max absolute amount) e.g. `sub.TransactionFilter(balance_changes=[sub.BalanceChangeFilter(asset_id=[15345, 36234], role=[sub.BalanceChangeRole.Sender], address="ABC...", min_amount=1, max_amount=2)])`
+- Algo transfers (pay transactions)
+  - Amount transferred (min and/or max) e.g. `sub.TransactionFilter(type="pay", min_amount=1, max_amount=100)`
+  - Balance changes (address, role including Sender/Receiver/CloseTo, min and/or max amount, min and/or max absolute amount) e.g. `sub.TransactionFilter(balance_changes=[sub.BalanceChangeFilter(asset_id=[0], role=[sub.BalanceChangeRole.Sender], address="ABC...", min_absolute_amount=1, max_absolute_amount=100)])`
+- Custom filter e.g. `sub.TransactionFilter(custom_filter=lambda txn: txn.id_ is not None and txn.id_.startswith("ABC"))`
 
-## Multiple Filters and OR Logic
-
-You can supply multiple named filters as a list. A filter name can be used multiple times to create an OR filter (transactions matching any filter with the same name will be returned). When subscribed transactions are returned each transaction will have a `filters_matched` property that will have a list of any filter name(s) that caused that transaction to be returned.
+You can supply multiple, named filters via the [`NamedTransactionFilter`](../../guide/subscriptions/#namedtransactionfilter) type. When subscribed transactions are returned each transaction will have a `filters_matched` property that will have a list of any filter(s) that caused that transaction to be returned. When using [`AlgorandSubscriber`](../../guide/subscriber/), you can subscribe to events that are emitted with the filter name.

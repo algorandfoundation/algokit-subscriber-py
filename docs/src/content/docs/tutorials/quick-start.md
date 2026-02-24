@@ -1,28 +1,25 @@
 ---
 title: Quick Start
-description: Get up and running with algokit-subscriber in minutes.
+description: Get up and running with AlgoKit Subscriber in minutes.
 ---
 
-## Installation
+## Install
+
+This library can be installed from PyPI using your favourite package manager, e.g.:
 
 ```bash
 pip install algokit-subscriber
 ```
 
-Or with `uv`:
-
-```bash
-uv add algokit-subscriber
-```
-
-## Basic Example
+## Quick start
 
 ```python
 import algokit_subscriber as sub
 from algokit_utils import AlgorandClient
 
-testnet = AlgorandClient.testnet()
+algorand = AlgorandClient.testnet()
 
+# Create subscriber
 subscriber = sub.AlgorandSubscriber(
     config=sub.AlgorandSubscriberConfig(
         filters=[
@@ -30,53 +27,49 @@ subscriber = sub.AlgorandSubscriber(
                 name="filter1",
                 filter=sub.TransactionFilter(
                     type="pay",
-                    sender="AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ",
+                    sender="ABC...",
                 ),
             ),
         ],
         watermark_persistence=sub.in_memory_watermark(),
         sync_behaviour="skip-sync-newest",
-        max_rounds_to_sync=100,
     ),
-    algod_client=testnet.client.algod,
+    algod_client=algorand.client.algod,
 )
 
-# Set up event listener
-subscriber.on("filter1", lambda transaction, _: print(f"Received: {transaction.id_}"))
+# Set up subscription(s)
+subscriber.on("filter1", lambda transaction, _: ...)
+# ...
 
-# Handle errors
-subscriber.on_error(lambda error, _: print(f"Error: {error}"))
+# Set up error handling
+subscriber.on_error(lambda error, _: ...)
 
-# Either: poll once (for cron / Lambda)
-result = subscriber.poll_once()
-print(f"Polled {len(result.subscribed_transactions)} transactions")
+# Either: Start the subscriber (if in long-running process)
+subscriber.start()
 
-# Or: start continuous polling (for long-running processes)
-# subscriber.start()
+# OR: Poll the subscriber (if in cron job / periodic lambda)
+subscriber.poll_once()
 ```
 
-## Entry Points
+## Entry points
 
 There are two entry points into the subscriber functionality:
 
-- **[`AlgorandSubscriber`](../guide/subscriber/)** — Higher-level class that handles continuous polling, event listeners, error handling, and watermarking orchestration. Start here for most use cases.
-- **[`get_subscribed_transactions`](../guide/subscriptions/)** — Lower-level function for a single subscription poll. Use when you control scheduling yourself (e.g. cron, Lambda).
+- The lower level [`get_subscribed_transactions`](../guide/subscriptions/) function that contains the raw subscription logic for a single "poll"
+- The [`AlgorandSubscriber`](../guide/subscriber/) class that provides a higher level interface that is easier to use and takes care of a lot more orchestration logic for you (particularly around the ability to continuously poll)
 
-Both are first-class supported. We recommend starting with `AlgorandSubscriber` since it's easier to use and covers the majority of use cases.
+Both are first-class supported ways of using this library, but we generally recommend starting with the `AlgorandSubscriber` since it's easier to use and will cover the majority of use cases.
 
-## Programming Model
+## Simple programming model
 
-`AlgorandSubscriber` is modelled similarly to an event emitter. You:
+This library is easy to use and consume through easy to use, type-safe Python methods and objects and subscribed transactions have a comprehensive and familiar model type with all relevant/useful information about that transaction (including things like transaction id, round number, created asset/app id, app logs, etc.) modelled on the indexer data model (which is used regardless of whether the transactions come from indexer or algod so it's a consistent experience).
 
-1. Create a subscriber with a configuration that defines your filters and sync behaviour
-2. Register event listeners with `on()`, `on_batch()`, `on_poll()`, etc.
-3. Call `start()` for continuous polling or `poll_once()` for a single poll
+Furthermore, the `AlgorandSubscriber` class has a familiar event-driven programming model using an event emitter pattern where you register callbacks via `.on()` methods for each named filter.
 
-The subscriber handles watermarking, error recovery, and polling frequency for you.
+For more examples of how to use it see the [AlgorandSubscriber guide](../guide/subscriber/).
 
-## Next Steps
+## Easy to deploy
 
-- **[AlgorandSubscriber guide](../guide/subscriber/)** — Full API for the subscriber class
-- **[get_subscribed_transactions guide](../guide/subscriptions/)** — Full API for the lower-level function
-- **[Sync Behaviour](../concepts/sync-behaviour/)** — How to control what rounds are processed
-- **[Filtering](../concepts/filtering/)** — Fine-grained transaction filtering options
+Because the entry points of this library are simple Python methods to execute it you simply need to run it in a valid Python execution environment. You could run it in a web server if you want a user facing app to show real-time transaction notifications in-app, or in a standalone process running in the myriad of ways Python can be run.
+
+Because of that, you have full control over how you want to deploy and use the subscriber; it will work with whatever persistence (e.g. sql, no-sql, etc.), queuing/messaging (e.g. queues, topics, buses, web hooks, web sockets) and compute (e.g. serverless periodic lambdas, continually running containers, virtual machines, etc.) services you want to use.

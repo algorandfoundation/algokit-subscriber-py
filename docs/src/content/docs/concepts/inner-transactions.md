@@ -1,6 +1,6 @@
 ---
-title: Inner Transaction Support
-description: First-class support for subscribing to and receiving inner transactions.
+title: Inner Transactions
+description: First-class support for subscribing to and processing inner transactions.
 ---
 
 When you subscribe to transactions any subscriptions that cover an inner transaction will pick up that inner transaction and [return](../../guide/subscriptions/#subscribedtransaction) it to you correctly.
@@ -9,7 +9,7 @@ Note: the behaviour Algorand Indexer has is to return the parent transaction, no
 
 If you [receive](../../guide/subscriptions/#subscribedtransaction) an inner transaction then there will be a `parent_transaction_id` field populated that allows you to see that it was an inner transaction and how to identify the parent transaction.
 
-The `id` of an inner transaction will be set to `{parent_transaction_id}/inner/{index-of-child-within-parent}` where `{index-of-child-within-parent}` is calculated based on uniquely walking the tree of potentially nested inner transactions. [This transaction in Allo.info](https://allo.info/tx/group/cHiEEvBCRGnUhz9409gHl%2Fvn00lYDZnJoppC3YexRr0%3D) is a good illustration of how inner transaction indexes are allocated (this library uses the same approach).
+The `id_` of an inner transaction will be set to `{parent_transaction_id}/inner/{index-of-child-within-parent}` where `{index-of-child-within-parent}` is calculated based on uniquely walking the tree of potentially nested inner transactions. [This transaction in Allo.info](https://allo.info/tx/group/cHiEEvBCRGnUhz9409gHl%2Fvn00lYDZnJoppC3YexRr0%3D) is a good illustration of how inner transaction indexes are allocated (this library uses the same approach).
 
 All [returned](../../guide/subscriptions/#subscribedtransaction) transactions will have an `inner_txns` property with any inner transactions of that transaction populated (recursively).
 
