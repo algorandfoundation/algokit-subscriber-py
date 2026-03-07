@@ -2,6 +2,7 @@
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
 import remarkGithubAlerts from "remark-github-alerts";
+import sidebar from "./sidebar.config.json";
 
 export default defineConfig({
   site: "https://algorandfoundation.github.io",
@@ -32,53 +33,7 @@ export default defineConfig({
           href: "https://discord.gg/algorand",
         },
       ],
-      sidebar: [
-        { label: "Home", link: "/" },
-        {
-          label: "Getting Started",
-          items: [{ slug: "tutorials/quick-start" }],
-        },
-        {
-          label: "Guides",
-          items: [
-            { slug: "guide/subscriber" },
-            { slug: "guide/subscriptions" },
-          ],
-        },
-        {
-          label: "Concepts",
-          items: [
-            { slug: "concepts/sync-behaviour" },
-            { slug: "concepts/low-latency" },
-            { slug: "concepts/watermarking" },
-            { slug: "concepts/filtering" },
-            { slug: "concepts/arc28-events" },
-            { slug: "concepts/emit-arc28-events" },
-            { slug: "concepts/inner-transactions" },
-            { slug: "concepts/state-proofs" },
-            { slug: "concepts/fast-catchup" },
-          ],
-        },
-        {
-          label: "Examples",
-          items: [{ label: "Overview", link: "/examples/" }],
-        },
-        {
-          label: "API Reference",
-          collapsed: true,
-          items: [
-            {
-              slug: "api/algokit_subscriber",
-              label: "algokit_subscriber Index",
-            },
-            {
-              label: "types",
-              collapsed: true,
-              autogenerate: { directory: "api/algokit_subscriber/types" },
-            },
-          ],
-        },
-      ],
+      sidebar,
     }),
   ],
 });
