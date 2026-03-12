@@ -136,9 +136,9 @@ pythonpath = ["src", "tests"]
 
 [tool.poe.tasks]
 docs-api         = "python docs/api_build.py"
-docs-dev         = { shell = "python docs/api_build.py && cd docs && pnpm run dev" }
-docs-build       = { shell = "python docs/api_build.py && cd docs && pnpm run build" }
-docs-preview     = "cd docs && pnpm run preview"
+docs-dev         = { shell = "python docs/api_build.py && pnpm --dir docs dev" }
+docs-build       = { shell = "python docs/api_build.py && pnpm --dir docs build" }
+docs-preview     = { shell = "pnpm --dir docs preview" }
 docstrings-check = "pydoclint src --style sphinx --arg-type-hints-in-docstring false --check-return-types false"
 
 [tool.poe.tasks.release-preview]
