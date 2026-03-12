@@ -9,20 +9,18 @@ runs:
       with:
         install-algokit: "false"
 
-    - name: Install Python docs dependencies
-      shell: bash
-      run: uv sync --group docs
-
     - name: Set up Node.js 22
       uses: actions/setup-node@v4
       with:
         node-version: "22"
-        cache: "npm"
-        cache-dependency-path: docs/package-lock.json
 
-    - name: Install Node docs dependencies
+    - uses: pnpm/action-setup@v4
+      with:
+        package_json_file: docs/package.json
+
+    - name: Install docs dependencies
       shell: bash
-      run: npm ci --prefix docs
+      run: pnpm install --frozen-lockfile --dir docs
 
     - name: Generate API docs
       shell: bash
@@ -30,4 +28,4 @@ runs:
 
     - name: Build Starlight site
       shell: bash
-      run: npm run --prefix docs build
+      run: pnpm --dir docs build

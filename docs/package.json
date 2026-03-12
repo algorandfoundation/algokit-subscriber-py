@@ -2,9 +2,12 @@
   "name": "docs",
   "type": "module",
   "version": "0.0.1",
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
+    "predev": "tsx scripts/generate-examples-mdx.ts",
     "dev": "astro dev",
     "start": "astro dev",
+    "prebuild": "tsx scripts/generate-examples-mdx.ts",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
@@ -17,5 +20,9 @@
     "astro": "^5.17.3",
     "remark-github-alerts": "^0.1.1",
     "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "tsx": "^4.21.0"
   }
 }

@@ -54,7 +54,7 @@ def _run_sphinx_build() -> None:
     """Run Sphinx markdown build to generate API docs."""
     print("==> Running Sphinx markdown build...")
     result = subprocess.run(
-        ["uv", "run", "sphinx-build", "-b", "markdown", "docs/sphinx", str(API_OUT), "-q"],
+        ["uv", "run", "--group", "docs", "sphinx-build", "-b", "markdown", "docs/sphinx", str(API_OUT), "-q"],
         cwd=str(REPO_ROOT),
         capture_output=True,
         text=True,
