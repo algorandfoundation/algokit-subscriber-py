@@ -13,7 +13,7 @@ wheels = [
 
 [[package]]
 name = "algokit-subscriber"
-version = "2.0.0a3"
+version = "2.0.0a4"
 source = { editable = "." }
 dependencies = [
     { name = "algokit-utils" },
@@ -40,7 +40,7 @@ docs = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0a15" }]
+requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0a18" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -64,7 +64,7 @@ docs = [
 
 [[package]]
 name = "algokit-utils"
-version = "5.0.0a15"
+version = "5.0.0a18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -74,9 +74,9 @@ dependencies = [
     { name = "pynacl" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/63/4f/8b91b06f68e5972fda2f18ff6f9c43439eed5e41f0db9c98dfbe22b071b7/algokit_utils-5.0.0a15.tar.gz", hash = "sha256:bf0d9ca3fc8a3059906a22b6187d00ad114b754abd4f22919aff0e941b2fe6fc", size = 217241, upload-time = "2026-01-16T14:03:26.191Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/92/39/0cbc94eeeb9abe70c7269e5efb0abed54afa431e81b5f26b6e9e682c7ff1/algokit_utils-5.0.0a18.tar.gz", hash = "sha256:80e534490331a11e46a25fbbd8c6bdf2ac9e81c4dbbb54240c0f663d7a1cc7ce", size = 217589, upload-time = "2026-03-11T16:11:05.429Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b1/b5/6a0c79d93b2ebe4f962e9176e15c4cb65d0187664f2318d033371bac3d3a/algokit_utils-5.0.0a15-py3-none-any.whl", hash = "sha256:b33c8030e4c7a6d11a93a54c24c2385a42f45682d1148d956fcc74dc176536d3", size = 337620, upload-time = "2026-01-16T14:03:25.124Z" },
+    { url = "https://files.pythonhosted.org/packages/a1/af/d4529f066c25189a7725ff1896699df84e10c320b0b89118ff622b51ce75/algokit_utils-5.0.0a18-py3-none-any.whl", hash = "sha256:da8b893c917f3fbebee8de5bc427ed804ac2c4ad46022eeebdf0d6abfc6e2b47", size = 337536, upload-time = "2026-03-11T16:11:03.902Z" },
 ]
 
 [[package]]
