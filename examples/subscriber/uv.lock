@@ -4,14 +4,14 @@ requires-python = ">=3.12"
 
 [[package]]
 name = "algokit-subscriber"
-version = "2.0.0a4"
+version = "2.0.0a5"
 source = { editable = "../../" }
 dependencies = [
     { name = "algokit-utils" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0a18" }]
+requires-dist = [{ name = "algokit-utils", specifier = ">=5.0.0b1" }]
 
 [package.metadata.requires-dev]
 dev = [
@@ -46,19 +46,21 @@ requires-dist = [{ name = "algokit-subscriber", editable = "../../" }]
 
 [[package]]
 name = "algokit-utils"
-version = "5.0.0a18"
+version = "5.0.0b1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "exceptiongroup" },
     { name = "httpx" },
     { name = "msgpack" },
     { name = "msgpack-types" },
     { name = "pycryptodomex" },
     { name = "pynacl" },
     { name = "typing-extensions" },
+    { name = "xhd-wallet-api" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/92/39/0cbc94eeeb9abe70c7269e5efb0abed54afa431e81b5f26b6e9e682c7ff1/algokit_utils-5.0.0a18.tar.gz", hash = "sha256:80e534490331a11e46a25fbbd8c6bdf2ac9e81c4dbbb54240c0f663d7a1cc7ce", size = 217589, upload-time = "2026-03-11T16:11:05.429Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/11/8f/9749eadee85a9e0205d4e6458fcddd38af74dce51a17a8231857fcbf7148/algokit_utils-5.0.0b1.tar.gz", hash = "sha256:4ac5d99b4c354aef01347a0392b441f363c888505cf9ee62dc7af781e9730417", size = 222388, upload-time = "2026-04-08T14:12:22.995Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a1/af/d4529f066c25189a7725ff1896699df84e10c320b0b89118ff622b51ce75/algokit_utils-5.0.0a18-py3-none-any.whl", hash = "sha256:da8b893c917f3fbebee8de5bc427ed804ac2c4ad46022eeebdf0d6abfc6e2b47", size = 337536, upload-time = "2026-03-11T16:11:03.902Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/7a/8ca0d1d737f148b9cd83057ab7efd202364481df84a2a54297cdc56ac703/algokit_utils-5.0.0b1-py3-none-any.whl", hash = "sha256:9aca756c058606fe5d25eba19d0e350e96085e4aecc58a615a9ea16e3143e86c", size = 344145, upload-time = "2026-04-08T14:12:21.018Z" },
 ]
 
 [[package]]
@@ -138,6 +140,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a0/1d/ec1a60bd1a10daa292d3cd6bb0b359a81607154fb8165f3ec95fe003b85c/cffi-2.0.0-cp314-cp314t-win32.whl", hash = "sha256:1fc9ea04857caf665289b7a75923f2c6ed559b8298a1b8c49e59f7dd95c8481e", size = 180487, upload-time = "2025-09-08T23:23:40.423Z" },
     { url = "https://files.pythonhosted.org/packages/bf/41/4c1168c74fac325c0c8156f04b6749c8b6a8f405bbf91413ba088359f60d/cffi-2.0.0-cp314-cp314t-win_amd64.whl", hash = "sha256:d68b6cef7827e8641e8ef16f4494edda8b36104d79773a334beaa1e3521430f6", size = 191726, upload-time = "2025-09-08T23:23:41.742Z" },
     { url = "https://files.pythonhosted.org/packages/ae/3a/dbeec9d1ee0844c679f6bb5d6ad4e9f198b1224f4e7a32825f47f6192b0c/cffi-2.0.0-cp314-cp314t-win_arm64.whl", hash = "sha256:0a1527a803f0a659de1af2e1fd700213caba79377e27e4693648c2923da066f9", size = 184195, upload-time = "2025-09-08T23:23:43.004Z" },
+]
+
+[[package]]
+name = "exceptiongroup"
+version = "1.3.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8a/0e/97c33bf5009bdbac74fd2beace167cab3f978feb69cc36f1ef79360d6c4e/exceptiongroup-1.3.1-py3-none-any.whl", hash = "sha256:a7a39a3bd276781e98394987d3a5701d0c4edffb633bb7a5144577f82c773598", size = 16740, upload-time = "2025-11-21T23:01:53.443Z" },
 ]
 
 [[package]]
@@ -318,10 +332,49 @@ wheels = [
 ]
 
 [[package]]
+name = "types-cffi"
+version = "2.0.0.20260408"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "types-setuptools" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/64/67/eb4ef3408fdc0b4e5af38b30c0e6ad4663b41bdae9fb85a9f09a8db61a99/types_cffi-2.0.0.20260408.tar.gz", hash = "sha256:aa8b9c456ab715c079fc655929811f21f331bfb940f4a821987c581bf4e36230", size = 17541, upload-time = "2026-04-08T04:36:03.918Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c3/a3/7fbd93ededcc7c77e9e5948b9794161733ebdbf618a27965b1bea0e728a4/types_cffi-2.0.0.20260408-py3-none-any.whl", hash = "sha256:68bd296742b4ff7c0afe3547f50bd0acc55416ecf322ffefd2b7344ef6388a42", size = 20101, upload-time = "2026-04-08T04:36:02.995Z" },
+]
+
+[[package]]
+name = "types-setuptools"
+version = "82.0.0.20260408"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/12/3464b410c50420dd4674fa5fe9d3880711c1dbe1a06f5fe4960ee9067b9e/types_setuptools-82.0.0.20260408.tar.gz", hash = "sha256:036c68caf7e672a699f5ebbf914708d40644c14e05298bc49f7272be91cf43d3", size = 44861, upload-time = "2026-04-08T04:29:33.292Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3d/e1/46a4fc3ef03aabf5d18bac9df5cf37c6b02c3bddf3e05c3533f4b4588331/types_setuptools-82.0.0.20260408-py3-none-any.whl", hash = "sha256:ece0a215cdfa6463a65fd6f68bd940f39e455729300ddfe61cab1147ed1d2462", size = 68428, upload-time = "2026-04-08T04:29:32.175Z" },
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/72/94/1a15dd82efb362ac84269196e94cf00f187f7ed21c242792a923cdb1c61f/typing_extensions-4.15.0.tar.gz", hash = "sha256:0cea48d173cc12fa28ecabc3b837ea3cf6f38c6d1136f85cbaaf598984861466", size = 109391, upload-time = "2025-08-25T13:49:26.313Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/18/67/36e9267722cc04a6b9f15c7f3441c2363321a3ea07da7ae0c0707beb2a9c/typing_extensions-4.15.0-py3-none-any.whl", hash = "sha256:f0fa19c6845758ab08074a0cfa8b7aecb71c999ca73d62883bc25cc018c4e548", size = 44614, upload-time = "2025-08-25T13:49:24.86Z" },
+]
+
+[[package]]
+name = "xhd-wallet-api"
+version = "1.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cffi" },
+    { name = "types-cffi" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0f/fb/a50dbe3ec6ed5b7257894735e46306bd11c0daee09e971441b2fadeeb05c/xhd_wallet_api-1.0.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:e37dbb3f434d9baf28f49decf09d52a8ab64a58f926d50f49eab124a961a3a7e", size = 378250, upload-time = "2026-03-27T15:51:37.789Z" },
+    { url = "https://files.pythonhosted.org/packages/f0/46/32d7fdbc321a89ba5cedbf772a328badd76c3ff0e04c61d574f93801032e/xhd_wallet_api-1.0.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:915a89efacc1174f64af07c52672b026a355aee4374ab04d92721fc2b0930db9", size = 363100, upload-time = "2026-03-27T15:51:39.447Z" },
+    { url = "https://files.pythonhosted.org/packages/64/df/51a32ee17ed10723239215a6dc6a3eda81308ed9f29a10598de61d5fa25f/xhd_wallet_api-1.0.0-py3-none-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:092b079f244e5d88c254d8af3630181b4c049269374e4e25ed764baf417fdd3d", size = 386354, upload-time = "2026-03-27T15:51:40.729Z" },
+    { url = "https://files.pythonhosted.org/packages/53/5a/5da7ef4c70ede3b1bfbbe445a78857de99019b66169a0f9d75ebe0563e2f/xhd_wallet_api-1.0.0-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:38b4843464cdf2398ca635bc4cb6ba37ef7fbd2191c6b9053743bcc66a4784be", size = 395015, upload-time = "2026-03-27T15:51:41.964Z" },
+    { url = "https://files.pythonhosted.org/packages/d2/f8/6052412d8b360240fa4958319dc257a01517e864a1539accda639a7836cc/xhd_wallet_api-1.0.0-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:71d6aa0291fea0f0ecc22f7eda8a0f61482dc92e19345c0a354dd8a4f1bdb72a", size = 450127, upload-time = "2026-03-27T15:51:43.178Z" },
+    { url = "https://files.pythonhosted.org/packages/f8/38/9f3d3849e1bdff900f405dc4a636c872c189e0f4d3202bdfa969e3206825/xhd_wallet_api-1.0.0-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:a956ca70a155de9a0afc528a3bf216f9408172bc54afc5b8103c5425c5f9f912", size = 474598, upload-time = "2026-03-27T15:51:44.47Z" },
+    { url = "https://files.pythonhosted.org/packages/b1/78/5477067a40347a88af0b57b9dabf0f1dc3e5796f785073c2dd157434f56b/xhd_wallet_api-1.0.0-py3-none-win_amd64.whl", hash = "sha256:d4a633e0cdb8095e941b9ce84e05e96904ef273f7b655abd81f13f265bf195a9", size = 267934, upload-time = "2026-03-27T15:51:45.654Z" },
 ]
