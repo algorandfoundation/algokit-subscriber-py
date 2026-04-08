@@ -1,0 +1,8 @@
+dist/
+.astro/
+src/content/docs/api/
+src/content/docs/examples/
+node_modules/
+npm-debug.log*
+.env
+.DS_Store

@@ -1,11 +1,11 @@
+import typing
 from collections.abc import Callable
 from typing import Any
 
-from .subscription import SubscribedTransaction
-
-EventListener = Callable[[SubscribedTransaction, str], None]
+TEventType = typing.TypeVar("TEventType")
+EventListener = Callable[[TEventType, str], None]
 """
-A function that takes a SubscribedTransaction and the event name.
+A function that takes an event and event name.
 """
 
 
@@ -51,9 +51,7 @@ class EventEmitter:
 
         return self.on(event_name, listener)
 
-    def remove_listener(
-        self, event_name: str, listener: EventListener
-    ) -> "EventEmitter":
+    def remove_listener(self, event_name: str, listener: EventListener) -> "EventEmitter":
         """
         Removes a listener for the given event name.
         """

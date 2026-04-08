@@ -11,7 +11,7 @@
 
 ---
 
-This library a simple, but flexible / configurable Algorand transaction subscription / indexing mechanism. It allows you to quickly create Python services that follow or subscribe to the Algorand Blockchain.
+This library is a simple, but flexible / configurable Algorand transaction subscription / indexing mechanism. It allows you to quickly create Python services that follow or subscribe to the Algorand Blockchain.
 
 > pip install algokit_subscriber
 
@@ -20,35 +20,39 @@ This library a simple, but flexible / configurable Algorand transaction subscrip
 ## Quick start
 
 ```python
+import algokit_subscriber as sub
+from algokit_utils import AlgorandClient
+
+localnet = AlgorandClient.default_localnet()
+
 # Create subscriber
-subscriber = AlgorandSubscriber(
-  {
-    "filters": [
-      {
-        "name": "filter1",
-        "filter": {
-          "type": "pay",
-          "sender": "ABC...",
-        },
-      },
-    ],
-    # ... other options (use intellisense to explore)
-  },
-  algod,
-  optional_indexer
-);
+subscriber = sub.AlgorandSubscriber(
+    config=sub.AlgorandSubscriberConfig(
+        filters=[
+            sub.SubscriberConfigFilter(
+                name="filter1",
+                type="pay",
+                sender="ABC...",
+            ),
+        ],
+        watermark_persistence=sub.in_memory_watermark(),
+        sync_behaviour="skip-sync-newest",
+    ),
+    algod_client=localnet.client.algod,
+    indexer_client=localnet.client.indexer,  # only needed when sync_behaviour="catchup-with-indexer"
+)
 
 # Set up subscription(s)
-def on_filter1(transaction, event_name):
+def on_filter1(transaction: sub.SubscribedTransaction, filter_name: str) -> None:
     ...
 
 subscriber.on("filter1", on_filter1)
 
 # Either: Start the subscriber (if in long-running process)
-subscriber.start();
+subscriber.start()
 
 # OR: Poll the subscriber (if in cron job / periodic lambda)
-subscriber.pollOnce();
+subscriber.poll_once()
 ```
 
 ## Key features
@@ -67,19 +71,21 @@ subscriber.pollOnce();
 
 ## Balance change notes
 
-The balance change semantics work mostly as expected, however the sematics around asset creation and destruction warrants further clarification.
+The balance change semantics work mostly as expected, however the semantics around asset creation and destruction warrants further clarification.
 
 When an asset is created, the full asset supply is attributed to the asset creators account.
 
 The balance change for an asset create transaction will be as below:
 
 ```py
-{
-  "address": "VIDHG4SYANCP2GUQXXSFSNBPJWS4TAQSI3GH4GYO54FSYPDIBYPMSF7HBY", # The asset creator
-  "asset_id": 2391, # The created asset id
-  "amount": 100000, # Full asset supply of the created asset
-  "roles": [BalanceChangeroles.AssetCreator]
-}
+import algokit_subscriber as sub
+
+sub.BalanceChange(
+    address="VIDHG4SYANCP2GUQXXSFSNBPJWS4TAQSI3GH4GYO54FSYPDIBYPMSF7HBY",  # The asset creator
+    asset_id=2391,  # The created asset id
+    amount=100000,  # Full asset supply of the created asset
+    roles=[sub.BalanceChangeRole.AssetCreator],
+)
 ```
 
 When an asset is destroyed, the full asset supply must be in the asset creators account and the asset manager must send the destroy transaction.
@@ -89,12 +95,14 @@ If you need to account for the asset supply being destroyed from the creators ac
 The balance change for an asset destroy transaction will be as below:
 
 ```python
-{
-  "address": "PIDHG4SYANCP2GUQXXSFSNBPJWS4TAQSI3GH4GYO54FSYPDIBYPMSF7HBY", # The asset destroyer, which will always be the asset manager
-  "assetId": 2391, # The destroyed asset id
-  "amount": 0, # This value will always be 0
-  "roles": [BalanceChangeroles.AssetDestroyer]
-}
+import algokit_subscriber as sub
+
+sub.BalanceChange(
+    address="PIDHG4SYANCP2GUQXXSFSNBPJWS4TAQSI3GH4GYO54FSYPDIBYPMSF7HBY",  # The asset destroyer, which will always be the asset manager
+    asset_id=2391,  # The destroyed asset id
+    amount=0,  # This value will always be 0
+    roles=[sub.BalanceChangeRole.AssetDestroyer],
+)
 ```
 
 ## Examples
@@ -103,54 +111,47 @@ The balance change for an asset destroy transaction will be as below:
 
 The following code, when algod is pointed to TestNet, will find all transactions emitted by the [Data History Museum](https://datahistory.org) since the beginning of time in _seconds_ and then find them in real-time as they emerge on the chain.
 
-The watermark is stored in-memory so this particular example is not resilient to restarts. To change that you can implement proper persistence of the watermark. There is [an example that uses the file system](./examples/data-history-museum/) to demonstrate this.
+The watermark is stored in-memory so this particular example is not resilient to restarts. To change that you can implement proper persistence of the watermark.
 
 ```python
+import algokit_subscriber as sub
+from algokit_utils import AlgorandClient
+
 algorand = AlgorandClient.testnet()
 
-# The watermark is used to track how far the subscriber has processed transactions
-watermark = 0
 
-def get_watermark() -> int:
-    return watermark
-
-def set_watermark(new_watermark: int) -> None:
-    global watermark
-    watermark = new_watermark
-
-subscriber = AlgorandSubscriber(
-    # algod is used to get the latest transactions once the subscriber has caught up to the network
-    algod_client=algorand.client.algod,
-    config={
-        "filters": [
-            {
-                "name": "dhm-asset",
-                "filter": {
-                    # Match asset configuration transactions
-                    "type": "acfg",
-                    # Data History Museum creator account on TestNet
-                    "sender": "ER7AMZRPD5KDVFWTUUVOADSOWM4RQKEEV2EDYRVSA757UHXOIEKGMBQIVU",
-                },
-            }
+subscriber = sub.AlgorandSubscriber(
+    config=sub.AlgorandSubscriberConfig(
+        filters=[
+            # Match asset configuration transactions from DHM creator account
+            sub.SubscriberConfigFilter(
+                name="dhm-asset",
+                type="acfg",
+                sender="ER7AMZRPD5KDVFWTUUVOADSOWM4RQKEEV2EDYRVSA757UHXOIEKGMBQIVU",
+            ),
         ],
-        "frequency_in_seconds": 5,
-        "max_rounds_to_sync": 100,
-        "sync_behaviour": "catchup-with-indexer",
-        "watermark_persistence": {"get": get_watermark, "set": set_watermark},
-    },
-    # indexer is used to get historical transactions
+        frequency_in_seconds=5,
+        max_rounds_to_sync=100,
+        sync_behaviour="catchup-with-indexer",
+        watermark_persistence=sub.in_memory_watermark(),
+    ),
+    algod_client=algorand.client.algod,
     indexer_client=algorand.client.indexer,
 )
 
-def process_dhm_assets(transactions: list[SubscribedTransaction], filter_name: str) -> None:
+
+def process_dhm_assets(transactions: list[sub.SubscribedTransaction], filter_name: str) -> None:
     print(f"Received {len(transactions)} asset changes")
     # ... do stuff with the transactions
+
 
 # Attach our callback to the 'dhm-asset' filter
 subscriber.on_batch("dhm-asset", process_dhm_assets)
 
+
 def handle_error(error: Exception) -> None:
     print(f"An error occurred: {error}")
+
 
 # Attach the error handler
 subscriber.on_error(handle_error)
@@ -164,54 +165,44 @@ subscriber.start()
 The following code, when algod is pointed to MainNet, will find all transfers of [USDC](https://www.circle.com/en/usdc-multichain/algorand) that are greater than $1 and it will poll every 1s for new transfers.
 
 ```python
-from algokit_subscriber import AlgorandSubscriber
-from algokit_subscriber.types import SubscribedTransaction
+import algokit_subscriber as sub
 from algokit_utils import AlgorandClient
 
 algorand = AlgorandClient.mainnet()
 
-# The watermark is used to track how far the subscriber has processed transactions
-watermark = 0
-
-def get_watermark() -> int:
-    return watermark
-
-def set_watermark(new_watermark: int) -> None:
-    global watermark
-    watermark = new_watermark
-
-subscriber = AlgorandSubscriber(
-    algod_client=algorand.client.algod,
-    config={
-        "filters": [
-            {
-                "name": "usdc",
-                "filter": {
-                    "type": "axfer",
-                    "asset_id": 31566704,  # MainNet: USDC
-                    "min_amount": 1_000_000,  # $1
-                },
-            }
+subscriber = sub.AlgorandSubscriber(
+    config=sub.AlgorandSubscriberConfig(
+        filters=[
+            sub.SubscriberConfigFilter(
+                name="usdc",
+                type="axfer",
+                asset_id=31566704,  # MainNet: USDC
+                min_amount=1_000_000,  # $1
+            ),
         ],
-        "wait_for_block_when_at_tip": True,
-        "sync_behaviour": "skip-sync-newest",
-        "watermark_persistence": {"get": get_watermark, "set": set_watermark},
-    },
+        wait_for_block_when_at_tip=True,
+        sync_behaviour="skip-sync-newest",
+        watermark_persistence=sub.in_memory_watermark(),
+    ),
+    algod_client=algorand.client.algod,
 )
 
-def process_usdc_transfer(transfer: SubscribedTransaction, filter_name: str) -> None:
-    asset_transfer = transfer.get("asset-transfer-transaction", {})
-    amount = asset_transfer.get("amount", 0) / 1_000_000
-    print(
-        f"{transfer['sender']} sent {asset_transfer.get('receiver')} "
-        f"USDC${amount:.2f} in transaction {transfer['id']}"
-    )
+
+def process_usdc_transfer(transfer: sub.SubscribedTransaction, filter_name: str) -> None:
+    axfer = transfer.asset_transfer_transaction
+    if axfer is None:
+        return
+    amount = axfer.amount / 1_000_000
+    print(f"{transfer.sender} sent {axfer.receiver} USDC${amount:.2f} in transaction {transfer.id_}")
+
 
 # Attach our callback to the 'usdc' filter
 subscriber.on("usdc", process_usdc_transfer)
 
+
 def handle_error(error: Exception) -> None:
     print(f"An error occurred: {error}")
+
 
 # Attach the error handler
 subscriber.on_error(handle_error)

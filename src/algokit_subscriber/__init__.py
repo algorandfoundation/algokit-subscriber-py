@@ -1,28 +1,64 @@
-from .subscriber import AlgorandSubscriber
-from .subscription import get_subscribed_transactions
-from .types.arc28 import Arc28EventGroup
-from .types.event_emitter import EventListener
-from .types.subscription import (
+from algokit_subscriber._subscriber import AlgorandSubscriber
+from algokit_subscriber._subscription import compile_filters, get_subscribed_transactions
+from algokit_subscriber._watermark import in_memory_watermark
+from algokit_subscriber.types.arc28 import (
+    Arc28Event,
+    Arc28EventArg,
+    Arc28EventFilter,
+    Arc28EventGroup,
+    EmittedArc28Event,
+)
+from algokit_subscriber.types.subscription import (
     AlgorandSubscriberConfig,
     BalanceChange,
+    BalanceChangeFilter,
     BalanceChangeRole,
+    BeforePollMetadata,
+    BlockMetadata,
+    BlockRewards,
+    BlockStateProofTracking,
+    BlockUpgradeState,
+    BlockUpgradeVote,
+    CoreTransactionSubscriptionParams,
     NamedTransactionFilter,
+    ParticipationUpdates,
     SubscribedTransaction,
+    SubscriberConfigFilter,
+    SyncBehaviour,
+    TransactionFilter,
     TransactionSubscriptionParams,
     TransactionSubscriptionResult,
+    WatermarkPersistence,
 )
 
 __all__ = [
     "AlgorandSubscriber",
     "AlgorandSubscriberConfig",
+    "Arc28Event",
+    "Arc28EventArg",
+    "Arc28EventFilter",
     "Arc28EventGroup",
     "BalanceChange",
+    "BalanceChangeFilter",
     "BalanceChangeRole",
-    "EventListener",
+    "BeforePollMetadata",
+    "BlockMetadata",
+    "BlockRewards",
+    "BlockStateProofTracking",
+    "BlockUpgradeState",
+    "BlockUpgradeVote",
+    "CoreTransactionSubscriptionParams",
+    "EmittedArc28Event",
     "NamedTransactionFilter",
+    "ParticipationUpdates",
     "SubscribedTransaction",
+    "SubscriberConfigFilter",
+    "SyncBehaviour",
     "TransactionFilter",
     "TransactionSubscriptionParams",
     "TransactionSubscriptionResult",
+    "WatermarkPersistence",
+    "compile_filters",
     "get_subscribed_transactions",
+    "in_memory_watermark",
 ]

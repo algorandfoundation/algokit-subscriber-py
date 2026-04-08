@@ -1,3 +1,4 @@
+from algokit_indexer_client import models as indexer
 from algokit_utils import (
     AlgoAmount,
     AlgorandClient,
@@ -8,21 +9,23 @@ from algokit_utils import (
     PaymentParams,
 )
 
-from algokit_subscriber.subscriber import AlgorandSubscriber
-from algokit_subscriber.types.indexer import TransactionResult
+from algokit_subscriber import AlgorandSubscriber
 from algokit_subscriber.types.subscription import (
     AlgorandSubscriberConfig,
+    BalanceChangeFilter,
     BalanceChangeRole,
+    NamedTransactionFilter,
+    SubscriberConfigFilter,
+    TransactionFilter,
+    WatermarkPersistence,
 )
 
 from .accounts import generate_account
-from .filter_fixture import filter_fixture  # noqa: F401
+from .conftest import FilterFixture
 from .transactions import get_confirmations
 
 
-def test_asset_create_txns(filter_fixture: dict) -> None:
-    localnet: AlgorandClient = filter_fixture["localnet"]
-
+def test_asset_create_txns(localnet: AlgorandClient, filter_fixture: FilterFixture) -> None:
     sender = generate_account(localnet)
     txns = (
         localnet.new_group()
@@ -34,35 +37,34 @@ def test_asset_create_txns(filter_fixture: dict) -> None:
         .send()
     )
     confirmations = get_confirmations(localnet, txns.tx_ids)
-    asset = confirmations[0]["asset-index"]
+    asset = confirmations[0].asset_id
 
-    subscription = filter_fixture["subscribe_and_verify"](
-        {
-            "balance_changes": [{"role": [BalanceChangeRole.AssetCreator]}],
-        },
+    subscription = filter_fixture.subscribe_and_verify(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(role=[BalanceChangeRole.AssetCreator])]
+            ),
+        ),
         txns.tx_ids[0],
     )
 
-    transaction = subscription["subscribed_transactions"][0]
-    assert transaction["balance_changes"]
-    assert len(transaction["balance_changes"]) == 2
+    transaction = subscription.subscribed_transactions[0]
+    assert transaction.balance_changes
+    assert len(transaction.balance_changes) == 2
 
-    assert transaction["balance_changes"][0]["address"] == sender
-    assert transaction["balance_changes"][0]["amount"] == -2000
-    assert transaction["balance_changes"][0]["roles"] == [BalanceChangeRole.Sender]
-    assert transaction["balance_changes"][0]["asset_id"] == 0
+    assert transaction.balance_changes[0].address == sender
+    assert transaction.balance_changes[0].amount == -2000
+    assert transaction.balance_changes[0].roles == [BalanceChangeRole.Sender]
+    assert transaction.balance_changes[0].asset_id == 0
 
-    assert transaction["balance_changes"][1]["address"] == sender
-    assert transaction["balance_changes"][1]["amount"] == 100_000_000
-    assert transaction["balance_changes"][1]["roles"] == [
-        BalanceChangeRole.AssetCreator
-    ]
-    assert transaction["balance_changes"][1]["asset_id"] == asset
+    assert transaction.balance_changes[1].address == sender
+    assert transaction.balance_changes[1].amount == 100_000_000
+    assert transaction.balance_changes[1].roles == [BalanceChangeRole.AssetCreator]
+    assert transaction.balance_changes[1].asset_id == asset
 
 
-def test_asset_destroy_txns(filter_fixture: dict) -> None:
-    localnet: AlgorandClient = filter_fixture["localnet"]
-
+def test_asset_destroy_txns(localnet: AlgorandClient, filter_fixture: FilterFixture) -> None:
     sender = generate_account(localnet)
     create_asset_txns = (
         localnet.new_group()
@@ -76,7 +78,10 @@ def test_asset_destroy_txns(filter_fixture: dict) -> None:
         )
         .send()
     )
-    asset = get_confirmations(localnet, create_asset_txns.tx_ids)[0]["asset-index"]
+
+    confirmations = get_confirmations(localnet, create_asset_txns.tx_ids)
+    asset = confirmations[0].asset_id
+    assert asset is not None
 
     txns = (
         localnet.new_group()
@@ -88,33 +93,34 @@ def test_asset_destroy_txns(filter_fixture: dict) -> None:
         .send()
     )
 
-    subscription = filter_fixture["subscribe_and_verify"](
-        {
-            "balance_changes": [{"role": [BalanceChangeRole.AssetDestroyer]}],
-        },
+    subscription = filter_fixture.subscribe_and_verify(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(role=[BalanceChangeRole.AssetDestroyer])]
+            ),
+        ),
         txns.tx_ids[0],
     )
 
-    transaction = subscription["subscribed_transactions"][0]
-    assert transaction["balance_changes"]
-    assert len(transaction["balance_changes"]) == 2
+    transaction = subscription.subscribed_transactions[0]
+    assert transaction.balance_changes
+    assert len(transaction.balance_changes) == 2
 
-    assert transaction["balance_changes"][0]["address"] == sender
-    assert transaction["balance_changes"][0]["amount"] == -2000
-    assert transaction["balance_changes"][0]["roles"] == [BalanceChangeRole.Sender]
-    assert transaction["balance_changes"][0]["asset_id"] == 0
+    assert transaction.balance_changes[0].address == sender
+    assert transaction.balance_changes[0].amount == -2000
+    assert transaction.balance_changes[0].roles == [BalanceChangeRole.Sender]
+    assert transaction.balance_changes[0].asset_id == 0
 
-    assert transaction["balance_changes"][1]["address"] == sender
-    assert transaction["balance_changes"][1]["amount"] == 0
-    assert transaction["balance_changes"][1]["roles"] == [
-        BalanceChangeRole.AssetDestroyer
-    ]
-    assert transaction["balance_changes"][1]["asset_id"] == asset
+    assert transaction.balance_changes[1].address == sender
+    assert transaction.balance_changes[1].amount == 0
+    assert transaction.balance_changes[1].roles == [BalanceChangeRole.AssetDestroyer]
+    assert transaction.balance_changes[1].asset_id == asset
 
 
-def test_balance_change_filter_on_fee(filter_fixture: dict) -> None:
-    localnet: AlgorandClient = filter_fixture["localnet"]
-
+def test_balance_change_filter_on_fee(
+    localnet: AlgorandClient, filter_fixture: FilterFixture
+) -> None:
     random_account = generate_account(localnet, amount=1_000_000)
     test_account = generate_account(localnet)
 
@@ -126,44 +132,42 @@ def test_balance_change_filter_on_fee(filter_fixture: dict) -> None:
             )
         )
         .add_asset_create(
-            AssetCreateParams(
-                sender=test_account, static_fee=AlgoAmount(micro_algo=1000), total=1
-            )
+            AssetCreateParams(sender=test_account, static_fee=AlgoAmount(micro_algo=1000), total=1)
         )
         .add_asset_create(
-            AssetCreateParams(
-                sender=test_account, static_fee=AlgoAmount(micro_algo=3000), total=1
-            )
+            AssetCreateParams(sender=test_account, static_fee=AlgoAmount(micro_algo=3000), total=1)
         )
         .add_asset_create(
-            AssetCreateParams(
-                sender=test_account, static_fee=AlgoAmount(micro_algo=5000), total=1
-            )
+            AssetCreateParams(sender=test_account, static_fee=AlgoAmount(micro_algo=5000), total=1)
         )
         .send()
     )
 
-    filter_fixture["subscribe_and_verify_filter"](
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": test_account,
-                    "role": [BalanceChangeRole.Sender],
-                    "min_amount": -4000,
-                    "max_amount": -2000,
-                    "min_absolute_amount": 2000,
-                    "max_absolute_amount": 4000,
-                }
-            ],
-        },
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=test_account,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-4000,
+                        max_amount=-2000,
+                        min_absolute_amount=2000,
+                        max_absolute_amount=4000,
+                    )
+                ]
+            ),
+        ),
         [txns.tx_ids[2]],
     )
 
 
-def test_various_filters_on_payments(filter_fixture: dict) -> None:
-    localnet: AlgorandClient = filter_fixture["localnet"]
-    subscribe_and_verify_filter = filter_fixture["subscribe_and_verify_filter"]
+def test_various_filters_on_payments(
+    localnet: AlgorandClient, filter_fixture: FilterFixture
+) -> None:
+    subscribe_and_verify_filter = filter_fixture.subscribe_and_verify_filter
 
     account = generate_account(localnet, 200_000)
     account2 = generate_account(localnet, 200_000)
@@ -258,190 +262,199 @@ def test_various_filters_on_payments(filter_fixture: dict) -> None:
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account,
-                    "role": [BalanceChangeRole.Sender],
-                    "min_absolute_amount": 2001,
-                    "max_absolute_amount": 3000,
-                }
-            ],
-        },
-        txns.tx_ids[2],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account,
+                        role=[BalanceChangeRole.Sender],
+                        min_absolute_amount=2001,
+                        max_absolute_amount=3000,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[2]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account,
-                    "role": [BalanceChangeRole.Sender],
-                    "min_amount": -3000,
-                    "max_amount": -2001,
-                }
-            ],
-        },
-        txns.tx_ids[2],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-3000,
+                        max_amount=-2001,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[2]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account,
-                    "min_amount": -2000,
-                    "max_amount": -2000,
-                }
-            ],
-        },
-        txns.tx_ids[0],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0], address=account, min_amount=-2000, max_amount=-2000
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[0]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account,
-                    "min_amount": 1000,
-                    "max_amount": 1000,
-                }
-            ],
-        },
-        txns.tx_ids[1],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0], address=account, min_amount=1000, max_amount=1000
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[1]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account2,
-                    "role": [BalanceChangeRole.Sender],
-                    "min_amount": -3000,
-                    "max_amount": -2001,
-                    "min_absolute_amount": 2001,
-                    "max_absolute_amount": 3000,
-                }
-            ],
-        },
-        txns.tx_ids[3],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account2,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-3000,
+                        max_amount=-2001,
+                        min_absolute_amount=2001,
+                        max_absolute_amount=3000,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[3]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account,
-                    "min_absolute_amount": 1,
-                    "max_absolute_amount": 1000,
-                }
-            ],
-        },
-        txns.tx_ids[1],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account,
+                        min_absolute_amount=1,
+                        max_absolute_amount=1000,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[1]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account2,
-                    "max_absolute_amount": 1000,
-                }
-            ],
-        },
-        txns.tx_ids[0],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(asset_id=[0], address=account2, max_absolute_amount=1000)
+                ]
+            ),
+        ),
+        [txns.tx_ids[0]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account3,
-                    "role": BalanceChangeRole.CloseTo,
-                }
-            ],
-        },
-        txns.tx_ids[6],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0], address=account3, role=BalanceChangeRole.CloseTo
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[6]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [0],
-                    "address": account3,
-                    "role": [BalanceChangeRole.CloseTo, BalanceChangeRole.Sender],
-                    "min_amount": 0,
-                }
-            ],
-        },
-        txns.tx_ids[6],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[0],
+                        address=account3,
+                        role=[BalanceChangeRole.CloseTo, BalanceChangeRole.Sender],
+                        min_amount=0,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[6]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "min_amount": 196_000,
-                }
-            ],
-        },
-        txns.tx_ids[7],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(balance_changes=[BalanceChangeFilter(min_amount=196_000)]),
+        ),
+        [txns.tx_ids[7]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "address": [account2, account3],
-                    "min_absolute_amount": 296_000,
-                    "max_absolute_amount": 296_000,
-                }
-            ],
-        },
-        txns.tx_ids[8],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        address=[account2, account3],
+                        min_absolute_amount=296_000,
+                        max_absolute_amount=296_000,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[8]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "min_absolute_amount": 297_000,
-                }
-            ],
-        },
-        txns.tx_ids[7],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(min_absolute_amount=297_000)]
+            ),
+        ),
+        [txns.tx_ids[7]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "max_amount": -297_000,
-                }
-            ],
-        },
-        txns.tx_ids[7],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(balance_changes=[BalanceChangeFilter(max_amount=-297_000)]),
+        ),
+        [txns.tx_ids[7]],
     )
 
     subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "min_amount": 0,
-                    "max_amount": 0,
-                }
-            ],
-        },
-        txns.tx_ids[9],
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(min_amount=0, max_amount=0)]
+            ),
+        ),
+        [txns.tx_ids[9]],
     )
 
     address = {
@@ -450,19 +463,24 @@ def test_various_filters_on_payments(filter_fixture: dict) -> None:
         account3: "account3",
     }
 
-    result = filter_fixture["subscribe_algod"](
-        {"balance_changes": [{"min_amount": 0}]},
-        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])[
-            "confirmed-round"
-        ],
+    confirmed_round = localnet.client.algod.pending_transaction_information(
+        txns.tx_ids[0]
+    ).confirmed_round
+    assert confirmed_round is not None
+    result = filter_fixture.subscribe_algod(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(balance_changes=[BalanceChangeFilter(min_amount=0)]),
+        ),
+        confirmed_round,
     )
 
     balance_changes = [
         [
-            f"{address[b['address']]}: {b['amount']} ({', '.join([r.value for r in b['roles']])})"
-            for b in sorted(s["balance_changes"], key=lambda x: address[x["address"]])
+            f"{address[b.address]}: {b.amount} ({', '.join([r.value for r in b.roles])})"
+            for b in sorted(s.balance_changes, key=lambda x: address[x.address])
         ]
-        for s in result["subscribed_transactions"]
+        for s in result.subscribed_transactions
     ]
 
     expected_balance_changes = [
@@ -512,10 +530,9 @@ def test_various_filters_on_payments(filter_fixture: dict) -> None:
     assert balance_changes == expected_balance_changes
 
 
-def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR0915
-    localnet: AlgorandClient = filter_fixture["localnet"]
-    subscribe_and_verify_filter = filter_fixture["subscribe_and_verify_filter"]
-
+def test_various_filters_on_axfers(
+    localnet: AlgorandClient, filter_fixture: FilterFixture
+) -> None:
     test_account = generate_account(localnet)
     account = generate_account(localnet, 1_000_000)
     account2 = generate_account(localnet, 1_000_000)
@@ -523,10 +540,12 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
 
     asset1 = localnet.send.asset_create(
         AssetCreateParams(sender=test_account, total=1000, clawback=test_account)
-    ).confirmation["asset-index"]
+    ).confirmation.asset_id
+    assert asset1 is not None
     asset2 = localnet.send.asset_create(
         AssetCreateParams(sender=test_account, total=1001, clawback=test_account)
-    ).confirmation["asset-index"]
+    ).confirmation.asset_id
+    assert asset2 is not None
 
     localnet.send.asset_opt_in(AssetOptInParams(sender=account, asset_id=asset1))
     localnet.send.asset_opt_in(AssetOptInParams(sender=account2, asset_id=asset1))
@@ -536,52 +555,34 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
     localnet.send.asset_opt_in(AssetOptInParams(sender=account3, asset_id=asset2))
 
     localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account, asset_id=asset1, amount=10
-        )
+        AssetTransferParams(sender=test_account, receiver=account, asset_id=asset1, amount=10)
     )
     localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account2, asset_id=asset1, amount=10
-        )
+        AssetTransferParams(sender=test_account, receiver=account2, asset_id=asset1, amount=10)
     )
     localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account3, asset_id=asset1, amount=20
-        )
+        AssetTransferParams(sender=test_account, receiver=account3, asset_id=asset1, amount=20)
     )
     localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account, asset_id=asset2, amount=10
-        )
+        AssetTransferParams(sender=test_account, receiver=account, asset_id=asset2, amount=10)
     )
     localnet.send.asset_transfer(
-        AssetTransferParams(
-            sender=test_account, receiver=account2, asset_id=asset2, amount=23
-        )
+        AssetTransferParams(sender=test_account, receiver=account2, asset_id=asset2, amount=23)
     )
 
     txns = (
         localnet.new_group()
         .add_asset_transfer(
-            AssetTransferParams(
-                sender=account, receiver=account2, asset_id=asset1, amount=1
-            )
+            AssetTransferParams(sender=account, receiver=account2, asset_id=asset1, amount=1)
         )
         .add_asset_transfer(
-            AssetTransferParams(
-                sender=account2, receiver=account, asset_id=asset1, amount=1
-            )
+            AssetTransferParams(sender=account2, receiver=account, asset_id=asset1, amount=1)
         )
         .add_asset_transfer(
-            AssetTransferParams(
-                sender=account, receiver=account2, asset_id=asset1, amount=2
-            )
+            AssetTransferParams(sender=account, receiver=account2, asset_id=asset1, amount=2)
         )
         .add_asset_transfer(
-            AssetTransferParams(
-                sender=account2, receiver=account, asset_id=asset1, amount=2
-            )
+            AssetTransferParams(sender=account2, receiver=account, asset_id=asset1, amount=2)
         )
         .add_asset_transfer(
             AssetTransferParams(
@@ -631,225 +632,241 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
             )
         )
         .add_asset_transfer(
-            AssetTransferParams(
-                sender=account, receiver=account2, asset_id=asset2, amount=1
-            )
+            AssetTransferParams(sender=account, receiver=account2, asset_id=asset2, amount=1)
         )
         .add_asset_transfer(
-            AssetTransferParams(
-                sender=account2, receiver=account, asset_id=asset2, amount=23
-            )
+            AssetTransferParams(sender=account2, receiver=account, asset_id=asset2, amount=23)
         )
         .send()
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account,
-                    "role": [BalanceChangeRole.Sender],
-                    "min_absolute_amount": 1.1,
-                    "max_absolute_amount": 2,
-                }
-            ],
-        },
-        txns.tx_ids[2],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1],
+                        address=account,
+                        role=[BalanceChangeRole.Sender],
+                        min_absolute_amount=1.1,
+                        max_absolute_amount=2,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[2]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account,
-                    "role": [BalanceChangeRole.Sender],
-                    "min_amount": -2,
-                    "max_amount": -1.1,
-                }
-            ],
-        },
-        txns.tx_ids[2],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1],
+                        address=account,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-2,
+                        max_amount=-1.1,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[2]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account,
-                    "min_amount": -1,
-                    "max_amount": -1,
-                }
-            ],
-        },
-        txns.tx_ids[0],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account, min_amount=-1, max_amount=-1
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[0]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account,
-                    "min_amount": 1,
-                    "max_amount": 1,
-                }
-            ],
-        },
-        txns.tx_ids[1],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account, min_amount=1, max_amount=1
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[1]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account2,
-                    "role": [BalanceChangeRole.Sender],
-                    "min_amount": -2,
-                    "max_amount": -1.1,
-                    "min_absolute_amount": 1.1,
-                    "max_absolute_amount": 2,
-                }
-            ],
-        },
-        txns.tx_ids[3],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1],
+                        address=account2,
+                        role=[BalanceChangeRole.Sender],
+                        min_amount=-2,
+                        max_amount=-1.1,
+                        min_absolute_amount=1.1,
+                        max_absolute_amount=2,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[3]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account,
-                    "min_amount": 0.1,
-                    "max_absolute_amount": 1,
-                }
-            ],
-        },
-        txns.tx_ids[1],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account, min_amount=0.1, max_absolute_amount=1
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[1]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account2,
-                    "min_amount": 0.1,
-                    "max_absolute_amount": 1,
-                }
-            ],
-        },
-        txns.tx_ids[0],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account2, min_amount=0.1, max_absolute_amount=1
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[0]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account3,
-                    "role": BalanceChangeRole.CloseTo,
-                }
-            ],
-        },
-        txns.tx_ids[6],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1], address=account3, role=BalanceChangeRole.CloseTo
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[6]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "address": account3,
-                    "role": [BalanceChangeRole.CloseTo, BalanceChangeRole.Sender],
-                    "min_amount": 0,
-                }
-            ],
-        },
-        txns.tx_ids[6],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        asset_id=[asset1],
+                        address=account3,
+                        role=[BalanceChangeRole.CloseTo, BalanceChangeRole.Sender],
+                        min_amount=0,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[6]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "min_amount": 18,
-                }
-            ],
-        },
-        txns.tx_ids[10],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(asset_id=[asset1], min_amount=18)]
+            ),
+        ),
+        [txns.tx_ids[10]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "address": [account2, account3],
-                    "min_absolute_amount": 17,
-                    "max_absolute_amount": 17,
-                }
-            ],
-        },
-        txns.tx_ids[8],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        address=[account2, account3],
+                        min_absolute_amount=17,
+                        max_absolute_amount=17,
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[8]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "asset_id": [asset1],
-                    "min_absolute_amount": 23,
-                }
-            ],
-        },
-        txns.tx_ids[10],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[BalanceChangeFilter(asset_id=[asset1], min_absolute_amount=23)]
+            ),
+        ),
+        [txns.tx_ids[10]],
     )
 
-    subscribe_and_verify_filter(
-        {
-            "balance_changes": [
-                {
-                    "address": account2,
-                    "max_amount": -23,
-                    "max_absolute_amount": 23,  # Stop algo balance changes triggering it
-                }
-            ],
-        },
-        txns.tx_ids[12],
+    filter_fixture.subscribe_and_verify_filter(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(
+                balance_changes=[
+                    BalanceChangeFilter(
+                        address=account2,
+                        max_amount=-23,
+                        max_absolute_amount=23,  # Stop algo balance changes triggering it
+                    )
+                ]
+            ),
+        ),
+        [txns.tx_ids[12]],
     )
 
-    address = {}
-    address[account] = "account1"
-    address[account2] = "account2"
-    address[account3] = "account3"
-    address[test_account] = "testAccount"
+    address = {
+        account: "account1",
+        account2: "account2",
+        account3: "account3",
+        test_account: "testAccount",
+    }
 
-    result = filter_fixture["subscribe_algod"](
-        {"balance_changes": [{"min_amount": 0}]},
-        localnet.client.algod.pending_transaction_info(txns.tx_ids[0])[
-            "confirmed-round"
-        ],
+    confirmed_round = localnet.client.algod.pending_transaction_information(
+        txns.tx_ids[0]
+    ).confirmed_round
+    assert confirmed_round is not None
+    result = filter_fixture.subscribe_algod(
+        NamedTransactionFilter(
+            name="default",
+            filter=TransactionFilter(balance_changes=[BalanceChangeFilter(min_amount=0)]),
+        ),
+        confirmed_round,
     )
 
-    assets = {}
-    assets[asset1] = "asset1"
-    assets[asset2] = "asset2"
+    assets = {
+        asset1: "asset1",
+        asset2: "asset2",
+    }
 
     balance_changes = []
-    for s in result["subscribed_transactions"]:
+    for s in result.subscribed_transactions:
         transaction_changes = []
-        for b in s["balance_changes"]:
-            if b["asset_id"] != 0:
-                roles = ", ".join([role.value for role in b["roles"]])
-                asset_id = assets[b["asset_id"]]
-                change_str = (
-                    f"{address[b['address']]}: {b['amount']} x {asset_id} ({roles})"
-                )
+        for b in s.balance_changes:
+            if b.asset_id != 0:
+                roles = ", ".join([role.value for role in b.roles])
+                asset_id = assets[b.asset_id]
+                change_str = f"{address[b.address]}: {b.amount} x {asset_id} ({roles})"
                 transaction_changes.append(change_str)
         balance_changes.append(sorted(transaction_changes))
 
@@ -912,8 +929,7 @@ def test_various_filters_on_axfers(filter_fixture: dict) -> None:  # noqa: PLR09
         assert bc == expected_balance_changes[i]
 
 
-def test_block_payouts() -> None:
-    algorand = AlgorandClient.mainnet()
+def test_block_payouts(mainnet: AlgorandClient) -> None:
     payout_round = 46838092
     watermark: int = payout_round - 1
 
@@ -921,53 +937,63 @@ def test_block_payouts() -> None:
         return watermark
 
     def set_watermark(n: int) -> None:
-        global watermark  # noqa: PLW0603
+        nonlocal watermark
         watermark = n
 
-    def synthetic_filter(txn: TransactionResult) -> bool:
-        return (
-            txn["sender"]
-            == "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA"
-        )
+    def synthetic_filter(txn: indexer.Transaction) -> bool:
+        return txn.sender == "Y76M3MSY6DKBRHBL7C3NNDXGS5IIMQVQVUAB6MP4XEMMGVF2QWNPL226CA"
 
-    config: AlgorandSubscriberConfig = {
-        "filters": [
-            {
-                "name": "payout",
-                "filter": {"custom_filter": synthetic_filter},
-            }
+    config = AlgorandSubscriberConfig(
+        filters=[
+            SubscriberConfigFilter(
+                name="payout", filter=TransactionFilter(custom_filter=synthetic_filter)
+            ),
         ],
-        "max_rounds_to_sync": 1,
-        "max_indexer_rounds_to_sync": 1,
-        "sync_behaviour": "sync-oldest",
-        "watermark_persistence": {
-            "get": get_watermark,
-            "set": set_watermark,
-        },
-    }
+        max_rounds_to_sync=1,
+        max_indexer_rounds_to_sync=1,
+        sync_behaviour="sync-oldest",
+        watermark_persistence=WatermarkPersistence(
+            get=get_watermark,
+            set=set_watermark,
+        ),
+    )
 
     algod_subscriber = AlgorandSubscriber(
         config=config,
-        algod_client=algorand.client.algod,
-        indexer_client=algorand.client.indexer,
+        algod_client=mainnet.client.algod,
+        indexer_client=mainnet.client.indexer,
     )
     algod_result = algod_subscriber.poll_once()
-    assert len(algod_result["subscribed_transactions"]) == 1
+    assert len(algod_result.subscribed_transactions) == 1
 
     watermark = payout_round - 1
-    config["sync_behaviour"] = "catchup-with-indexer"
+    config_indexer = AlgorandSubscriberConfig(
+        filters=[
+            SubscriberConfigFilter(
+                name="payout", filter=TransactionFilter(custom_filter=synthetic_filter)
+            ),
+        ],
+        max_rounds_to_sync=1,
+        max_indexer_rounds_to_sync=1,
+        sync_behaviour="catchup-with-indexer",
+        watermark_persistence=WatermarkPersistence(
+            get=get_watermark,
+            set=set_watermark,
+        ),
+    )
     indexer_subscriber = AlgorandSubscriber(
-        config=config,
-        algod_client=algorand.client.algod,
-        indexer_client=algorand.client.indexer,
+        config=config_indexer,
+        algod_client=mainnet.client.algod,
+        indexer_client=mainnet.client.indexer,
     )
     indexer_result = indexer_subscriber.poll_once()
 
-    assert len(indexer_result["subscribed_transactions"]) == 1
+    assert len(indexer_result.subscribed_transactions) == 1
     assert (
-        algod_result["subscribed_transactions"][0]["id"]
-        == indexer_result["subscribed_transactions"][0]["id"]
+        algod_result.subscribed_transactions[0].id_
+        == indexer_result.subscribed_transactions[0].id_
     )
-    assert algod_result["subscribed_transactions"][0].get(
-        "intra-round-offset"
-    ) == indexer_result["subscribed_transactions"][0].get("intra-round-offset")
+    assert (
+        algod_result.subscribed_transactions[0].intra_round_offset
+        == indexer_result.subscribed_transactions[0].intra_round_offset
+    )

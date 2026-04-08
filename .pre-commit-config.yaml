@@ -1,31 +1,32 @@
 repos:
   - repo: local
     hooks:
-      - id: black
-        name: black
-        description: "Black: The uncompromising Python code formatter"
-        entry: poetry run black .
+      - id: ruff_format
+        name: ruff format
+        entry: uv run ruff format
         pass_filenames: false
         require_serial: true
         language: system
         minimum_pre_commit_version: 2.9.2
         types_or: [python, pyi]
+        exclude: ^docs/
       - id: ruff
         name: ruff
         description: "Run 'ruff' for extremely fast Python linting"
-        entry: poetry run ruff check
+        entry: uv run ruff check
         language: system
         "types": [python]
         args: [--fix, --no-cache]
         additional_dependencies: []
         minimum_pre_commit_version: "0"
+        exclude: ^docs/
       - id: mypy
         name: mypy
         description: "`mypy` will check Python types for correctness"
-        entry: poetry run mypy
+        entry: uv run mypy
         language: system
         types_or: [python, pyi]
         require_serial: true
         additional_dependencies: []
         minimum_pre_commit_version: "2.9.2"
-        exclude: "tests/"
+        exclude: ^docs/

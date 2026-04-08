@@ -1,42 +1,31 @@
-name: "Sphinx: Render + publish docs"
+name: "Starlight: Render + publish docs"
 
 on:
   workflow_call:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pages: write
       id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Build documentation
+        uses: ./.github/actions/publish-docs
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v4
         with:
-          python-version: "3.12"
-          cache: "poetry"
-
-      - name: Install dependencies
-        run: poetry install --no-interaction
-
-      - name: Test doctests
-        run: poetry run poe docs-test
-
-      - name: Build docs
-        run: poetry run poe docs-build
-
-      - name: Upload to GitHub pages
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/_build
+          path: docs/dist
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
