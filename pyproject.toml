@@ -6,7 +6,7 @@ authors = [{ name = "Algorand Foundation" }]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "algokit-utils>=5.0.0a18",
+    "algokit-utils>=5.0.0b1",
 ]
 
 [dependency-groups]
