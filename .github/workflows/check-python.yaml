@@ -15,6 +15,14 @@ jobs:
         with:
           install-algokit: "false"
 
+      - name: Audit with pip-audit
+        run: |
+          # Audit all installed dependencies with exclusions
+          # If a vulnerability is found in a dev dependency without an available fix,
+          # it can be temporarily ignored by adding --ignore-vuln e.g.
+          # --ignore-vuln "GHSA-hcpj-qp55-gfph" # GitPython  vulnerability, dev only dependency
+          uv run --no-sync pip-audit
+
       - name: Check pre-commits
         run: |
           set -o pipefail
