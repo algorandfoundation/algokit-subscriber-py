@@ -1,12 +1,11 @@
 name: Continuous Delivery of Python package
 
-run-name: ${{ github.ref == 'refs/heads/alpha' && 'Alpha Release' || (inputs.production_release && 'Production Release' || 'Beta Release') }}
+run-name: ${{ inputs.production_release && 'Production Release' || 'Beta Release' }}
 
 on:
   push:
     branches:
       - main
-      - alpha
     paths-ignore:
       - "docs/**"
   workflow_dispatch:
@@ -33,13 +32,13 @@ jobs:
       contents: write
       packages: read
     steps:
-      - uses: actions/create-github-app-token@v2
+      - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         id: app-token
         with:
           app-id: ${{ secrets.BOT_ID }}
           private-key: ${{ secrets.BOT_SK }}
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           # Fetch entire repository history so we can determine version number from it
           fetch-depth: 0
@@ -59,18 +58,10 @@ jobs:
         run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
         id: get_branch
 
-      - name: Python Semantic Release - Alpha
-        id: release-alpha
-        if: steps.get_branch.outputs.branch == 'alpha' && !inputs.production_release
-        uses: python-semantic-release/python-semantic-release@v10.5.3
-        with:
-          github_token: ${{ steps.app-token.outputs.token }}
-          prerelease: true
-
       - name: Python Semantic Release - Beta (non-prod)
         id: release-beta
         if: steps.get_branch.outputs.branch == 'main' && !inputs.production_release
-        uses: python-semantic-release/python-semantic-release@v10.5.3
+        uses: python-semantic-release/python-semantic-release@350c48fcb3ffcdfd2e0a235206bc2ecea6b69df0 # v10.5.3
         with:
           github_token: ${{ steps.app-token.outputs.token }}
           prerelease: true
@@ -78,21 +69,21 @@ jobs:
       - name: Python Semantic Release - Production
         id: release-prod
         if: steps.get_branch.outputs.branch == 'main' && inputs.production_release
-        uses: python-semantic-release/python-semantic-release@v10.5.3
+        uses: python-semantic-release/python-semantic-release@350c48fcb3ffcdfd2e0a235206bc2ecea6b69df0 # v10.5.3
         with:
           github_token: ${{ steps.app-token.outputs.token }}
 
       - name: Publish to PyPI
-        if: (steps.release-alpha.outputs.released == 'true') || (steps.release-beta.outputs.released == 'true') || (steps.release-prod.outputs.released == 'true')
-        uses: pypa/gh-action-pypi-publish@release/v1
+        if: (steps.release-beta.outputs.released == 'true') || (steps.release-prod.outputs.released == 'true')
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
         with:
           verbose: true
 
   publish-docs:
     name: Publish Docs
     needs: release
-    # Don't publish docs for beta or alpha releases from main
-    if: inputs.production_release && github.ref != 'refs/heads/alpha'
+    # Only publish docs for production releases
+    if: inputs.production_release
     uses: ./.github/workflows/gh-pages.yaml
     permissions:
       contents: read
