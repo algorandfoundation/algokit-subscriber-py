@@ -64,7 +64,7 @@ docs = [
 
 [[package]]
 name = "algokit-utils"
-version = "5.0.0b1"
+version = "5.0.0b4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "exceptiongroup" },
@@ -76,9 +76,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "xhd-wallet-api" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/11/8f/9749eadee85a9e0205d4e6458fcddd38af74dce51a17a8231857fcbf7148/algokit_utils-5.0.0b1.tar.gz", hash = "sha256:4ac5d99b4c354aef01347a0392b441f363c888505cf9ee62dc7af781e9730417", size = 222388, upload-time = "2026-04-08T14:12:22.995Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a1/94/007b95a0cbf04b94ed751ad9c230df437f3e70885277cdab7fd40ad60234/algokit_utils-5.0.0b4.tar.gz", hash = "sha256:d0e97c55b9ca90de91c6f218cb46fa2dad273538dba236f847fdee344fb27902", size = 222420, upload-time = "2026-05-26T16:30:02.958Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/7a/8ca0d1d737f148b9cd83057ab7efd202364481df84a2a54297cdc56ac703/algokit_utils-5.0.0b1-py3-none-any.whl", hash = "sha256:9aca756c058606fe5d25eba19d0e350e96085e4aecc58a615a9ea16e3143e86c", size = 344145, upload-time = "2026-04-08T14:12:21.018Z" },
+    { url = "https://files.pythonhosted.org/packages/a2/b5/4fdadc3fa26d9db154d6233b52c9e6a19c07233df23e97517a8fc94bcf72/algokit_utils-5.0.0b4-py3-none-any.whl", hash = "sha256:644d12ecb03a08b6edfc929822dd70e228b926a249ce02743cbc852d3da394a0", size = 344085, upload-time = "2026-05-26T16:30:01.423Z" },
 ]
 
 [[package]]
