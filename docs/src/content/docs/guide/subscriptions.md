@@ -1,8 +1,11 @@
-# `get_subscribed_transactions`
+---
+title: get_subscribed_transactions
+description: The core building block for enacting a single subscription poll of the Algorand blockchain.
+---
 
 `get_subscribed_transactions` is the core building block at the centre of this library. It's a simple, but flexible mechanism that allows you to enact a single subscription "poll" of the Algorand blockchain.
 
-This is a lower level building block, you likely don't want to use it directly, but instead use the [`AlgorandSubscriber` class](./subscriber.ts).
+This is a lower level building block, you likely don't want to use it directly, but instead use the [`AlgorandSubscriber` class](../guide/subscriber/).
 
 You can use this method to orchestrate everything from an index of all relevant data from the start of the chain through to simply subscribing to relevant transactions as they emerge at the tip of the chain. It allows you to have reliable at least once delivery even if your code has outages through the use of watermarking.
 
@@ -64,7 +67,7 @@ class TransactionSubscriptionParams(CoreTransactionSubscriptionParams):
 
 The [`filters` parameter](#transactionsubscriptionparams) allows you to specify a set of filters to return a subset of transactions you are interested in. Each filter contains a `filter` property of type `TransactionFilter`, which matches the following type:
 
-```typescript
+```python
 class TransactionFilter(TypedDict):
     type: NotRequired[str | list[str]]
     """Filter based on the given transaction type(s)."""
@@ -129,7 +132,7 @@ class TransactionFilter(TypedDict):
 
 Each filter you provide within this type will apply an AND logic between the specified filters, e.g.
 
-```typescript
+```python
 "filter": {
   "type": "axfer",
   "sender": "ABC..."
@@ -278,7 +281,7 @@ TransactionResult = TypedDict("TransactionResult", {
     "confirmed-round": NotRequired[int],
     "group": NotRequired[None | str],
     "note": NotRequired[str],
-    "logs": NotRequired[list[str]],
+    "logs": NotRequired[list[str] | None],
     "round-time": NotRequired[int],
     "intra-round-offset": NotRequired[int],
     "signature": NotRequired['TransactionSignature'],
@@ -390,9 +393,9 @@ it would drop old records and restart notifications from the new tip.
 
 ```python
 from algokit_subscriber import AlgorandSubscriber, SubscribedTransaction
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
-algorand = AlgorandClient.test_net()
+algorand = AlgorandClient.testnet()
 watermark = 0
 
 def get_watermark() -> int:
@@ -435,9 +438,9 @@ it would pick up where it left off and catch up using algod (note: you need to c
 
 ```python
 from algokit_subscriber import AlgorandSubscriber, SubscribedTransaction
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
-algorand = AlgorandClient.test_net()
+algorand = AlgorandClient.testnet()
 watermark = 0
 
 def get_watermark() -> int:
@@ -479,9 +482,9 @@ If you ran the following code on a cron schedule of (say) every 30 - 60 seconds 
 
 ```python
 from algokit_subscriber import AlgorandSubscriber, SubscribedTransaction
-from algokit_utils.beta.algorand_client import AlgorandClient
+from algokit_utils import AlgorandClient
 
-algorand = AlgorandClient.test_net()
+algorand = AlgorandClient.testnet()
 watermark = 0
 
 def get_watermark() -> int:

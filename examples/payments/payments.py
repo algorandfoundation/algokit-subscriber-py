@@ -40,10 +40,12 @@ subscriber = AlgorandSubscriber(
         # The watermark persistence functions are used to get and set the watermark
         "watermark_persistence": {"get": get_watermark, "set": set_watermark},
         # Use indexer to get historical transactions
-        # Indexer is not required to use the subscriber, but it can be used to quickly get batch transactions via indexer API queries
+        # Indexer is not required to use the subscriber, but it can be used to
+        # quickly get batch transactions via indexer API queries
         "sync_behaviour": "catchup-with-indexer",
     },
-    # indexer is OPTIONALLY used to get historical transactions. We only need it here because we're using the 'sync_behaviour' of 'catchup-with-indexer'
+    # indexer is OPTIONALLY used to get historical transactions. We only need it here
+    # because we're using the 'sync_behaviour' of 'catchup-with-indexer'
     indexer_client=algorand.client.indexer,
 )
 
@@ -56,12 +58,12 @@ def print_payment(transaction: SubscribedTransaction, filter_name: str) -> None:
     * The transaction data
     * The filter name (from the 'filters' list) that the transaction matched
 
-    Here we are only using this EventListener callback for one filter, but if we had multiple filters we could use the filter name to determine which filter the transaction matched.
+    Here we are only using this EventListener callback for one filter, but if we had
+    multiple filters we could use the filter name to determine which filter the
+    transaction matched.
     """
     pay = transaction["payment-transaction"]
-    print(
-        f"{filter_name}: {transaction['sender']} sent {pay['receiver']} {pay['amount'] * 1e-6} ALGO"
-    )
+    print(f"{filter_name}: {transaction['sender']} sent {pay['receiver']} {pay['amount'] * 1e-6} ALGO")
 
 
 # Attach our callback to the 'pay txns' filter

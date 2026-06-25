@@ -51,9 +51,7 @@ class EventEmitter:
 
         return self.on(event_name, listener)
 
-    def remove_listener(
-        self, event_name: str, listener: EventListener
-    ) -> "EventEmitter":
+    def remove_listener(self, event_name: str, listener: EventListener) -> "EventEmitter":
         """
         Removes a listener for the given event name.
         """

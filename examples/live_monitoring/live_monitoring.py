@@ -86,7 +86,8 @@ def print_transfer(transaction: SubscribedTransaction, filter_name: str) -> None
         details = transaction["payment-transaction"]
 
     print(
-        f"{transaction['sender']} sent {details['receiver']} {details['amount'] * 1e-6} {filter_name} in transaction {transaction['id']}"
+        f"{transaction['sender']} sent {details['receiver']} {details['amount'] * 1e-6} {filter_name} "
+        f"in transaction {transaction['id']}"
     )
 
 

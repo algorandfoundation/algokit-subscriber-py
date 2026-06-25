@@ -49,9 +49,7 @@ def filter_fixture() -> dict:
                 localnet.client.indexer.block_info(confirmed_round)
                 break
             except Exception:
-                print(
-                    f"Waiting for round {confirmed_round} to be available on indexer..."
-                )
+                print(f"Waiting for round {confirmed_round} to be available on indexer...")
                 time.sleep(1)
 
         result = get_subscribed_transactions_for_test(
@@ -75,9 +73,7 @@ def filter_fixture() -> dict:
     def subscribe_and_verify(
         txn_filter: dict, tx_id: str, arc28_events: list | None = None
     ) -> TransactionSubscriptionResult:
-        confirmed_round = localnet.client.algod.pending_transaction_info(tx_id)[
-            "confirmed-round"
-        ]
+        confirmed_round = localnet.client.algod.pending_transaction_info(tx_id)["confirmed-round"]
 
         subscribed = subscribe_algod(txn_filter, confirmed_round, arc28_events)
         assert len(subscribed["subscribed_transactions"]) == 1
@@ -90,9 +86,7 @@ def filter_fixture() -> dict:
         if isinstance(tx_ids, str):
             tx_ids = [tx_ids]
 
-        confirmed_round = localnet.client.algod.pending_transaction_info(tx_ids[-1])[
-            "confirmed-round"
-        ]
+        confirmed_round = localnet.client.algod.pending_transaction_info(tx_ids[-1])["confirmed-round"]
 
         algod = subscribe_algod(txn_filter, confirmed_round, arc28_events)
         assert len(algod["subscribed_transactions"]) == len(tx_ids)

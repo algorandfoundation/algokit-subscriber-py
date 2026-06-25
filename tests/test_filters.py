@@ -84,27 +84,15 @@ def asset_transfers_fixture() -> dict:
     algorand: AlgorandClient = AlgorandClient.default_localnet()
 
     test_account = generate_account(algorand, 10_000_000)
-    asset1 = algorand.send.asset_create(
-        AssetCreateParams(sender=test_account, total=100)
-    ).confirmation["asset-index"]
-    asset2 = algorand.send.asset_create(
-        AssetCreateParams(sender=test_account, total=101)
-    ).confirmation["asset-index"]
+    asset1 = algorand.send.asset_create(AssetCreateParams(sender=test_account, total=100)).confirmation["asset-index"]
+    asset2 = algorand.send.asset_create(AssetCreateParams(sender=test_account, total=101)).confirmation["asset-index"]
     txns = (
         algorand.new_group()
         .add_asset_opt_in(AssetOptInParams(sender=test_account, asset_id=asset1))
         .add_asset_opt_in(AssetOptInParams(sender=test_account, asset_id=asset2))
         .add_asset_create(AssetCreateParams(sender=test_account, total=103))
-        .add_asset_transfer(
-            AssetTransferParams(
-                sender=test_account, receiver=test_account, asset_id=asset1, amount=1
-            )
-        )
-        .add_asset_transfer(
-            AssetTransferParams(
-                sender=test_account, receiver=test_account, asset_id=asset1, amount=2
-            )
-        )
+        .add_asset_transfer(AssetTransferParams(sender=test_account, receiver=test_account, asset_id=asset1, amount=1))
+        .add_asset_transfer(AssetTransferParams(sender=test_account, receiver=test_account, asset_id=asset1, amount=2))
         .send()
     )
     return {

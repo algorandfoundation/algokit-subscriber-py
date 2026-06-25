@@ -85,7 +85,10 @@ class BlockMetadata(TypedDict):
     """Full count of transactions and inner transactions (recursively) in this block."""
 
     txn_counter: int
-    """Number of the next transaction that will be committed after this block. It is 0 when no transactions have ever been committed (since TxnCounter started being supported)."""
+    """
+    Number of the next transaction that will be committed after this block. It is 0 when no
+    transactions have ever been committed (since TxnCounter started being supported).
+    """
 
     transactions_root: str
     """
@@ -95,7 +98,9 @@ class BlockMetadata(TypedDict):
 
     transactions_root_sha256: str
     """
-    TransactionsRootSHA256 is an auxiliary TransactionRoot, built using a vector commitment instead of a merkle tree, and SHA256 hash function instead of the default SHA512_256. This commitment can be used on environments where only the SHA256 function exists.
+    TransactionsRootSHA256 is an auxiliary TransactionRoot, built using a vector commitment instead
+    of a merkle tree, and SHA256 hash function instead of the default SHA512_256. This commitment can
+    be used on environments where only the SHA256 function exists.
     """
 
     upgrade_state: NotRequired["BlockUpgradeState"]
@@ -107,19 +112,28 @@ class BlockRewards(TypedDict):
     """FeeSink is an address that accepts transaction fees, it can only spend to the incentive pool."""
 
     rewards_calculation_round: int
-    """number of leftover MicroAlgos after the distribution of rewards-rate MicroAlgos for every reward unit in the next round."""
+    """
+    number of leftover MicroAlgos after the distribution of rewards-rate MicroAlgos for every
+    reward unit in the next round.
+    """
 
     rewards_level: int
     """How many rewards, in MicroAlgos, have been distributed to each RewardUnit of MicroAlgos since genesis."""
 
     rewards_pool: str
-    """RewardsPool is an address that accepts periodic injections from the fee-sink and continually redistributes them as rewards."""
+    """
+    RewardsPool is an address that accepts periodic injections from the fee-sink and continually
+    redistributes them as rewards.
+    """
 
     rewards_rate: int
     """Number of new MicroAlgos added to the participation stake from rewards at the next round."""
 
     rewards_residue: int
-    """Number of leftover MicroAlgos after the distribution of RewardsRate/rewardUnits MicroAlgos for every reward unit in the next round."""
+    """
+    Number of leftover MicroAlgos after the distribution of RewardsRate/rewardUnits MicroAlgos for
+    every reward unit in the next round.
+    """
 
 
 class BlockUpgradeState(TypedDict):
@@ -145,7 +159,8 @@ class SubscribedTransaction(TransactionResult):
 
     Substantively, based on the Indexer `TransactionResult` model format with some modifications to:
     * Add the `parent_transaction_id` field so inner transactions have a reference to their parent
-    * Override the type of `inner_txns` to be `SubscribedTransaction[]` so inner transactions (recursively) get these extra fields too
+    * Override the type of `inner_txns` to be `SubscribedTransaction[]` so inner transactions
+      (recursively) get these extra fields too
     * Add emitted ARC-28 events via `arc28_events`
     * Balance changes in algo or assets
     """
@@ -262,7 +277,10 @@ class TransactionFilter(TypedDict):
             ]
         ]
     ]
-    """Filter to transactions that result in balance changes that match one or more of the given set of balance changes."""
+    """
+    Filter to transactions that result in balance changes that match one or more of the given set
+    of balance changes.
+    """
 
     custom_filter: NotRequired[Callable[[TransactionResult], bool]]
     """Catch-all custom filter to filter for things that the rest of the filters don't provide."""
@@ -312,7 +330,9 @@ class CoreTransactionSubscriptionParams(TypedDict):
     `skip-sync-newest`: Skip catchup and start syncing from the latest block regardless of the watermark.
     `sync-oldest`: Start syncing from the watermark
     `sync-oldest-start-now`: If the watermark is 0, start syncing from round 0. Otherwise skip to the latest block.
-    `catchup-with-indexer`: Use indexer to get missing transactions that match the filters starting from the watermark. Filters will be used in the indexer request to reduce the total amount of requests needed (relative to getting every block)
+    `catchup-with-indexer`: Use indexer to get missing transactions that match the filters starting
+    from the watermark. Filters will be used in the indexer request to reduce the total amount of
+    requests needed (relative to getting every block)
     """
 
 
@@ -349,7 +369,10 @@ class AlgorandSubscriberConfig(CoreTransactionSubscriptionParams):
     """The frequency to poll for new blocks in seconds; defaults to 1s"""
 
     wait_for_block_when_at_tip: NotRequired[bool]
-    """Whether to wait via algod `/status/wait-for-block-after` endpoint when at the tip of the chain; reduces latency of subscription"""
+    """
+    Whether to wait via algod `/status/wait-for-block-after` endpoint when at the tip of the chain;
+    reduces latency of subscription
+    """
 
     watermark_persistence: WatermarkPersistence
     """
@@ -363,5 +386,6 @@ class SubscriberConfigFilter(NamedTransactionFilter):
 
     mapper: NotRequired[Callable[[list["SubscribedTransaction"]], list[Any]]]
     """
-    An optional data mapper if you want the event data to take a certain shape when subscribing to events with this filter name.
+    An optional data mapper if you want the event data to take a certain shape when subscribing to
+    events with this filter name.
     """

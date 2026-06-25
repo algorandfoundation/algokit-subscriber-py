@@ -1,4 +1,7 @@
-# `AlgorandSubscriber`
+---
+title: AlgorandSubscriber
+description: A class that allows you to easily subscribe to the Algorand Blockchain and react to events of interest.
+---
 
 `AlgorandSubscriber` is a class that allows you to easily subscribe to the Algorand Blockchain, define a series of events that you are interested in, and react to those events.
 
@@ -17,7 +20,32 @@ class AlgorandSubscriber:
         """
 ```
 
-The `config` parameter is an instance of `AlgorandSubscriberConfig` (see the documentation [here](apidocs/algokit_subscriber/algokit_subscriber.types.subscription.md#algokit_subscriber.types.subscription.AlgorandSubscriberConfig)).
+The `config` parameter is a `AlgorandSubscriberConfig` `TypedDict` (see the [API reference](../api/algokit_subscriber/types/subscription/)). A minimal example looks like:
+
+```python
+from algokit_subscriber import AlgorandSubscriber
+from algokit_utils import get_algod_client, get_algonode_config
+
+algod_client = get_algod_client(get_algonode_config("testnet", "algod", ""))
+
+subscriber = AlgorandSubscriber(
+    config={
+        "filters": [
+            {
+                "name": "filter1",
+                "filter": {
+                    "type": "pay",
+                    "sender": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ",
+                },
+            },
+        ],
+        "watermark_persistence": {"get": lambda: 0, "set": lambda x: None},
+        "sync_behaviour": "skip-sync-newest",
+        "max_rounds_to_sync": 100,
+    },
+    algod_client=algod_client,
+)
+```
 
 ## Subscribing to events
 
@@ -72,17 +100,17 @@ The default type that will be received is a `SubscribedTransaction`, which can b
 from algokit_subscriber import SubscribedTransaction
 ```
 
-See the [detail about this type](subscriptions.md#subscribedtransaction).
+See the [detail about this type](../guide/subscriptions/#subscribedtransaction).
 
 Alternatively, if you defined a mapper against the filter then it will be applied before passing the objects through.
 
-If you call `on_poll` it will be called last (after all `on` and `on_batch` listeners) for each poll, with the full set of transactions for that poll and [metadata about the poll result](./subscriptions.md#transactionsubscriptionresult). This allows you to process the entire poll batch in one transaction or have a hook to call after processing individual listeners (e.g. to commit a transaction).
+If you call `on_poll` it will be called last (after all `on` and `on_batch` listeners) for each poll, with the full set of transactions for that poll and [metadata about the poll result](../guide/subscriptions/#transactionsubscriptionresult). This allows you to process the entire poll batch in one transaction or have a hook to call after processing individual listeners (e.g. to commit a transaction).
 
 If you want to run code before a poll starts (e.g. to log or start a transaction) you can do so with `on_before_poll`.
 
 ## Poll the chain
 
-There are two methods to poll the chain for events: `pollOnce` and `start`:
+There are two methods to poll the chain for events: `poll_once` and `start`:
 
 ```python
 def poll_once(self) -> TransactionSubscriptionResult:
@@ -90,7 +118,7 @@ def poll_once(self) -> TransactionSubscriptionResult:
     Execute a single subscription poll.
     """
 
-def start(self, inspect: Callable | None = None, suppress_log: bool = False) -> None:  # noqa: FBT001, FBT002
+def start(self, inspect: Callable | None = None, *, suppress_log: bool = False) -> None:
     """
     Start the subscriber in a loop until `stop` is called.
 
@@ -115,4 +143,4 @@ Once an error listener has been registered, the default listener is removed and 
 
 ## Examples
 
-See the [main README](../README.md#examples).
+See the [examples in the repository README](https://github.com/algorandfoundation/algokit-subscriber-py#examples).

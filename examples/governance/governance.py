@@ -15,9 +15,7 @@ dispenser = algorand.account.localnet_dispenser()
 sender = algorand.account.random()
 
 # Fund the sender
-algorand.send.payment(
-    PayParams(sender=dispenser.address, receiver=sender.address, amount=1_000_000)
-)
+algorand.send.payment(PayParams(sender=dispenser.address, receiver=sender.address, amount=1_000_000))
 
 # Send a governance commitment message
 algorand.send.payment(
@@ -95,18 +93,13 @@ def print_transfer(transaction: SubscribedTransaction, _: str) -> None:
     * The transaction data
     * The filter name (from the 'filters' list) that the transaction matched
     """
-    json_data = (
-        base64.b64decode(transaction["note"])
-        .decode()
-        .split(":j")[1]
-        .replace("”", '"')
-        .replace("“", '"')
-    )
+    json_data = base64.b64decode(transaction["note"]).decode().split(":j")[1].replace("”", '"').replace("“", '"')
 
     amount = json.loads(json_data)["com"] * 1e-6
 
     print(
-        f"Transaction {transaction['sender']} committed {amount} ALGO on round {transaction['confirmed-round']} in transaction {transaction['id']}"
+        f"Transaction {transaction['sender']} committed {amount} ALGO on round "
+        f"{transaction['confirmed-round']} in transaction {transaction['id']}"
     )
 
 

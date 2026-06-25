@@ -15,9 +15,7 @@ TransactionSearchResults = TypedDict(
     },
 )
 
-AccountLookupResult = TypedDict(
-    "AccountLookupResult", {"current-round": int, "account": "AccountResult"}
-)
+AccountLookupResult = TypedDict("AccountLookupResult", {"current-round": int, "account": "AccountResult"})
 
 AssetsLookupResult = TypedDict(
     "AssetsLookupResult",
@@ -38,9 +36,7 @@ ApplicationCreatedLookupResult = TypedDict(
     },
 )
 
-AssetLookupResult = TypedDict(
-    "AssetLookupResult", {"current-round": int, "asset": "AssetResult"}
-)
+AssetLookupResult = TypedDict("AssetLookupResult", {"current-round": int, "asset": "AssetResult"})
 
 LookupAssetHoldingsOptions = TypedDict(
     "LookupAssetHoldingsOptions",
@@ -196,13 +192,9 @@ class StateProofParticipant(TypedDict):
     weight: int
 
 
-StateProofVerifier = TypedDict(
-    "StateProofVerifier", {"commitment": str, "key-lifetime": int}
-)
+StateProofVerifier = TypedDict("StateProofVerifier", {"commitment": str, "key-lifetime": int})
 
-StateProofSigSlot = TypedDict(
-    "StateProofSigSlot", {"lower-sig-weight": int, "signature": "MerkleSignature"}
-)
+StateProofSigSlot = TypedDict("StateProofSigSlot", {"lower-sig-weight": int, "signature": "MerkleSignature"})
 
 MerkleSignature = TypedDict(
     "MerkleSignature",

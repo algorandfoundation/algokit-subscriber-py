@@ -2,52 +2,33 @@ name: Check Python Code
 
 on:
   workflow_call:
-  pull_request:
 
 jobs:
   check-python:
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: ./.github/actions/setup-algokit-python
-
-      - name: Check pre-commits
-        run: |
-          set -o pipefail
-          poetry run pre-commit run --all-files && git diff --exit-code
-
-      - name: Check documentation
-        run: |
-          set -o pipefail
-          poetry run poe docs-test
-
-      - name: Check wheels can be built
-        run: |
-          set -o pipefail
-          poetry build --format wheel
-
-  tests:
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
-
-      - name: Setup Python and algokit
-        uses: ./.github/actions/setup-algokit-python
-
-      - name: pytest + coverage
-        shell: bash
-        env:
-          COVERAGE_CORE: sysmon
-        run: |
-          set -o pipefail
-          poetry run pytest --junitxml=pytest-junit.xml --cov | tee pytest-coverage.txt
-
-      - name: pytest coverage comment
-        continue-on-error: true # forks fail to add a comment, so continue any way
-        uses: MishaKav/pytest-coverage-comment@main
+      - name: Setup Python environment
+        uses: algorandfoundation/algokit-shared-config/.github/actions/setup-algokit-python@main
         with:
-          pytest-coverage-path: ./pytest-coverage.txt
-          junitxml-path: ./pytest-junit.xml
+          python-version: "3.12"
+          install-algokit: "false"
+
+      - name: Audit with pip-audit
+        run: |
+          # audit all dependencies.
+          # If a vulnerability is found in a dev dependency without an available fix,
+          # it can be temporarily ignored by adding --ignore-vuln e.g.
+          # --ignore-vuln "GHSA-hcpj-qp55-gfph" # GitPython vulnerability, dev only dependency
+          uv run --no-sync pip-audit
+
+      - name: Check formatting with Ruff
+        run: uv run ruff format --check .
+
+      - name: Check linting with Ruff
+        run: uv run ruff check .
+
+      - name: Check types with mypy
+        run: uv run mypy

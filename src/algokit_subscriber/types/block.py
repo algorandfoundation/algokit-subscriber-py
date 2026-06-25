@@ -69,7 +69,8 @@ class TransactionInBlock(TypedDict):
 
     round_index: int
     """
-    The index within the block.txns array of this transaction or if it's an inner transaction of it's ultimate parent transaction.
+    The index within the block.txns array of this transaction or if it's an inner transaction of it's ultimate
+    parent transaction.
 
     @example
     - 0

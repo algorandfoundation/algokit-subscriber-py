@@ -40,7 +40,8 @@ def get_watermark() -> int:
 def set_watermark(new_watermark: int) -> None:
     """
     Write the new transactions to the CSV file and then write the new watermark value to the watermark file
-    This order is important to ensure we are not increasing the watermark value if we fail to write the transactions to the CSV file
+    This order is important to ensure we are not increasing the watermark value if we fail to write the
+    transactions to the CSV file
     """
     csv_lines = "\n".join(",".join(str(v) for v in bc) for bc in balance_changes)
     with Path.open(csv_file, "a") as f:

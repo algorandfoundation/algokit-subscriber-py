@@ -13,11 +13,11 @@ To run the example, execute the following commands:
 ### Install dependencies
 
 ```bash
-poetry install
+uv sync
 ```
 
 ### Run the script
 
 ```bash
-poetry run python live_monitoring.py
+uv run python live_monitoring.py
 ```

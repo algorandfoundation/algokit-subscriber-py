@@ -44,6 +44,7 @@ def test_nested_inners_from_indexer(algorand_mainnet: AlgorandClient) -> None:
     txn = txns["subscribed_transactions"][0]
     assert txn == {
         "application-transaction": {
+            "access": [],
             "accounts": [],
             "application-args": [
                 "AA==",

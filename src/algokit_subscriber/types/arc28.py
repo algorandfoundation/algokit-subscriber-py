@@ -51,7 +51,10 @@ class Arc28EventGroup(TypedDict):
     """Optional predicate to indicate if these ARC-28 events should be processed for the given transaction."""
 
     continue_on_error: bool
-    """Whether or not to silently (with warning log) continue if an error is encountered processing the ARC-28 event data; default = False."""
+    """
+    Whether or not to silently (with warning log) continue if an error is encountered processing the ARC-28
+    event data; default = False.
+    """
 
     events: list[Arc28Event]
     """The list of ARC-28 event definitions."""

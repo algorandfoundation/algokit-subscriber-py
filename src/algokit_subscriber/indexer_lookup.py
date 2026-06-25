@@ -26,9 +26,7 @@ def transaction(transaction_id: str, indexer: IndexerClient) -> TransactionLooku
     return indexer.transaction(txid=transaction_id)  # type: ignore[no-untyped-call, no-any-return]
 
 
-def lookup_account_by_address(
-    account_address: str, indexer: IndexerClient
-) -> AccountLookupResult:
+def lookup_account_by_address(account_address: str, indexer: IndexerClient) -> AccountLookupResult:
     """
     Looks up an account by address using Indexer.
     """
@@ -64,9 +62,7 @@ def lookup_account_created_application_by_address(
 
         return args
 
-    return execute_paginated_request(
-        indexer.lookup_account_application_by_creator, extract_items, build_request
-    )
+    return execute_paginated_request(indexer.lookup_account_application_by_creator, extract_items, build_request)
 
 
 def lookup_asset_holdings(
@@ -88,18 +84,12 @@ def lookup_asset_holdings(
         args: dict[str, Any] = {
             "asset-id": asset_id,
             "limit": pagination_limit or DEFAULT_INDEXER_MAX_API_RESOURCES_PER_ACCOUNT,
-            "include-all": (
-                options["include-all"] if options and "include-all" in options else None
-            ),
+            "include-all": (options["include-all"] if options and "include-all" in options else None),
             "currency-greater-than": (
-                options["currency-greater-than"]
-                if options and "currency-greater-than" in options
-                else None
+                options["currency-greater-than"] if options and "currency-greater-than" in options else None
             ),
             "currency-less-than": (
-                options["currency-less-than"]
-                if options and "currency-less-than" in options
-                else None
+                options["currency-less-than"] if options and "currency-less-than" in options else None
             ),
         }
 
@@ -108,9 +98,7 @@ def lookup_asset_holdings(
 
         return args
 
-    return execute_paginated_request(
-        indexer.lookup_account_assets, extract_items, build_request
-    )
+    return execute_paginated_request(indexer.lookup_account_assets, extract_items, build_request)
 
 
 def search_transactions(
@@ -132,17 +120,13 @@ def search_transactions(
 
     def build_request(next_token: str | None = None) -> dict[str, Any]:
         args: dict[str, Any] = search_criteria
-        args["limit"] = (
-            pagination_limit or DEFAULT_INDEXER_MAX_API_RESOURCES_PER_ACCOUNT
-        )
+        args["limit"] = pagination_limit or DEFAULT_INDEXER_MAX_API_RESOURCES_PER_ACCOUNT
         if next_token:
             args["next_page"] = next_token
 
         return args
 
-    transactions = execute_paginated_request(
-        indexer.search_transactions, extract_items, build_request
-    )
+    transactions = execute_paginated_request(indexer.search_transactions, extract_items, build_request)
 
     return {
         "current-round": current_round,

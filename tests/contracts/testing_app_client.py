@@ -11,7 +11,12 @@ from abc import ABC, abstractmethod
 
 import algokit_utils
 import algosdk
-from algosdk.atomic_transaction_composer import AtomicTransactionComposer, AtomicTransactionResponse, SimulateAtomicTransactionResponse, TransactionSigner
+from algosdk.atomic_transaction_composer import (
+    AtomicTransactionComposer,
+    AtomicTransactionResponse,
+    SimulateAtomicTransactionResponse,
+    TransactionSigner,
+)
 from algosdk.v2client import models
 
 _APP_SPEC_JSON = r"""{
@@ -935,7 +940,7 @@ class TestingAppClient:
     ) -> None:
         ...
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         algod_client: algosdk.v2client.algod.AlgodClient,
         *,

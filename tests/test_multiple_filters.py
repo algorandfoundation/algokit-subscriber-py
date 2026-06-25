@@ -18,15 +18,11 @@ def test_multiple_filters_with_indexer() -> None:
     tx_ids1 = send_x_transactions(2, senders[0], algorand)["tx_ids"]
     tx_ids2 = send_x_transactions(2, senders[1], algorand)["tx_ids"]
     tx_ids3 = send_x_transactions(2, senders[2], algorand)["tx_ids"]
-    post_indexer_round = send_x_transactions(1, generate_account(algorand), algorand)[
-        "last_txn_round"
-    ]
+    post_indexer_round = send_x_transactions(1, generate_account(algorand), algorand)["last_txn_round"]
     tx_ids11 = send_x_transactions(1, senders[0], algorand)["tx_ids"]
     tx_ids22 = send_x_transactions(1, senders[1], algorand)["tx_ids"]
     tx_ids33 = send_x_transactions(1, senders[2], algorand)["tx_ids"]
-    last_txn_round = send_x_transactions(1, generate_account(algorand), algorand)[
-        "last_txn_round"
-    ]
+    last_txn_round = send_x_transactions(1, generate_account(algorand), algorand)["last_txn_round"]
     while True:
         try:
             algorand.client.indexer.block_info(last_txn_round)
